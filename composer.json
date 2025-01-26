@@ -1,0 +1,5 @@
+{
+    "require": {
+        "juoum/giaeconnect": "^1.1"
+    }
+}

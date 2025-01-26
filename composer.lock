@@ -1,0 +1,55 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "4baf65eea26993ad66a1ad995d2de5ff",
+    "packages": [
+        {
+            "name": "juoum/giaeconnect",
+            "version": "v1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/itsjuoum/GIAEConnect.git",
+                "reference": "fc67b7662613c038aacff1bd97f7636fc223fe97"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/itsjuoum/GIAEConnect/zipball/fc67b7662613c038aacff1bd97f7636fc223fe97",
+                "reference": "fc67b7662613c038aacff1bd97f7636fc223fe97",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "juoum\\GiaeConnect\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-only"
+            ],
+            "authors": [
+                {
+                    "name": "juoum"
+                }
+            ],
+            "description": "This PHP class provides an unofficial API for the GIAE platform (Gestão Integrada para Administração Escolar), widely used on Portuguese public schools, on behalf of a given user.",
+            "support": {
+                "issues": "https://github.com/itsjuoum/GIAEConnect/issues",
+                "source": "https://github.com/itsjuoum/GIAEConnect/tree/v1.1.0"
+            },
+            "time": "2024-01-14T20:30:13+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": [],
+    "plugin-api-version": "2.6.0"
+}
