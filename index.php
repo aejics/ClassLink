@@ -9,10 +9,18 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
         <link href="/css/main.css" rel="stylesheet">
     </head>
+    <?php 
+        require_once(__DIR__ . "/vendor/autoload.php");
+        ini_set('display_errors', 1);
+        ini_set('display_startup_errors', 1);
+        error_reporting(E_ALL);
+    ?>
     <body>
         <nav class="navbar navbar-expand-lg navbar-light bg-light justify-content-center">
           <a class="navbar-brand" href="/">Reserva Salas</a>
         <div class="dropdown">
+          <?php 
+          ?>
           <button class="btn btn-secondary dropdown-toggle" type="button" id="areaMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
             A Minha Área
           </button>
