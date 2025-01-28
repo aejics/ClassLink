@@ -19,6 +19,7 @@
         <?php include 'src/header.php'; ?>
         <?php include 'src/navbar.php'; ?>
         <br>
+        <?php include 'src/asminhasreservas.php'; ?>
         <?php include 'src/loginform.php'; ?>
         <?php include 'src/footer.php'; ?>
     </body>
