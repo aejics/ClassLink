@@ -16,21 +16,7 @@
         error_reporting(E_ALL);
     ?>
     <body>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light justify-content-center">
-          <a class="navbar-brand" href="/">Reserva Salas</a>
-        <div class="dropdown">
-          <?php 
-          ?>
-          <button class="btn btn-secondary dropdown-toggle" type="button" id="areaMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-            A Minha Área
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            <li><a class="dropdown-item" href="/link1.php">Link 1</a></li>
-            <li><a class="dropdown-item" href="/link2.php">Link 2</a></li>
-            <li><a class="dropdown-item" href="/link3.php">Link 3</a></li>
-          </ul>
-        </div>
-        </nav>
+        <?php include 'src/navbar.php'; ?>
         <br>
         <div class="h-100 d-flex align-items-center justify-content-center flex-column">
             <p class="h2 mb-4">Autentique-se via GIAE</p>
