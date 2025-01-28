@@ -16,6 +16,7 @@
         error_reporting(E_ALL);
     ?>
     <body>
+        <?php include 'src/header.php'; ?>
         <?php include 'src/navbar.php'; ?>
         <br>
         <div class="h-100 d-flex align-items-center justify-content-center flex-column">
