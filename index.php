@@ -1,3 +1,4 @@
+<?php include 'src/verifsessaovalida.php'; ?>
 <!DOCTYPE html>
 <html>
     <head>
@@ -16,6 +17,7 @@
         error_reporting(E_ALL);
     ?>
     <body>
+        <?php include 'src/verifsessaovalida.php'; ?>
         <?php include 'src/header.php'; ?>
         <?php include 'src/navbar.php'; ?>
         <br>

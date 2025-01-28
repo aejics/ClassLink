@@ -24,7 +24,8 @@
             $giae->logout();
             setcookie("loggedin", "", time() - 9999, "/");
             print("<div class='alert alert-success text-center' role='alert'>
-                A sua sessão foi terminada com sucesso.
+                A sua sessão foi terminada com sucesso, ou então expirou.
+                Será redirecionado para a página inicial em 5 segundos.
                 </div>
                 ")
         ?>
