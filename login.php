@@ -7,13 +7,6 @@
     <meta name='viewport' content='width=device-width, initial-scale=1'>
 </head>
 <body>
-    <style>
-        img {
-            width: 100px;
-            height: 150px;
-            border-radius: 50%;
-        }
-    </style>
     <?php
         require_once(__DIR__ . "/vendor/autoload.php");
         ini_set('display_errors', 1);
@@ -21,9 +14,17 @@
         error_reporting(E_ALL);
         $giae = new \juoum\GiaeConnect\GiaeConnect("giae.aejics.org", $_POST["user"], $_POST["pass"]);
         $config = json_decode($giae->getConfInfo(), true);
-        $nome = $config['nomeutilizador'];
-        $fotoutente = json_decode('"' . $config['fotoutente'] . '"'); // Decode Unicode
-        echo "<img src='https://giae.aejics.org/" . $fotoutente . "' />";
+        if (str_contains($giae->getConfInfo(), 'Erro do Servidor')){
+            echo "A sua palavra-passe está errada. Por favor tente novamente.";
+        }
+        else {
+            setcookie("loggedin", "true", time() + 60, "/");
+            setcookie("session", "Token futuro que fica na DB para verificação", time() + 60, "/");
+            setcookie("nomedapessoa", $config['nomeutilizador'], time() + 60, "/");
+            setcookie("username", $_POST["user"], time() + 60, "/");
+            setcookie("password", $_POST["pass"], time() + 60, "/");
+            header('Location: /');
+        }
     ?>
 
     <h1>Bem-vindo, <?php echo($nome)?></h1>
