@@ -1,4 +1,3 @@
-<?php include 'src/verifsessaovalida.php'; ?>
 <!DOCTYPE html>
 <html>
     <head>
