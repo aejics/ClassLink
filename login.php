@@ -21,7 +21,7 @@
         $giae = new \juoum\GiaeConnect\GiaeConnect("giae.aejics.org", $_POST["user"], $_POST["pass"]);
         $config = json_decode($giae->getConfInfo(), true);
         if (str_contains($giae->getConfInfo(), 'Erro do Servidor')){
-            echo("<div class='alert alert-success text-center' role='alert'> A sua palavra-passe está errada. Será redirecionado para a página inicial em 5 segundos.
+            echo("<div class='alert alert-danger text-center' role='alert'>A sua palavra-passe está errada.
                 </div>");
         }
         else {
