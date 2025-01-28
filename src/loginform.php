@@ -2,7 +2,7 @@
     if (!isset($_COOKIE["loggedin"]))
         echo "<div class='h-100 d-flex align-items-center justify-content-center flex-column'>
             <p class='h2 mb-4'>Autentique-se via GIAE</p>
-            <p class='mb-4'>Utilize as credenciais do GIAE para continuar para Reserva Salas</p>
+            <p class='mb-4'>Utilize as credenciais do GIAE para continuar para <b>Reserva Salas</b></p>
             <form action='/login.php' method='POST' class='w-200' style='max-width: 600px;'>
                 <div class='mb-3'>
                     <label for='user' class='form-label'>Nome de utilizador <b class='required'>*</b>:</label>

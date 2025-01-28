@@ -22,11 +22,11 @@
             $giae = new \juoum\GiaeConnect\GiaeConnect("giae.aejics.org");
             $giae->session=$_COOKIE["session"];
             $giae->logout();
-            setcookie("loggedin", "", time() - 3600, "/");
+            setcookie("loggedin", "", time() - 9999, "/");
             print("<div class='alert alert-success text-center' role='alert'>
                 A sua sessão foi terminada com sucesso.
                 </div>
-")
+                ")
         ?>
         <?php include 'src/footer.php'; ?>
     </body>
