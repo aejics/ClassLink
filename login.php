@@ -3,7 +3,7 @@
 <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Page Title</title>
+    <title>Reserva Salas - Login</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
 </head>
 <body>
@@ -15,7 +15,11 @@
         $giae = new \juoum\GiaeConnect\GiaeConnect("giae.aejics.org", $_POST["user"], $_POST["pass"]);
         $config = json_decode($giae->getConfInfo(), true);
         if (str_contains($giae->getConfInfo(), 'Erro do Servidor')){
-            echo "A sua palavra-passe está errada. Por favor tente novamente.";
+            print("<div class='alert alert-danger text-center' role='alert'>
+            A sua palavra-passe está errada. Por favor, tente novamente.
+            </div>
+            <meta http-equiv='refresh' content='5;url=/' />
+            ")
         }
         else {
             setcookie("loggedin", "true", time() + 3599, "/");
