@@ -9,8 +9,8 @@
     $fotoutente = json_decode('"' . $config['fotoutente'] . '"'); // Decode Unicode da Foto do Utente
     echo "<button class='btn btn-secondary dropdown-toggle' type='button' id='areaMenuButton' data-bs-toggle='dropdown' aria-expanded='false'>
       <img class='fotoutente' src='https://giae.aejics.org/" . $fotoutente . "'>  A Minha Área
-    </button>
-    <ul class='dropdown-menu' aria-labelledby='dropdownMenuButton'>
+      </button>
+      <ul class='dropdown-menu' aria-labelledby='dropdownMenuButton'>
       <li><a class='dropdown-item' href='/'>As minhas reservas</a></li>
       <li><a class='dropdown-item' href='/reservar.php'>Reservar uma sala</a></li>
       <li><a class='dropdown-item' href='/logout.php'>Terminar sessão</a></li>
