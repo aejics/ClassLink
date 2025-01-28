@@ -19,7 +19,7 @@
         }
         else {
             setcookie("loggedin", "true", time() + 60, "/");
-            setcookie("session", "Token futuro que fica na DB para verificação", time() + 60, "/");
+            setcookie("session", $giae->session, time() + 60, "/");
             setcookie("nomedapessoa", $config['nomeutilizador'], time() + 60, "/");
             setcookie("username", $_POST["user"], time() + 60, "/");
             setcookie("password", $_POST["pass"], time() + 60, "/");
@@ -27,6 +27,5 @@
         }
     ?>
 
-    <h1>Bem-vindo, <?php echo($nome)?></h1>
 </body>
 </html>

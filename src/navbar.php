@@ -7,9 +7,9 @@
       A Minha Área
     </button>
     <ul class='dropdown-menu' aria-labelledby='dropdownMenuButton'>
-      <li><a class='dropdown-item' href='/link1.php'>Link 1</a></li>
-      <li><a class='dropdown-item' href='/link2.php'>Link 2</a></li>
-      <li><a class='dropdown-item' href='/link3.php'>Link 3</a></li>
+      <li><a class='dropdown-item' href='/'>As minhas reservas</a></li>
+      <li><a class='dropdown-item' href='/reservar.php'>Reservar uma sala</a></li>
+      <li><a class='dropdown-item' href='/logout.php'>Terminar sessão</a></li>
     </ul>
   </div>";
    echo "</nav>";
