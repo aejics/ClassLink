@@ -18,11 +18,11 @@
             echo "A sua palavra-passe está errada. Por favor tente novamente.";
         }
         else {
-            setcookie("loggedin", "true", time() + 3600, "/");
-            setcookie("session", $giae->session, time() + 3600, "/");
-            setcookie("nomedapessoa", $config['nomeutilizador'], time() + 3600, "/");
-            setcookie("username", $_POST["user"], time() + 3600, "/");
-            setcookie("password", $_POST["pass"], time() + 3600, "/");
+            setcookie("loggedin", "true", time() + 3599, "/");
+            setcookie("session", $giae->session, time() + 3599, "/");
+            setcookie("nomedapessoa", $config['nomeutilizador'], time() + 3599, "/");
+            setcookie("username", $_POST["user"], time() + 3599, "/");
+            setcookie("password", $_POST["pass"], time() + 3599, "/");
             header('Location: /');
         }
     ?>

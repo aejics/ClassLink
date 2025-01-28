@@ -3,7 +3,7 @@
   <a class='navbar-brand' href='/'>Reserva Salas</a>
   <div class='dropdown'>";
   if (isset($_COOKIE["loggedin"])){
-    require_once(__DIR__ . "/vendor/autoload.php");
+    require_once(__DIR__ . "/../vendor/autoload.php");
     $giae = new \juoum\GiaeConnect\GiaeConnect("giae.aejics.org");
     $giae->session=$_COOKIE["session"];
     $config = json_decode($giae->getConfInfo(), true);
