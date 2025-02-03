@@ -15,7 +15,7 @@
         $mail->SMTPSecure = $config->mail->tipodeseguranca;
         $mail->Port       = $config->mail->porta;
             //Recipients
-        $mail->setFrom($config->mail->mail, 'FormFill');
+        $mail->setFrom($config->mail->mail, 'ReservaSalas');
         $mail->addAddress($email);
         $mail->addAttachment($nomeficheiro);
         $mail->isHTML(false);
