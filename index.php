@@ -15,7 +15,8 @@
         "<table class='table table-bordered'><thead><tr><th scope='col'>Tempos</th>"
     );
     for ($i = 0; $i < 5; $i++){
-        $dia = date("d-m-Y", strtotime("+{$i} day"));
+        $segunda = strtotime("monday this week");
+        $dia = date("d-m-Y", strtotime("+{$i} day", $segunda));
         echo "<th scope='col'>{$dia}</th>";
     };
     echo "</tr></thead><tbody>";
@@ -28,7 +29,7 @@
             } else if ($j == 5 && $i == 4){
                 echo "<td class='bg-danger text-white text-center'>Ocupado<br>José Vidigal</td>";
             } else {
-                echo "<td class='bg-success text-white text-center'>Desocupado</td>";
+                echo "<td class='bg-success text-white text-center'>Livre</td>";
             }
         }
         echo "</tr>";
