@@ -74,9 +74,9 @@
         }
     };
     if ($loggedin){
-        $giae->session = filter_input(INPUT_COOKIE, 'session', FILTER_UNSAFE_RAW);
+        $session = filter_input(INPUT_COOKIE, 'session', FILTER_UNSAFE_RAW);
         $giae = new \juoum\GiaeConnect\GiaeConnect("giae.aejics.org");
-        $giae->session=$_COOKIE["session"];
+        $giae->session=$session;
         // Este código funciona especificamente com a maneira de verificação no GIAE AEJICS.
         // Pode não funcionar da mesma maneira nos outros GIAEs. Caso não funcione na mesma maneira, corriga este código e faça um pull request!
         if (str_contains($giae->getConfInfo(), 'Erro do Servidor')){
