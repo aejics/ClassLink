@@ -31,7 +31,7 @@
       <li><a class='dropdown-item' href='/'>As Minhas Reservas</a></li>
       <li><a class='dropdown-item' href='/reservar.php'>Reservar uma Sala</a></li>";
     if ($isAdmin) {
-      echo "<li><a class='dropdown-item' href='/admin.php'>Painel Administrativo</a></li>";
+      echo "<li><a class='dropdown-item' href='/admin'>Painel Administrativo</a></li>";
     }
     echo "<li><a class='dropdown-item' href='/login.php?action=logout'>Terminar sessão</a></li>";
     echo "</ul>
