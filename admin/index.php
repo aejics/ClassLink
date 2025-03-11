@@ -1,5 +1,6 @@
-<?php // verificar login
-       require '../login.php'; 
+<?php
+    // verificar login
+    require '../login.php'; 
     // verificar acesso administrativo
     $admin = 1;
     // ^^ temporariamente dar como 1, pois ainda não foi criada uma gestão administrativa apropriada para o sql
@@ -9,13 +10,7 @@
     }
 ?>
 <?php
-    // ini_set('display_startup_errors', 1);
-    // ini_set('display_errors', 1);
-    // error_reporting(E_ALL);
-
-
     // Criação da Sidebar (reaproveito do módulo para as subpáginas)
-
     // Links do Sidebar
     function sidebarLink($url, $nome) {
         if ($url == "/admin/" && $_SERVER['REQUEST_URI'] == "/admin/") {
@@ -35,6 +30,7 @@
     <li class='nav-item'>";
     // Links da Sidebar
     sidebarLink('/admin/', 'Dashboard');
+    sidebarLink('/admin/pedidos.php', 'Pedidos de Reserva');
     sidebarLink('/admin/tempos.php', 'Gestão de Tempos');
     sidebarLink('/admin/salas.php', 'Gestão de Salas');
     sidebarLink('/admin/admins.php', 'Gestão de Administradores');
