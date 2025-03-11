@@ -1,6 +1,6 @@
 <?php 
 function getLatestCommit() {
-    if ($_SERVER['REQUEST_URI'] != "/index.php") {
+    if (str_starts_with($_SERVER['SCRIPT_NAME'], "/admin/")) {
         return substr(file_get_contents(sprintf( '../.git/refs/heads/%s', 'main' )),0,8);
     } else {
         return substr(file_get_contents(sprintf( '.git/refs/heads/%s', 'main' )),0,8);

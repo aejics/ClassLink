@@ -9,16 +9,18 @@
     }
 ?>
 <?php
-    ini_set('display_startup_errors', 1);
-    ini_set('display_errors', 1);
-    error_reporting(E_ALL);
+    // ini_set('display_startup_errors', 1);
+    // ini_set('display_errors', 1);
+    // error_reporting(E_ALL);
+
+
     // Criação da Sidebar (reaproveito do módulo para as subpáginas)
 
     // Links do Sidebar
     function sidebarLink($url, $nome) {
         if ($url == "/admin/" && $_SERVER['REQUEST_URI'] == "/admin/") {
             echo "<li class='nav-item'><a href='$url' class='nav-link active'>$nome</a></li>";
-        } if (str_starts_with($_SERVER['REQUEST_URI'], $url) && $url != "/admin/") {
+        } else if (str_starts_with($_SERVER['REQUEST_URI'], $url) && $url != "/admin/") {
             echo "<li class='nav-item'><a href='$url' class='nav-link active'>$nome</a></li>";
         } else {
             echo "<li class='nav-item'><a href='$url' class='nav-link'>$nome</a></li>";
