@@ -21,7 +21,7 @@
 $db = new SQLite3('../db.sqlite3'); 
 // Criação da Tabela de Tempos, caso não exista. Se houverem logs ligados, esta linha vai produzir um aviso se a
 // base de dados já estiver criada.
-$db->exec("CREATE TABLE tempos (idtempo INTEGER, horashumanos VARCHAR, PRIMARY KEY (idtempo));");
+$db->exec("CREATE TABLE tempos (idtempo INTEGER DISTINCT, horashumanos VARCHAR, PRIMARY KEY (idtempo));");
 
 // Ações caso seja preenchido o formulário
 if ($_POST && $_GET['action'] == "criar") {
