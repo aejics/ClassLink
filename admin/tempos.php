@@ -81,8 +81,8 @@ switch ($_GET['action']){
 $temposatuais = $db->query("SELECT * FROM tempos;");
 // esta variável é definida para poder mostrar se não existem tempos,
 // para corrigir um bug caso sejam criados e apagados tempos
-
 $numerotempos = $db->querySingle("SELECT COUNT(*) as numerotempos FROM tempos");
+
 if (!$numerotempos || $numerotempos == 0) {
     echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>Não existem tempos.</div>\n";
 }
