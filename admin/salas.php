@@ -117,7 +117,7 @@ while ($row = $temposatuais->fetchArray()) {
     } else {
         $ativada = "Não";
     }
-    echo "<tr><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td><td>$ativada</td><td><a href='/admin/tempos.php?action=edit&id=$row[0]'>EDITAR</a>  <a href='/admin/tempos.php?action=apagar&id=$row[0]'>APAGAR</a></tr>";
+    echo "<tr><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td><td>$ativada</td><td><a href='/admin/salas.php?action=edit&id=$row[0]'>EDITAR</a>  <a href='/admin/salas.php?action=apagar&id=$row[0]'>APAGAR</a></tr>";
 }
 $db->close();
 echo "</div></table>"
