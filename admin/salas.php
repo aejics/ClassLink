@@ -5,7 +5,7 @@
     <form action="salas.php?action=criar" method="POST" class="d-flex align-items-center">
         <div class="form-floating me-2" style="flex: 1;">
             <input type="number" class="form-control form-control-sm" id="idsala" name="idsala" placeholder="ID da Sala (interno)" required>
-            <label for="idsala">ID da Sala (interno)</label>
+            <label for="idsala">ID da Sala</label>
         </div>
         <div class="form-floating me-2" style="flex: 1;">
             <input type="text" class="form-control form-control-sm" id="nomesala" name="nomesala" placeholder="Sala" required>
@@ -16,7 +16,7 @@
             <label for="localsala">Local</label>
         </div>
         <div class="form-check me-2" style="flex: 1;">
-            <input type="checkbox" class="form-check-input" id="ativar" name="ativar">
+            <input type="checkbox" class="form-check-input" id="ativar" name="ativar" value="1">
             <label class="form-check-label" for="ativar">Mostrar</label>
         </div>
         <button type="submit" class="btn btn-primary btn-sm" style="height: 38px;">Submeter</button>
@@ -35,6 +35,9 @@ switch ($_GET['action']){
         $nomesala = filter_input(INPUT_POST, 'nomesala', FILTER_SANITIZE_STRING);
         $localsala = filter_input(INPUT_POST, 'localsala', FILTER_SANITIZE_STRING);
         $ativar = filter_input(INPUT_POST, 'ativar', FILTER_SANITIZE_NUMBER_INT);
+        if (!$ativar) {
+            $ativar = 0;
+        }
         $c = $db->exec("INSERT INTO salas (idsala, nomesala, localsala, ativada) VALUES ('$idsala', '$nomesala', '$localsala', '$ativar');");
         if (!$c){
             echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>Falha na criação da sala!
@@ -63,11 +66,17 @@ switch ($_GET['action']){
             <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Fechar'></button></div>";
         }
         $row = $c->fetchArray();
+        if ($row[3] == 1) {
+            $ativar = "checked";
+        } else {
+            $ativar = "";
+        }
         echo "<div class='alert alert-warning fade show' role='alert'>A editar a Sala ID $row[0] (<b>$row[1]</b>).</div>";
-        echo "<form action='salas.php?action=update&id=$row[0]' method='POST' class='d-flex align-items-center'>
+        echo "<div class='d-flex align-items-center mb-3'>
+        <form action='salas.php?action=update&id=$row[0]' method='POST' class='d-flex align-items-center'>
         <div class='form-floating me-2' style='flex: 1;'>
-            <input type='number' class='form-control form-control-sm' id='idsala' name='idsala' placeholder='ID da Sala (interno) value='$row[0]' required>
-            <label for='idsala'>ID da Sala (interno)</label>
+            <input type='number' class='form-control form-control-sm' id='idsala' name='idsala' placeholder='ID da Sala' value=\"{$row[0]}\" required>
+            <label for='idsala'>ID da Sala</label>
         </div>
         <div class='form-floating me-2' style='flex: 1;'>
             <input type='text' class='form-control form-control-sm' id='nomesala' name='nomesala' placeholder='Sala' value='$row[1]' required>
@@ -78,11 +87,11 @@ switch ($_GET['action']){
             <label for='localsala'>Local</label>
         </div>
         <div class='form-floating me-2' style='flex: 1;'>
-            <input type='checkbox' class='form-check-input' id='ativar' name='ativar' value='$row[3]'>
+            <input type='checkbox' class='form-check-input' id='ativar' name='ativar' value='1' $ativar>
             <label class='form-check-label' for='ativar'>Mostrar</label>
         </div>
         <button type='submit' class='btn btn-primary btn-sm' style='height: 38px;'>Submeter</button>
-        </form>";
+        </form></div>";
         break;
     // caso seja submetida a edição:
     case "update":
@@ -90,7 +99,10 @@ switch ($_GET['action']){
         $idsala = filter_input(INPUT_POST, 'idsala', FILTER_SANITIZE_NUMBER_INT);
         $nomesala = filter_input(INPUT_POST, 'nomesala', FILTER_SANITIZE_STRING);
         $localsala = filter_input(INPUT_POST, 'localsala', FILTER_SANITIZE_STRING);
-        $ativar = filter_input(INPUT_POST, 'ativar', FILTER_SANITIZE_NUMBER_INT);
+        $ativar = filter_input(INPUT_POST, 'ativar', filter: FILTER_SANITIZE_NUMBER_INT);
+        if (!$ativar) {
+            $ativar = 0;
+        }
         $c = $db->exec("UPDATE salas SET idsala = '$idsala', nomesala = '$nomesala', localsala = '$localsala', ativada = '$ativar' WHERE idsala = $id;");
         if (!$c){
             echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>Falha na atualização da Sala!
@@ -118,7 +130,7 @@ while ($row = $temposatuais->fetchArray()) {
     } else {
         $ativada = "Não";
     }
-    echo "<tr><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td><td>$ativada</td><td><a href='/admin/salas.php?action=edit&id=$row[0]'>EDITAR</a>  <a href='/admin/salas.php?action=apagar&id=$row[0]'>APAGAR</a></tr>";
+    echo "<tr><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td><td>$ativada ($row[3])</td><td><a href='/admin/salas.php?action=edit&id=$row[0]'>EDITAR</a>  <a href='/admin/salas.php?action=apagar&id=$row[0]'>APAGAR</a></tr>";
 }
 $db->close();
 echo "</div></table>"
