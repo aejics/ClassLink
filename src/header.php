@@ -10,8 +10,6 @@
   }
 ?>
 <?php
-  $db = new SQLite3('db.sqlite3');
-  $isAdmin = $db->querySingle("SELECT * from admins WHERE id = '{$_COOKIE["user"]}' AND atividade = true");
   // Temporáriamente permitir a todos os utilizadores a ver o painel administrativo.
   $isAdmin = true;
   $db->close();
