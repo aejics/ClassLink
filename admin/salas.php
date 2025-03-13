@@ -64,21 +64,21 @@ switch ($_GET['action']){
         }
         $row = $c->fetchArray();
         echo "<div class='alert alert-warning fade show' role='alert'>A editar a Sala ID $row[0] (<b>$row[1]</b>).</div>";
-        echo "<form action='tempos.php?action=update&id=$row[0]' method='POST' class='d-flex align-items-center'>
+        echo "<form action='salas.php?action=update&id=$row[0]' method='POST' class='d-flex align-items-center'>
         <div class='form-floating me-2' style='flex: 1;'>
-            <input type='number' class='form-control form-control-sm' id='idsala' name='idsala' placeholder='ID da Sala (interno)' required>
+            <input type='number' class='form-control form-control-sm' id='idsala' name='idsala' placeholder='ID da Sala (interno) value='$row[0]' required>
             <label for='idsala'>ID da Sala (interno)</label>
         </div>
         <div class='form-floating me-2' style='flex: 1;'>
-            <input type='text' class='form-control form-control-sm' id='nomesala' name='nomesala' placeholder='Sala' required>
+            <input type='text' class='form-control form-control-sm' id='nomesala' name='nomesala' placeholder='Sala' value='$row[1]' required>
             <label for='nomesala'>Sala</label>
         </div>
         <div class='form-floating me-2' style='flex: 1;'>
-            <input type='text' class='form-control form-control-sm' id='localsala' name='localsala' placeholder='Local' required>
+            <input type='text' class='form-control form-control-sm' id='localsala' name='localsala' placeholder='Local' value='$row[2]' required>
             <label for='localsala'>Local</label>
         </div>
         <div class='form-floating me-2' style='flex: 1;'>
-            <input type='checkbox' class='form-check-input' id='ativar' name='ativar'>
+            <input type='checkbox' class='form-check-input' id='ativar' name='ativar' value='$row[3]'>
             <label class='form-check-label' for='ativar'>Mostrar</label>
         </div>
         <button type='submit' class='btn btn-primary btn-sm' style='height: 38px;'>Submeter</button>
@@ -102,11 +102,12 @@ switch ($_GET['action']){
 }
 
 $temposatuais = $db->query("SELECT * FROM salas;");
+
 // esta variável é definida para poder mostrar se não existem tempos,
 // para corrigir um bug caso sejam criados e apagados tempos
+$numerosalas = $db->querySingle("SELECT COUNT(*) as numerotempos FROM salas");
 
-$numerotempos = $db->querySingle("SELECT COUNT(*) as numerotempos FROM tempos");
-if (!$numerotempos || $numerotempos == 0) {
+if (!$numerosalas || $numerosalas == 0) {
     echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>Não existem salas.</div>\n";
 }
 echo "<table class='table'><tr><th scope='col'>ID</th><th scope='col'>Nome Sala</th><th scope='col'>Local</th><th scope='col'>Ativada</th><th scope='col'>AÇÕES</th></tr>";
