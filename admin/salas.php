@@ -16,7 +16,7 @@
             <label for="localsala">Local</label>
         </div>
         <div class="form-check me-2" style="flex: 1;">
-            <input type="checkbox" class="form-check-input" id="ativar" name="ativar" required>
+            <input type="checkbox" class="form-check-input" id="ativar" name="ativar">
             <label class="form-check-label" for="ativar">Mostrar</label>
         </div>
         <button type="submit" class="btn btn-primary btn-sm" style="height: 38px;">Submeter</button>
@@ -24,11 +24,6 @@
 </div>
 
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-
 $db = new SQLite3('../db.sqlite3'); 
 // Criação da Tabela das Salas.
 $db->exec("CREATE TABLE salas (idsala INTEGER UNIQUE, nomesala VARCHAR, localsala VARCHAR, ativada BOOLEAN, PRIMARY KEY (idsala));");
@@ -83,7 +78,7 @@ switch ($_GET['action']){
             <label for='localsala'>Local</label>
         </div>
         <div class='form-floating me-2' style='flex: 1;'>
-            <input type='checkbox' class='form-check-input' id='ativar' name='ativar' required>
+            <input type='checkbox' class='form-check-input' id='ativar' name='ativar'>
             <label class='form-check-label' for='ativar'>Mostrar</label>
         </div>
         <button type='submit' class='btn btn-primary btn-sm' style='height: 38px;'>Submeter</button>
@@ -117,7 +112,7 @@ if (!$numerotempos || $numerotempos == 0) {
 echo "<table class='table'><tr><th scope='col'>ID</th><th scope='col'>Nome Sala</th><th scope='col'>Local</th><th scope='col'>Ativada</th><th scope='col'>AÇÕES</th></tr>";
 while ($row = $temposatuais->fetchArray()) {
     // definir para valores legíveis, na db fica 0 ou 1
-    if $row[3] == 1 {
+    if ($row[3] == 1) {
         $ativada = "Sim";
     } else {
         $ativada = "Não";
