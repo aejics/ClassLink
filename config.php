@@ -19,11 +19,4 @@
         'mail' => '',
         'password' => ''
     );
-
-
-    // mensagem para membros externos da comunidade de hacking
-    // potencialmente removida na versão final
-    if ($_SERVER['REQUEST_URI'] == '/config.php'){
-        echo "What are you doing you snooper???<img src=\"https://i.gifer.com/74Uy.gif\">";
-    }
 ?>
