@@ -4,7 +4,7 @@
     <span class="me-3">Adicionar um tempo</span>
     <form action="tempos.php?action=criar" method="POST" class="d-flex align-items-center">
         <div class="form-floating me-2" style="flex: 1;">
-            <input type="text" class="form-control form-control-sm" id="idtempo" name="idtempo" placeholder="ID do Tempo" required>
+            <input type="number" class="form-control form-control-sm" id="idtempo" name="idtempo" placeholder="ID do Tempo" required>
             <label for="idtempo">ID do Tempo</label>
         </div>
         <div class="form-floating me-2" style="flex: 1;">
