@@ -5,7 +5,7 @@
     require '../src/db.php';
     if (!$isAdmin == 1) {
         http_response_code(403);
-        die("403 - Não tem acesso para aceder a esta página.");
+        die("<h2>403 - Não tem acesso para aceder a esta página.</h2>");
     }
 ?>
 <?php
