@@ -1,9 +1,14 @@
-<?php require 'login.php'; ?>
+<?php 
+    require '../src/config.php';
+    require '../src/db.php';
+    require '../src/base.php';
+?>
+
 <div class="h-100 d-flex align-items-center justify-content-center flex-column">
-    <p class="h2 mb-4">Reservar uma Sala</p>
-<form action="reservar.php" method="POST" class="d-flex align-items-center">
+    <p class="h2 fw-light">Reservar uma Sala</p>    
+<form action="/reservas/" method="POST" class="d-flex align-items-center">
     <div class="form-floating me-2">
-        <select class="form-select" id="sala" name="sala" required>
+        <select class="form-select" id="sala" name="sala" required onchange="this.form.submit();">
             <option value="" selected disabled>Escolha uma sala</option>
             <option value="1">Sala 1</option>
             <option value="2">Sala 2</option>
@@ -26,7 +31,7 @@
 <?php
     if ($_POST['sala']){
         echo(
-            "<div class='h-100 d-flex align-items-center justify-content-center flex-column'>
+            "<div class='mt-3 h-100 d-flex align-items-center justify-content-center flex-column'>
             <table class='table table-bordered'><thead><tr><th scope='col'>Tempos</th>"
         );
         for ($i = 0; $i < 5; $i++){

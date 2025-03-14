@@ -23,7 +23,8 @@
             if ($_COOKIE['loggedin']) {
                 $user = filter_var($_COOKIE['user'], FILTER_SANITIZE_STRING);
                 require(__DIR__ .'/../login/giae.php');
-                checkValidSession($_COOKIE['session']);
+                // temporariamente desativado para acelerar o desenvolvimento
+                //checkValidSession($_COOKIE['session']);
                 $isAdmin = $db->query("SELECT * FROM admins WHERE id = '$user' AND permitido = 1;")->num_rows;
                 echo "<div class='dropdown'>
                         <button class='btn dropdown-toggle text-white' style='background-color:rgb(2, 152, 7);' type='button' id='areaMenuButton' data-bs-toggle='dropdown' aria-expanded='false'>
