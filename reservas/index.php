@@ -60,12 +60,12 @@
                 for ($j = 0; $j < 7; $j++){
                     $diacheckdb = $segunda + ($j * 86400);
                     $diacheckdb = date("Y-m-d", $diacheckdb);
-                    if ($_POST['sala']){
-                        $tempoatualdb = $db->query("SELECT * FROM reservas WHERE sala='{$_POST['sala']}' AND data='{$diacheckdb}' AND tempo='{$row['id']}';");
-                        $sala = $_POST['sala'];
-                    } else {
+                    if ($_GET['sala']){
                         $tempoatualdb = $db->query("SELECT * FROM reservas WHERE sala='{$_GET['sala']}' AND data='{$diacheckdb}' AND tempo='{$row['id']}';");
                         $sala = $_GET['sala'];
+                    } else {
+                        $tempoatualdb = $db->query("SELECT * FROM reservas WHERE sala='{$_POST['sala']}' AND data='{$diacheckdb}' AND tempo='{$row['id']}';");
+                        $sala = $_POST['sala'];
                     }
                     $tempoatualdb = $tempoatualdb->fetch_assoc();
                     if (!$tempoatualdb){
