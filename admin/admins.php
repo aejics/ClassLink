@@ -3,7 +3,7 @@
 <div class="d-flex align-items-center mb-3">
     <span class="me-3">Adicionar um admin</span>
     <?php formulario("admins.php?action=criar", [
-        ["type" => "text", "id" => "id", "placeholder" => "ID do Admin", "label" => "ID do Tempo", "value" => null],
+        ["type" => "text", "id" => "id", "placeholder" => "ID do Admin", "label" => "ID do Admin", "value" => null],
         ["type" => "text", "id" => "permitido", "placeholder" => "Permitido (1 ou 0)", "label" => "Permitido (1 ou 0)", "value" => null]
     ]); ?>
 </div>
