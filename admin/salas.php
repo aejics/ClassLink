@@ -3,10 +3,8 @@
 <div class="d-flex align-items-center mb-3">
     <span class="me-3">Adicionar uma sala</span>
     <?php formulario("salas.php?action=criar", [
-        ["type" => "number", "id" => "idsala", "placeholder" => "ID da Sala", "label" => "ID da Sala"],
-        ["type" => "text", "id" => "nomesala", "placeholder" => "Sala", "label" => "Sala"],
-        ["type" => "text", "id" => "localsala", "placeholder" => "Local", "label" => "Local"],
-        ["type" => "checkbox", "id" => "ativar", "placeholder" => "Mostrar", "label" => "Mostrar"]
+        ["type" => "number", "id" => "idsala", "placeholder" => "ID da Sala", "label" => "ID da Sala", "value" => null],
+        ["type" => "text", "id" => "nomesala", "placeholder" => "Sala", "label" => "Sala", "value" => null]
     ]); ?>
 </div>
 
@@ -14,85 +12,27 @@
 switch ($_GET['action']){
     // caso seja preenchido o formulário de criação:
     case "criar":
-        if (!$ativar) {
-            $ativar = 0;
-        }
-        $c = $db->exec("INSERT INTO salas (id, nome, local, ativada) VALUES ('$idsala', '$nomesala', '$localsala', '$ativar');");
-        if (!$c){
-            echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>Falha na criação da sala!
-            <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Fechar'></button></div>";
-        }
-        echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>Sala criada com sucesso!
-            <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Fechar'></button></div>";
+        $db->query("INSERT INTO salas (id, nome) VALUES ('{$_POST["idsala"]}', '{$_POST["nomesala"]}');");
+        acaoexecutada("Criação de Sala");
         break;
     // caso execute a ação apagar:
     case "apagar":
-        $c = $db->exec("DELETE FROM salas WHERE id = $id;");
-        if (!$c){
-            echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>Falha na eliminação da sala!
-            <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Fechar'></button></div>";
-        }
-        echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>Sala eliminada com sucesso!
-            <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Fechar'></button></div>";
+        $db->query("DELETE FROM salas WHERE id = {$_GET['id']};");
+        acaoexecutada("Eliminação de Sala");
         break;
     // caso execute a ação editar:
     case "edit":
-        $c = $db->query("SELECT * FROM salas WHERE id = $id;");
-        if (!$c){
-            echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>Falha na obtenção da sala!
-            <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Fechar'></button></div>";
-        }
-        $row = $c->fetch_assoc();
-        if ($row[3] == 1) {
-            $ativar = "checked";
-        } else {
-            $ativar = "";
-        }
-        echo "<div class='alert alert-warning fade show' role='alert'>A editar a Sala ID $row[0] (<b>$row[1]</b>).</div>";
-        formulariovalue("salas.php?action=update&id=$row[0]", [
-            ["type" => "number", "id" => "idsala", "placeholder" => "ID da Sala", "label" => "ID da Sala"],
-            ["type" => "text", "id" => "nomesala", "placeholder" => "Sala", "label" => "Sala"],
-            ["type" => "text", "id" => "localsala", "placeholder" => "Local", "label" => "Local"],
-            ["type" => "checkbox", "id" => "ativar", "placeholder" => "Mostrar", "label" => "Mostrar"]
-        ], $row);
-        echo "<div class='d-flex align-items-center mb-3'>
-        <form action='salas.php?action=update&id=$row[0]' method='POST' class='d-flex align-items-center'>
-        <div class='form-floating me-2' style='flex: 1;'>
-            <input type='number' class='form-control form-control-sm' id='idsala' name='idsala' placeholder='ID da Sala' value=\"{$row[0]}\" required>
-            <label for='idsala'>ID da Sala</label>
-        </div>
-        <div class='form-floating me-2' style='flex: 1;'>
-            <input type='text' class='form-control form-control-sm' id='nomesala' name='nomesala' placeholder='Sala' value='$row[1]' required>
-            <label for='nomesala'>Sala</label>
-        </div>
-        <div class='form-floating me-2' style='flex: 1;'>
-            <input type='text' class='form-control form-control-sm' id='localsala' name='localsala' placeholder='Local' value='$row[2]' required>
-            <label for='localsala'>Local</label>
-        </div>
-        <div class='form-floating me-2' style='flex: 1;'>
-            <input type='checkbox' class='form-check-input' id='ativar' name='ativar' value='1' $ativar>
-            <label class='form-check-label' for='ativar'>Mostrar</label>
-        </div>
-        <button type='submit' class='btn btn-primary btn-sm' style='height: 38px;'>Submeter</button>
-        </form></div>";
+        $c = $db->query("SELECT * FROM salas WHERE id = '{$_GET['id']}';");
+        $d = $c->fetch_assoc();
+        echo "<div class='alert alert-warning fade show' role='alert'>A editar a Sala ID {$d['id']} (<b>{$d['nome']}</b>).</div>";
+        formulario("salas.php?action=update&id={$d['id']}", [
+            ["type" => "number", "id" => "idsala", "placeholder" => "ID da Sala", "label" => "ID da Sala", "value" => $d['id']],
+            ["type" => "text", "id" => "nomesala", "placeholder" => "Sala", "label" => "Sala", "value" => $d['nome']]]);
         break;
     // caso seja submetida a edição:
     case "update":
-        $id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
-        $idsala = filter_input(INPUT_POST, 'idsala', FILTER_SANITIZE_NUMBER_INT);
-        $nomesala = filter_input(INPUT_POST, 'nomesala', FILTER_SANITIZE_STRING);
-        $localsala = filter_input(INPUT_POST, 'localsala', FILTER_SANITIZE_STRING);
-        $ativar = filter_input(INPUT_POST, 'ativar', filter: FILTER_SANITIZE_NUMBER_INT);
-        if (!$ativar) {
-            $ativar = 0;
-        }
-        $c = $db->exec("UPDATE salas SET idsala = '$idsala', nomesala = '$nomesala', localsala = '$localsala', ativada = '$ativar' WHERE idsala = $id;");
-        if (!$c){
-            echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>Falha na atualização da Sala!
-            <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Fechar'></button></div>";
-        }
-        echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>Sala atualizada com sucesso!
-            <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Fechar'></button></div>";
+        $c = $db->query("UPDATE salas SET id = '{$_POST['idsala']}', nome = '{$_POST['nomesala']}' WHERE id = {$_GET['id']};");
+        acaoexecutada("Atualização de Sala");
         break;
 }
 
@@ -100,15 +40,9 @@ $temposatuais = $db->query("SELECT * FROM salas;");
 if ($temposatuais->num_rows == 0) {
     echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>Não existem salas.</div>\n";
 }
-echo "<table class='table'><tr><th scope='col'>ID</th><th scope='col'>Nome Sala</th><th scope='col'>Local</th><th scope='col'>Ativada</th><th scope='col'>AÇÕES</th></tr>";
-while ($row = $temposatuais->fetchArray()) {
-    // definir para valores legíveis, na db fica 0 ou 1
-    if ($row[3] == 1) {
-        $ativada = "Sim";
-    } else {
-        $ativada = "Não";
-    }
-    echo "<tr><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td><td>$ativada ($row[3])</td><td><a href='/admin/salas.php?action=edit&id=$row[0]'>EDITAR</a>  <a href='/admin/salas.php?action=apagar&id=$row[0]'>APAGAR</a></tr>";
+echo "<table class='table'><tr><th scope='col'>ID</th><th scope='col'>Nome Sala</th><th scope='col'>AÇÕES</th></tr>";
+while ($row = $temposatuais->fetch_assoc()) {
+    echo "<tr><td>{$row['id']}</td><td>{$row['nome']}</td><td><a href='/admin/salas.php?action=edit&id={$row['id']}'>EDITAR</a>  <a href='/admin/salas.php?action=apagar&id={$row['id']}'>APAGAR</a></tr>";
 }
 $db->close();
 echo "</div></table>"

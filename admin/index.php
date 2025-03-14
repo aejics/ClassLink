@@ -3,12 +3,16 @@
     require '../src/base.php';
     require '../src/config.php';
     require '../src/db.php';
-    if (!$isAdmin){
+    if (!$isAdmin == 1) {
         http_response_code(403);
         die("403 - Não tem acesso para aceder a esta página.");
     }
 ?>
 <?php
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
+
     // Criação da Sidebar (reaproveito do módulo para as subpáginas)
     // Links do Sidebar
     function sidebarLink($url, $nome) {
@@ -52,33 +56,16 @@
         echo "<form action='$action' method='POST' class='d-flex align-items-center'>";
         foreach ($inputs as $input) {
             echo "<div class='form-floating me-2' style='flex: 1;'>
-            <input type='{$input['type']}' class='form-control form-control-sm' id='{$input['id']}' name='{$input['id']}' placeholder='{$input['placeholder']}' required>
+            <input type='{$input['type']}' class='form-control form-control-sm' id='{$input['id']}' name='{$input['id']}' placeholder='{$input['placeholder']}' value='{$input['value']}' required>
             <label for='{$input['id']}'>{$input['label']}</label>
             </div>";
-        }
+            }
         echo "<button type='submit' class='btn btn-primary btn-sm' style='height: 38px;'>Submeter</button></form>";
     }
 
-    function formulariovalue($action, $inputs, $values) {
-        echo "<form action='$action' method='POST' class='d-flex align-items-center'>";
-        foreach ($inputs as $input) {
-            if ($input['type'] == 'checkbox') {
-                if ($values[$input['id']] == 1) {
-                    $checked = "checked";
-                } else {
-                    $checked = "";
-                }
-                echo "<div class='form-floating me-2' style='flex: 1;'>
-                <input type='{$input['type']}' class='form-check-input' id='{$input['id']}' name='{$input['id']}' value='1' $checked>
-                <label for='{$input['id']}'>{$input['label']}</label>
-                </div>";
-            } else {
-                echo "<div class='form-floating me-2' style='flex: 1;'>
-                <input type='{$input['type']}' class='form-control form-control-sm' id='{$input['id']}' name='{$input['id']}' placeholder='{$input['placeholder']}' value='{$values[$input['id']]}' required>
-                <label for='{$input['id']}'>{$input['label']}</label>
-                </div>";
-            }
-        }
-        echo "<button type='submit' class='btn btn-primary btn-sm' style='height: 38px;'>Submeter</button></form>";
+    // ação executada
+    function acaoexecutada($acao) {
+        echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>Ação executada. <b>$acao</b>
+            <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Fechar'></button></div>";
     }
 ?>
