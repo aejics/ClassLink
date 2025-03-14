@@ -93,5 +93,3 @@ while ($row = $temposatuais->fetchArray()) {
 $db->close();
 echo "</div></table>"
 ?>
-
-<?php require '../src/footer.php'; ?>
