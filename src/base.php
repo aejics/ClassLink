@@ -9,6 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <link href="/src/main.css" rel="stylesheet">
+    <link rel='icon' href='/src/logo.png'>
 </head>
 <body>
     <?php
@@ -24,7 +25,7 @@
         $_COOKIE['userpicture'] = "fotos/11531.jpg";
     ?>
     <nav class="navbar navbar-expand-lg navbar-light bg-light justify-content-center">
-        <a class="navbar-brand" href="/">ReservaSalas</a>
+        <a class="navbar-brand" href="/"><img src="/src/logo.png" style="max-width: 1.8em">  <?php echo $info['nome']; ?></a>
         <?php 
             if ($_COOKIE['loggedin']) {
                 $isAdmin = $db->query("SELECT * FROM admins WHERE id = '{$_COOKIE['loggedin']}' AND permitido = 1;")->num_rows;
