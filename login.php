@@ -1,7 +1,4 @@
 <?php
-    if (!$loggedin && $action !== "loginform" && $action !== "login"){
-        header('Location: /login.php?action=loginform');
-    }
     if ($action == "loginform"){
         print("");
         include 'src/footer.php';

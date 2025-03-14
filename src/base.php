@@ -13,25 +13,19 @@
 </head>
 <body>
     <?php
-        ini_set('display_errors', 1);
-        ini_set('display_startup_errors', 1);
-        error_reporting(E_ALL);
-
         if ($mensagem['ativada']){
             echo("<div class='alert alert-{$mensagem['tipo']} text-center' role='alert'>{$mensagem['mensagem']}</div>");
         }
-        // enquanto cookies nao forem reimplementados, esta solução é temporária.
-        $_COOKIE['loggedin'] = "a11531";
-        $_COOKIE['userpicture'] = "fotos/11531.jpg";
     ?>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light justify-content-center">
-        <a class="navbar-brand" href="/"><img src="/src/logo.png" style="max-width: 1.8em">  <?php echo $info['nome']; ?></a>
+    <nav class="navbar navbar-expand-lg navbar-light bg-success text-white justify-content-center">
+        <a class="navbar-brand" href="/"><img src="/src/logo.png" style="max-width: 1.8em">  <span class="text-white"><?php echo $info['nome']; ?></span></a>
         <?php 
             if ($_COOKIE['loggedin']) {
-                $isAdmin = $db->query("SELECT * FROM admins WHERE id = '{$_COOKIE['loggedin']}' AND permitido = 1;")->num_rows;
+                $user = filter_var($_COOKIE['user'], FILTER_SANITIZE_STRING);
+                $isAdmin = $db->query("SELECT * FROM admins WHERE id = '$user' AND permitido = 1;")->num_rows;
                 echo "<div class='dropdown'>
-                        <button class='btn btn-secondary dropdown-toggle' type='button' id='areaMenuButton' data-bs-toggle='dropdown' aria-expanded='false'>
-                        <img class='fotoutente' src='https://{$giae['servidor']}/{$_COOKIE['userpicture']}'>  A Minha Área
+                        <button class='btn dropdown-toggle text-white' style='background-color:rgb(2, 152, 7);' type='button' id='areaMenuButton' data-bs-toggle='dropdown' aria-expanded='false'>
+                        <img class='fotoutente' src='https://{$giae['servidor']}/{$_COOKIE['userpic']}'>  A Minha Área
                         </button>
                         <ul class='dropdown-menu' aria-labelledby='dropdownMenuButton'>";
                 barraMenuLink("/", "As Minhas Reservas", false);

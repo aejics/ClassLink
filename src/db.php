@@ -1,8 +1,4 @@
 <?php
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
-
     require 'config.php';
     $db = new mysqli($db['servidor'], $db['user'], $db['password'], $db['db'], $db['porta']);
     if ($db->connect_error) {

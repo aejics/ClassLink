@@ -1,31 +1,29 @@
 <?php
     require_once(__DIR__ . "/../vendor/autoload.php");
-    require 'config.php';
-    require 'db.php';
-    require 'base.php';
+    require '../src/config.php';
+    require '../src/db.php';
+    require '../src/base.php';
     $giae = new \juoum\GiaeConnect\GiaeConnect($giae['servidor']);
     if ($_POST){
         $user = filter_input(INPUT_POST, 'user', FILTER_UNSAFE_RAW);
         $pass = filter_input(INPUT_POST, 'pass', FILTER_UNSAFE_RAW);
+        $giae->session = $giae->getSession($user, $pass);
         $config = json_decode($giae->getConfInfo(), true);
         if (strpos($giae->getConfInfo(), 'Erro do Servidor') !== false){
             die("<div class='alert alert-danger text-center' role='alert'>A sua palavra-passe está errada.</div>
             <div class='text-center'>
             <button type='button' class='btn btn-primary w-100' onclick='history.back()'>Voltar</button></div>");
-            include 'src/footer.php';
         } else {
             $perfil = json_decode($giae->getPerfil(), true);
-            setcookie("loggedin", "true", time() + 3599, "/");
+            setcookie("loggedin", true, time() + 3599, "/");
             setcookie("session", $giae->session, time() + 3599, "/");
-            setcookie("user", $_POST["user"], time() + 3599, "/");
+            setcookie("user", $user, time() + 3599, "/");
             setcookie("userpic", $config['fotoutente'], time() + 3599, "/");
-            $stmt = $db->prepare("INSERT INTO cache_giae(id, nome, nomecompleto, email) VALUES (?, ?, ?, ?);");
-            $valordb->bindValue(':1', mb_convert_encoding($_POST["user"], 'ISO-8859-1', 'auto'), SQLITE3_TEXT);
-            $valordb->bindValue(':2', mb_convert_encoding($config['nomeutilizador'], 'ISO-8859-1', 'auto'), SQLITE3_TEXT);
-            $valordb->bindValue(':3', mb_convert_encoding($perfil['perfil']['nome'], 'ISO-8859-1', 'auto'), SQLITE3_TEXT);
-            $valordb->bindValue(':4', mb_convert_encoding($perfil['perfil']['email'], 'ISO-8859-1', 'auto'), SQLITE3_TEXT);
-            $valordb->execute();
-            $db->
+            $stmt = $db->prepare("INSERT IGNORE INTO cache_giae(id, nome, nomecompleto, email) VALUES (?, ?, ?, ?);");
+            $stmt->bind_param("ssss", $user, $config['nomeutilizador'], $perfil['perfil']['nome'], $perfil['perfil']['email']);
+            $stmt->execute();
+            header('Location: /');
+        }
     }
 ?>
 
