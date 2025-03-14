@@ -22,8 +22,8 @@
     }
     if ($action == "loginform"){
         print("<div class='h-100 d-flex align-items-center justify-content-center flex-column'>
-            <p class='h2 mb-4'>Autentique-se via GIAE AEJICS</p>
-            <p class='mb-4'>Utilize as credenciais do GIAE AEJICS para continuar para <b>ReservaSalas</b></p>
+            <p class='h2 mb-4'>Autentique-se via GIAE</p>
+            <p class='mb-4'>Utilize as credenciais do GIAE para continuar para <b>ReservaSalas</b></p>
             <main class='form-signin w-100 m-auto'>
             <form action='/login.php?action=login' method='POST' class='w-200' style='max-width: 600px;'>
                 <div class='form-floating'>

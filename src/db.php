@@ -4,4 +4,6 @@
     if ($db->connect_error) {
         die("Ligação ao servidor falhou: " . $db->connect_error);
     }
+    $db->set_charset("utf8");
+
 ?>
