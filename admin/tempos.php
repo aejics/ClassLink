@@ -44,6 +44,5 @@ echo "<table class='table'><tr><th scope='col'>ID</th><th scope='col'>Hora Human
 while ($row = $temposatuais->fetch_assoc()) {
     echo "<tr><td>{$row['id']}</td><td>{$row['horashumanos']}</td><td><a href='/admin/tempos.php?action=edit&id={$row['id']}'>EDITAR</a>  <a href='/admin/tempos.php?action=apagar&id={$row['id']}'>APAGAR</a></tr>";
 }
-$db->close();
 echo "</div></table>"
 ?>

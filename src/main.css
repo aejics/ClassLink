@@ -1,2 +1,18 @@
 div {align-content: center;}
 .fotoutente{width: 1em}
+
+td a {
+    display:block;
+    width:100%;
+    height:100%;
+    color:white;
+    text-decoration:none;
+    text-align:center;
+    padding: 10px;
+}
+
+th {
+    text-align: center;
+    padding: 10px;
+    margin-top:20px;
+}
