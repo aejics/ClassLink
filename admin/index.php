@@ -1,9 +1,7 @@
 <?php
-    // verificar login
     require '../src/base.php';
     require '../src/config.php';
     require '../src/db.php';
-    require '../login/giae.php';
     if (!$isAdmin == 1) {
         http_response_code(403);
         die("<h2>403 - Não tem acesso para aceder a esta página.</h2>");
