@@ -19,4 +19,15 @@
         'mail' => '',
         'password' => ''
     );
+
+    // neste momento funciona só com mysql
+    // esta documentação vai ser restruturada antes da branch ser puxada para main
+    $db = array(
+        'tipo' => 'mysql',
+        'servidor' => 'localhost',
+        'user' => 'salasuser',
+        'password' => 'salaspass',
+        'db' => 'reservasalas',
+        'porta' => 3306
+    )
 ?>
