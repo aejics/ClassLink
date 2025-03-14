@@ -67,7 +67,7 @@
                     $tempoatualdb = $tempoatualdb->fetch_assoc();
                     if (!$tempoatualdb){
                         echo "<td class='bg-success text-white text-center'>
-                        <a href='/reservas/manage.php?tempo={$row['id']}&sala={$sala}&data={$diacheckdb}'>
+                        <a class='reserva' href='/reservas/manage.php?tempo={$row['id']}&sala={$sala}&data={$diacheckdb}'>
                         Livre
                         </a></td>";
                     } else { 
@@ -75,14 +75,14 @@
                         $nomerequisitor = $nomerequisitor->fetch_assoc();
                         if ($tempoatualdb['aprovado'] == 0){
                             echo "<td class='bg-warning text-white text-center'>
-                            <a href='/reservas/manage.php?tempo={$row['id']}&sala={$sala}&data={$diacheckdb}'>
+                            <a class='reserva' href='/reservas/manage.php?tempo={$row['id']}&sala={$sala}&data={$diacheckdb}'>
                             Pendente
                             <br>
                             {$nomerequisitor['nome']}
                             </a></td>";
                         } else if ($tempoatualdb['aprovado'] == 1){
                             echo "<td class='bg-danger text-white text-center'>
-                            <a href='/reservas/manage.php?tempo={$row['id']}&sala={$sala}&data={$diacheckdb}'>
+                            <a class='reserva' href='/reservas/manage.php?tempo={$row['id']}&sala={$sala}&data={$diacheckdb}'>
                             Ocupado
                             <br>
                             {$nomerequisitor['nome']}
