@@ -19,9 +19,6 @@
         } else {
         echo "<div class='mt-3 alert alert-danger text-center' role='alert'>Ainda não tem reservas. Irão aparecer as suas reservas aqui:</div>";
         }
-
-        require 'login/giae.php';
-        checkValidSession($_COOKIE['session']);
     } else {
         header('Location: /login/');
     }

@@ -22,7 +22,7 @@
         <?php
             if ($_COOKIE['loggedin']) {
                 $user = filter_var($_COOKIE['user'], FILTER_SANITIZE_STRING);
-                require '../login/giae.php';
+                require(__DIR__ .'/../login/giae.php');
                 checkValidSession($_COOKIE['session']);
                 $isAdmin = $db->query("SELECT * FROM admins WHERE id = '$user' AND permitido = 1;")->num_rows;
                 echo "<div class='dropdown'>
@@ -33,7 +33,7 @@
                 barraMenuLink("/", "As Minhas Reservas", false);
                 barraMenuLink("/reservar.php", "Reservar uma Sala", false);
                 barraMenuLink("/admin", "Painel Administrativo", true);
-                barraMenuLink("/login.php?action=logout", "Terminar sessão", false);
+                barraMenuLink("/login?logout=1", "Terminar sessão", false);
                 echo "</ul></div>";
             }
 

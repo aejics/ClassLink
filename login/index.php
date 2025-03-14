@@ -1,15 +1,10 @@
 <?php
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
-
-
     require_once(__DIR__ . "/../vendor/autoload.php");
     require '../src/config.php';
     require '../src/db.php';
     require '../src/base.php';
     $giaeconnect = new \juoum\GiaeConnect\GiaeConnect($giae['servidor']);
-    if ($_GET['logout'] == 'true'){
+    if ($_GET['logout']){
         $giaeconnect->session = $_COOKIE['session'];
         $giaeconnect->logout();
         setcookie("loggedin", "", time() - 3600, "/");
@@ -43,7 +38,7 @@
 
 <div class='h-100 d-flex align-items-center justify-content-center flex-column'>
     <p class='h2 mb-4'>Autentique-se via GIAE</p>
-    <p class='mb-4'>Utilize as credenciais do GIAE para continuar para <b>ReservaSalas</b></p>
+    <p class='mb-4'>Utilize as credenciais do GIAE para continuar para <b><?php echo $info['nome'] ?></b></p>
     <main class='form-signin w-100 m-auto'>
         <form action='/login/' method='POST' class='w-200' style='max-width: 600px;'>
             <div class='form-floating'>
