@@ -1,10 +1,8 @@
 <?php 
-    require '../src/config.php';
-    require '../src/db.php';
-    require '../src/base.php';
+    require 'index.php';
 ?>
-
 <div class="h-100 d-flex align-items-center justify-content-center flex-column">
+    <h3>Gestão de Pedidos de Salas</h3>
     <p class="h2 fw-light">Reservar uma Sala</p>    
 <form action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="POST" class="d-flex align-items-center">
     <div class="form-floating me-2">

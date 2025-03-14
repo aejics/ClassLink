@@ -2,9 +2,6 @@
     require '../src/config.php';
     require '../src/db.php';
     require '../src/base.php';
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
 
     if ($_GET['tempo'] && $_GET['data'] && $_GET['sala']){
         $tempo = filter_var($_GET['tempo'], FILTER_SANITIZE_NUMBER_INT);
