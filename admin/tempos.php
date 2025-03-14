@@ -20,14 +20,14 @@
 $db = new SQLite3('../db.sqlite3'); 
 // Criação da Tabela de Tempos, caso não exista. Se houverem logs ligados, esta linha vai produzir um aviso se a
 // base de dados já estiver criada.
-$db->exec("CREATE TABLE tempos (idtempo INTEGER UNIQUE, horashumanos VARCHAR, PRIMARY KEY (idtempo));");
+$db->exec("CREATE TABLE tempos (id INTEGER UNIQUE, horashumanos VARCHAR, PRIMARY KEY (idtempo));");
 // Ações caso seja executada uma ação
 switch ($_GET['action']){
     // caso seja preenchido o formulário de criação:
     case "criar":
         $idtempo = filter_input(INPUT_POST, 'idtempo', FILTER_SANITIZE_NUMBER_INT);
         $horashumanos = filter_input(INPUT_POST, 'horashumanos', FILTER_SANITIZE_STRING);
-        $c = $db->exec("INSERT INTO tempos (idtempo, horashumanos) VALUES ('$idtempo', '$horashumanos');");
+        $c = $db->exec("INSERT INTO tempos (id, horashumanos) VALUES ('$idtempo', '$horashumanos');");
         if (!$c){
             echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>Falha na criação do tempo!
             <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Fechar'></button></div>";

@@ -1,0 +1,52 @@
+<?php
+    require_once(__DIR__ . "/../vendor/autoload.php");
+    require 'config.php';
+    require 'db.php';
+    require 'base.php';
+    $giae = new \juoum\GiaeConnect\GiaeConnect($giae['servidor']);
+    if ($_POST){
+        $user = filter_input(INPUT_POST, 'user', FILTER_UNSAFE_RAW);
+        $pass = filter_input(INPUT_POST, 'pass', FILTER_UNSAFE_RAW);
+        $config = json_decode($giae->getConfInfo(), true);
+        if (strpos($giae->getConfInfo(), 'Erro do Servidor') !== false){
+            die("<div class='alert alert-danger text-center' role='alert'>A sua palavra-passe está errada.</div>
+            <div class='text-center'>
+            <button type='button' class='btn btn-primary w-100' onclick='history.back()'>Voltar</button></div>");
+            include 'src/footer.php';
+        } else {
+            $perfil = json_decode($giae->getPerfil(), true);
+            setcookie("loggedin", "true", time() + 3599, "/");
+            setcookie("session", $giae->session, time() + 3599, "/");
+            setcookie("user", $_POST["user"], time() + 3599, "/");
+            setcookie("userpic", $config['fotoutente'], time() + 3599, "/");
+            $stmt = $db->prepare("INSERT INTO cache_giae(id, nome, nomecompleto, email) VALUES (?, ?, ?, ?);");
+            $valordb->bindValue(':1', mb_convert_encoding($_POST["user"], 'ISO-8859-1', 'auto'), SQLITE3_TEXT);
+            $valordb->bindValue(':2', mb_convert_encoding($config['nomeutilizador'], 'ISO-8859-1', 'auto'), SQLITE3_TEXT);
+            $valordb->bindValue(':3', mb_convert_encoding($perfil['perfil']['nome'], 'ISO-8859-1', 'auto'), SQLITE3_TEXT);
+            $valordb->bindValue(':4', mb_convert_encoding($perfil['perfil']['email'], 'ISO-8859-1', 'auto'), SQLITE3_TEXT);
+            $valordb->execute();
+            $db->
+    }
+?>
+
+<div class='h-100 d-flex align-items-center justify-content-center flex-column'>
+    <p class='h2 mb-4'>Autentique-se via GIAE</p>
+    <p class='mb-4'>Utilize as credenciais do GIAE para continuar para <b>ReservaSalas</b></p>
+    <main class='form-signin w-100 m-auto'>
+        <form action='/login/' method='POST' class='w-200' style='max-width: 600px;'>
+            <div class='form-floating'>
+                <input type='text' class='form-control' id='user' name='user' required placeholder='fxxxx ou axxxxx'>
+                <label for='user' class='form-label'>Nome de utilizador</label>
+            </div>
+            <br>
+            <div class='form-floating'>
+                <input type='password' class='form-control' id='pass' name='pass' required placeholder='********'>
+                <label for='pass' class='form-label'>Palavra-passe</label>
+            </div>
+            <br> 
+            <button type='submit' class='btn btn-primary w-100'>Iniciar sessão</button>
+            <hr>
+        </form>
+    </main>
+    <p class='h6'><i>Problemas a fazer login? Contacte o Apoio Informático.</i></p>
+</div>

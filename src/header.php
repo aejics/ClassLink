@@ -1,17 +1,5 @@
 <?php
-  // Esta parte de configuração serve para mostrar uma mensagem no topo do painel.
-  $mensagem_ativada = false;
-  $mensagem_header = "Este painel está em desenvolvimento pesado. Bugs? Report an issue on GitHub!";
-  $mensagem_tipo = "info";
-  // ^^ Tipos de mensagem: primary, secondary, success, danger, warning, info, light, dark
-  if ($mensagem_ativada){
-    echo "<div class='alert alert-" . $mensagem_tipo . " alert-dismissible fade show text-center' role='alert'>" . $mensagem_header . "
-    <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Fechar'></button></div>";
-  }
-?>
-<?php
-  // Temporáriamente permitir a todos os utilizadores a ver o painel administrativo.
-  $isAdmin = true;
+
   $db->close();
   echo "<nav class='navbar navbar-expand-lg navbar-light bg-light justify-content-center'>
   <a class='navbar-brand' href='/'>ReservaSalas</a>
