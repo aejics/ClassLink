@@ -16,6 +16,12 @@
         $reservas = $db->query("SELECT * FROM reservas WHERE requisitor='{$id}';");
         if ($reservas->num_rows > 0) {
             echo "<div class='mt-3 alert alert-primary text-center' role='alert'>As suas reservas:</div>";
+            echo "<table class='table table-bordered'><thead><tr><th scope='col'>Sala</th><th scope='col'>Data</th><th scope='col'>Tempo</th><th scope='col'>Ações</th></tr></thead><tbody>";
+            while ($reserva = $reservas->fetch_assoc()) {
+                $sala = $db->query("SELECT nome FROM salas WHERE id='{$reserva['sala']}';")->fetch_assoc();
+                $tempo = $db->query("SELECT horashumanos FROM tempos WHERE id='{$reserva['tempo']}';")->fetch_assoc();
+                echo "<tr><td>{$sala['nome']}</td><td>{$reserva['data']}</td><td>{$tempo['horashumanos']}</td><td><a href='/reservas/?action=cancelar&id={$reserva['id']}' class='btn btn-danger'>Cancelar</a></td></tr>";
+            }
         } else {
         echo "<div class='mt-3 alert alert-danger text-center' role='alert'>Ainda não tem reservas. Irão aparecer as suas reservas aqui:</div>";
         }
