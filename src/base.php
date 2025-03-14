@@ -19,9 +19,11 @@
     ?>
     <nav class="navbar navbar-expand-lg navbar-light bg-success text-white justify-content-center">
         <a class="navbar-brand" href="/"><img src="/src/logo.png" style="max-width: 1.8em">  <span class="text-white"><?php echo $info['nome']; ?></span></a>
-        <?php 
+        <?php
             if ($_COOKIE['loggedin']) {
                 $user = filter_var($_COOKIE['user'], FILTER_SANITIZE_STRING);
+                require '../login/giae.php';
+                checkValidSession($_COOKIE['session']);
                 $isAdmin = $db->query("SELECT * FROM admins WHERE id = '$user' AND permitido = 1;")->num_rows;
                 echo "<div class='dropdown'>
                         <button class='btn dropdown-toggle text-white' style='background-color:rgb(2, 152, 7);' type='button' id='areaMenuButton' data-bs-toggle='dropdown' aria-expanded='false'>
