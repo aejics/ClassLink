@@ -1,8 +1,12 @@
 <?php
     $info = array(
         'nome' => 'ReservaSalas AEJICS',
+        'adminforcado' => 'a11531'
+    );
+
+    $giae = array(
         // Assumimos que o giae está configurado com o SSL.
-        'urlGiae' => 'giae.aejics.org'
+        'servidor' => 'giae.aejics.org'
     );
 
     // Não tenho 100% de certeza se enviar mails irá ser uma função da app.
@@ -19,4 +23,21 @@
         'mail' => '',
         'password' => ''
     );
+
+    // neste momento funciona só com mysql
+    // esta documentação vai ser restruturada antes da branch ser puxada para main
+    $db = array(
+        'tipo' => 'mysql',
+        'servidor' => 'localhost',
+        'user' => 'salasuser',
+        'password' => 'salaspass',
+        'db' => 'reservasalas',
+        'porta' => 3306
+    );
+
+    $mensagem = array(
+        'ativada' => false,
+        'mensagem' => "Este painel está em desenvolvimento pesado. Bugs? Report an issue on GitHub!",
+        'tipo' => "info"
+    )
 ?>

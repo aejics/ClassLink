@@ -1,15 +1,17 @@
 <?php
-    // verificar login
-    require '../login.php'; 
-    // verificar acesso administrativo
-    $admin = 1;
-    // ^^ temporariamente dar como 1, pois ainda não foi criada uma gestão administrativa apropriada para o sql
-    if ($admin != 1){
+    require '../src/base.php';
+    require '../src/config.php';
+    require '../src/db.php';
+    if (!$isAdmin == 1) {
         http_response_code(403);
-        die("403 - Não tem acesso para aceder a esta página.");
+        die("<h2>403 - Não tem acesso para aceder a esta página.</h2>");
     }
 ?>
 <?php
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
+
     // Criação da Sidebar (reaproveito do módulo para as subpáginas)
     // Links do Sidebar
     function sidebarLink($url, $nome) {
@@ -46,7 +48,23 @@
         echo "<div class='flex-grow-1 d-flex align-items-center justify-content-center flex-column'>
             <h1>Dashboard Administrativo</h1>
             <p>Conteúdos TBA</p>";
-        require '../src/footer.php';
     }
 
+    // criação rápida de formulários
+    function formulario($action, $inputs) {
+        echo "<form action='$action' method='POST' class='d-flex align-items-center'>";
+        foreach ($inputs as $input) {
+            echo "<div class='form-floating me-2' style='flex: 1;'>
+            <input type='{$input['type']}' class='form-control form-control-sm' id='{$input['id']}' name='{$input['id']}' placeholder='{$input['placeholder']}' value='{$input['value']}' required>
+            <label for='{$input['id']}'>{$input['label']}</label>
+            </div>";
+            }
+        echo "<button type='submit' class='btn btn-primary btn-sm' style='height: 38px;'>Submeter</button></form>";
+    }
+
+    // ação executada
+    function acaoexecutada($acao) {
+        echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>Ação executada. <b>$acao</b>
+            <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Fechar'></button></div>";
+    }
 ?>
