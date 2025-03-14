@@ -32,7 +32,7 @@
                         </button>
                         <ul class='dropdown-menu' aria-labelledby='dropdownMenuButton'>";
                 barraMenuLink("/", "As Minhas Reservas", false);
-                barraMenuLink("/reservar.php", "Reservar uma Sala", false);
+                barraMenuLink("/reservas", "Reservar uma Sala", false);
                 barraMenuLink("/admin", "Painel Administrativo", true);
                 barraMenuLink("/login?logout=1", "Terminar sessão", false);
                 echo "</ul></div>";

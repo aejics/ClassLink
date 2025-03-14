@@ -11,7 +11,7 @@
             <p class='h4 fw-light'>O que vamos fazer hoje?</p></div>
             <div class='w-100 d-flex justify-content-center'>
             <a href='/reservas/' class='btn btn-success w-20 me-2'>Reservar uma Sala</a>
-            <a href='/reservas/asminhas.php' class='btn btn-success w-20'>Ver as minhas reservas</a></div>");
+            </div>");
         // notificações do utilizador
         $reservas = $db->query("SELECT * FROM reservas WHERE requisitor='{$id}';");
         if ($reservas->num_rows > 0) {
