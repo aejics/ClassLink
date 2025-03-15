@@ -49,7 +49,7 @@
                     echo "<p class='fw-bold'>Aprovado: ";
                     if ($detalhesreserva['aprovado'] == 1){
                         echo "<span class='fw-normal'>Sim</span></p>";
-                    } if ($detalhesreserva['aprovado'] == -1) {
+                    } else if ($detalhesreserva['aprovado'] == -1) {
                         echo "<span class='fw-normal'>Rejeitado</span></p>";
                     } else {
                         echo "<span class='fw-normal'>Não</span></p>";
