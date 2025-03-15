@@ -1,5 +1,7 @@
 <?php 
     require 'index.php';
+    use PHPMailer\PHPMailer\PHPMailer;
+    use PHPMailer\PHPMailer\Exception;
 ?>
 <div class="h-100 d-flex align-items-center justify-content-center flex-column">
     <h3>Gestão de Pedidos de Salas</h3>
@@ -31,30 +33,74 @@
 
 <?php
     if ($_GET['subaction']) {
+        require '../vendor/phpmailer/phpmailer/src/Exception.php';
+        require '../vendor/phpmailer/phpmailer/src/PHPMailer.php';
+        require '../vendor/phpmailer/phpmailer/src/SMTP.php';
+
         switch ($_GET['subaction']){
             case "aprovar":
                 $db->query("UPDATE reservas SET aprovado=1 WHERE sala='{$_GET['sala']}' AND tempo='{$_GET['tempo']}' AND data='{$_GET['data']}';");
                 echo "<div class='mt-2 alert alert-success fade show' role='alert'>Reserva aprovada com sucesso.</div>";
                 echo "<a href='/admin/pedidos.php'><button class='btn btn-primary'>Voltar</button></a>";
-
-                require_once '../src/mail.php';
                 $sala = $db->query("SELECT nome FROM salas WHERE id='{$_GET['sala']}';")->fetch_assoc()['nome'];
                 $requisitor = $db->query("SELECT email FROM cache_giae WHERE id='{$_GET['requisitor']}';")->fetch_assoc()['email'];
                 $tempohumano = $db->query("SELECT horashumanos FROM tempos WHERE id='{$_GET['tempo']}';")->fetch_assoc()['horashumanos'];
-                $mail = new Mail();
-                $mail->sendMail($requisitor, "Reserva Sala {$sala} Aprovada", "A sua reserva da sala {$sala} para a data de {$_GET['data']} às {$tempohumano} foi aprovada.\n\nObrigado.");
+                // aparentemente o phpmailer não lê dados de arrays...?
+                $servidorenviar = $email['servidor'];
+                $portaenviar = $email['porta'];
+                $autenticacaoenviar = $email['autenticacao'];
+                $tipodesegurancaenviar = $email['tipodeseguranca'];
+                $usernameenviar = $email['username'];
+                $passwordenviar = $email['password'];
+                $nomeserver = $info['nome'];
+
+                $enviarmail = new PHPMailer(true);
+                $enviarmail->isSMTP();
+                $enviarmail->Host       = $servidorenviar;
+                $enviarmail->SMTPAuth   = $autenticacaoenviar;
+                $enviarmail->Username   = $usernameenviar;
+                $enviarmail->Password   = $passwordenviar;
+                $enviarmail->SMTPSecure = $tipodesegurancaenviar;
+                $enviarmail->Port       = $portaenviar;
+                $enviarmail->setFrom($usernameenviar, $nomeserver);
+                $enviarmail->addAddress($requisitor);
+                $enviarmail->isHTML(false);
+                $enviarmail->Subject = utf8_decode("Reserva da Sala {$sala} Aprovada");
+                $enviarmail->Body = utf8_decode("A sua reserva da sala {$sala} para a data de {$_GET['data']} às {$tempohumano} foi aprovada.\n\nObrigado.");
+                $enviarmail->send();
+
                 break;
             case "rejeitar":
                 $db->query("UPDATE reservas SET aprovado=-1 WHERE sala='{$_GET['sala']}' AND tempo='{$_GET['tempo']}' AND data='{$_GET['data']}';");
                 echo "<div class='mt-2 alert alert-danger fade show' role='alert'>Reserva rejeitada com sucesso.</div>";
                 echo "<a href='/admin/pedidos.php'><button class='btn btn-primary'>Voltar</button></a>";
-
-                require_once '../src/mail.php';
                 $sala = $db->query("SELECT nome FROM salas WHERE id='{$_GET['sala']}';")->fetch_assoc()['nome'];
                 $requisitor = $db->query("SELECT email FROM cache_giae WHERE id='{$_GET['requisitor']}';")->fetch_assoc()['email'];
                 $tempohumano = $db->query("SELECT horashumanos FROM tempos WHERE id='{$_GET['tempo']}';")->fetch_assoc()['horashumanos'];
-                $mail = new Mail();
-                $mail->sendMail($requisitor, "Reserva Sala {$sala} Rejeitada", "A sua reserva da sala {$sala} para a data de {$_GET['data']} às {$tempohumano} foi rejeitada.\n\nObrigado.");
+                
+                // aparentemente o phpmailer não lê dados de arrays...?
+                $servidorenviar = $email['servidor'];
+                $portaenviar = $email['porta'];
+                $autenticacaoenviar = $email['autenticacao'];
+                $tipodesegurancaenviar = $email['tipodeseguranca'];
+                $usernameenviar = $email['username'];
+                $passwordenviar = $email['password'];
+                $nomeserver = $info['nome'];
+
+                $enviarmail = new PHPMailer(true);
+                $enviarmail->isSMTP();
+                $enviarmail->Host       = $servidorenviar;
+                $enviarmail->SMTPAuth   = $autenticacaoenviar;
+                $enviarmail->Username   = $usernameenviar;
+                $enviarmail->Password   = $passwordenviar;
+                $enviarmail->SMTPSecure = $tipodesegurancaenviar;
+                $enviarmail->Port       = $portaenviar;
+                $enviarmail->setFrom($usernameenviar, $nomeserver);
+                $enviarmail->addAddress($requisitor);
+                $enviarmail->isHTML(false);
+                $enviarmail->Subject = utf8_decode("Reserva da Sala {$sala} Rejeitada");
+                $enviarmail->Body = utf8_decode("A sua reserva da sala {$sala} para a data de {$_GET['data']} às {$tempohumano} foi rejeitada.\n\nObrigado.");
+                $enviarmail->send();
                 break;
             case "detalhes":
                 

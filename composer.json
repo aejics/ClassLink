@@ -1,5 +1,6 @@
 {
     "require": {
-        "juoum/giaeconnect": "^1.1.1"
+        "juoum/giaeconnect": "^1.1.1",
+        "phpmailer/phpmailer": "^6.9"
     }
 }
