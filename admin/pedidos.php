@@ -36,10 +36,25 @@
                 $db->query("UPDATE reservas SET aprovado=1 WHERE sala='{$_GET['sala']}' AND tempo='{$_GET['tempo']}' AND data='{$_GET['data']}';");
                 echo "<div class='mt-2 alert alert-success fade show' role='alert'>Reserva aprovada com sucesso.</div>";
                 echo "<a href='/admin/pedidos.php'><button class='btn btn-primary'>Voltar</button></a>";
+
+                require_once '../src/mail.php';
+                $sala = $db->query("SELECT nome FROM salas WHERE id='{$_GET['sala']}';")->fetch_assoc()['nome'];
+                $requisitor = $db->query("SELECT email FROM cache_giae WHERE id='{$_GET['requisitor']}';")->fetch_assoc()['email'];
+                $tempohumano = $db->query("SELECT horashumanos FROM tempos WHERE id='{$_GET['tempo']}';")->fetch_assoc()['horashumanos'];
+                $mail = new Mail();
+                $mail->sendMail($requisitor, "Reserva Sala {$sala} Aprovada", "A sua reserva da sala {$sala} para a data de {$_GET['data']} às {$tempohumano} foi aprovada.\n\nObrigado.");
                 break;
             case "rejeitar":
-                $db->query("DELETE FROM reservas WHERE sala='{$sala}' AND tempo='{$tempo}' AND data='{$data}';");
-                header("Location: /reservas/?sala={$sala}");
+                $db->query("UPDATE reservas SET aprovado=-1 WHERE sala='{$_GET['sala']}' AND tempo='{$_GET['tempo']}' AND data='{$_GET['data']}';");
+                echo "<div class='mt-2 alert alert-danger fade show' role='alert'>Reserva rejeitada com sucesso.</div>";
+                echo "<a href='/admin/pedidos.php'><button class='btn btn-primary'>Voltar</button></a>";
+
+                require_once '../src/mail.php';
+                $sala = $db->query("SELECT nome FROM salas WHERE id='{$_GET['sala']}';")->fetch_assoc()['nome'];
+                $requisitor = $db->query("SELECT email FROM cache_giae WHERE id='{$_GET['requisitor']}';")->fetch_assoc()['email'];
+                $tempohumano = $db->query("SELECT horashumanos FROM tempos WHERE id='{$_GET['tempo']}';")->fetch_assoc()['horashumanos'];
+                $mail = new Mail();
+                $mail->sendMail($requisitor, "Reserva Sala {$sala} Rejeitada", "A sua reserva da sala {$sala} para a data de {$_GET['data']} às {$tempohumano} foi rejeitada.\n\nObrigado.");
                 break;
             case "detalhes":
                 
