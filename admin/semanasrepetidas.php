@@ -1,5 +1,5 @@
 <?php require 'index.php'; ?>
-<h1>Repetir ocupação de sala</h1>
+<h1>Semanas repetidas</h1>
 <p>Esta funcionalidade permite repetir uma ocupação de sala para um dia específico em várias semanas.</p>
 <p>Por exemplo, se o primeiro dia for o dia 1, e repetir-se 5 semanas, é o dia 1, 8, 15, 22 e 29.</p>
 <form action="/admin/horariosforcados.php" method="POST">
