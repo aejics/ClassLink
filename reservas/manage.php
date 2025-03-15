@@ -57,8 +57,8 @@
                     echo "<p class='fw-bold'>Motivo: <span class='fw-normal'>{$detalhesreserva['motivo']}</span></p>";
                     echo "<p class='fw-bold'>Informação Extra:</p>
                         <textarea rows='4' cols='50' class='fw-normal' disabled>{$detalhesreserva['extra']}</textarea>";
-                    if ($_SERVER['http_referer'] == "/admin/reservas.php"){
-                        echo "<a href='/admin/reservas.php' class='btn btn-primary mt-2'>Voltar</a>";
+                    if (strpos($_SERVER['HTTP_REFERER'], '/admin/pedidos.php') !== false) {
+                        echo "<a href='/admin/pedidos.php' class='btn btn-primary mt-2'>Voltar</a>";
                     } else {
                         echo "<a href='/reservas/?sala={$sala}' class='btn btn-primary mt-2'>Voltar</a>";
                     }
