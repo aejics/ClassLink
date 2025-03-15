@@ -36,7 +36,7 @@
                     </div>
                     <button type='submit' class='btn btn-success w-100'>Reservar</button>
                     </form>";
-                    echo "<a href='/reservas/' class='mt-2 btn btn-primary'>Voltar</a>";
+                    echo "<a href='{$_SERVER['HTTP_REFERER']}' class='mt-2 btn btn-primary'>Voltar</a>";
                 } else {
                     echo "<h2>Detalhes da Reserva:</h2>";
                     $salaextenso = $db->query("SELECT nome FROM salas WHERE id='{$sala}';")->fetch_assoc()['nome'];
@@ -57,7 +57,11 @@
                     echo "<p class='fw-bold'>Motivo: <span class='fw-normal'>{$detalhesreserva['motivo']}</span></p>";
                     echo "<p class='fw-bold'>Informação Extra:</p>
                         <textarea rows='4' cols='50' class='fw-normal' disabled>{$detalhesreserva['extra']}</textarea>";
-                    echo "<a href='/reservas/?sala={$sala}' class='btn btn-primary mt-2'>Voltar</a>";
+                    if ($_SERVER['http_referer'] == "/admin/reservas.php"){
+                        echo "<a href='/admin/reservas.php' class='btn btn-primary mt-2'>Voltar</a>";
+                    } else {
+                        echo "<a href='/reservas/?sala={$sala}' class='btn btn-primary mt-2'>Voltar</a>";
+                    }
                 }
         }
     }
