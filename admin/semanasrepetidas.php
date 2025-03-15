@@ -29,7 +29,7 @@
         $tempo = $db->query("SELECT * FROM tempos WHERE id='{$_POST['tempo']}';")->fetch_assoc();
         $data = strtotime($_POST['data']);
         $semanas = $_POST['semanas'];
-        $requisitor = $info['adminforcado'];
+        $requisitor = $_COOKIE['user'];
         for ($i = 0; $i < $semanas; $i++) {
             $datadb = date('Y-m-d', $data);
             $db->query("INSERT INTO reservas (sala, tempo, data, requisitor, aprovado, motivo, extra) VALUES ('{$sala['id']}', '{$tempo['id']}', '{$datadb}', '{$requisitor}', 1, 'Horário adicionado por um administrador.', 'Este horário foi adicionado durante várias semanas por um administrador do site.');");
