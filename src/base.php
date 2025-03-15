@@ -32,15 +32,15 @@
             if ($_COOKIE['loggedin']) {
                 $user = filter_var($_COOKIE['user'], FILTER_SANITIZE_STRING);
                 require(__DIR__ .'/../login/giae.php');
-                // temporariamente desativado para acelerar o desenvolvimento
-                //checkValidSession($_COOKIE['session']);
+                checkValidSession($_COOKIE['session']);
                 $isAdmin = $db->query("SELECT * FROM admins WHERE id = '$user' AND permitido = 1;")->num_rows;
                 echo "<div class='dropdown'>
                         <button class='btn dropdown-toggle text-white' style='background-color:rgb(2, 152, 7);' type='button' id='areaMenuButton' data-bs-toggle='dropdown' aria-expanded='false'>
                         <img class='fotoutente' src='https://{$giae['servidor']}/{$_COOKIE['userpic']}'>  A Minha Área
                         </button>
                         <ul class='dropdown-menu' aria-labelledby='dropdownMenuButton'>";
-                barraMenuLink("/", "As Minhas Reservas", false);
+                barraMenuLink("/", "Início", false);
+                barraMenuLink("/reservas/lista.php", "As Minhas Reservas", false);
                 barraMenuLink("/reservas", "Reservar uma Sala", false);
                 barraMenuLink("/admin", "Painel Administrativo", true);
                 barraMenuLink("/login?logout=1", "Terminar sessão", false);
