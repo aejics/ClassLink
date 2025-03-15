@@ -14,7 +14,7 @@
             <a href='/reservas/lista.php' class='btn btn-success w-20 me-2'>As suas reservas</a>
             </div>");
         // notificações do utilizador
-        $reservas = $db->query("SELECT * FROM reservas WHERE requisitor='{$id}' ORDER BY data asc limit 5;");
+        $reservas = $db->query("SELECT * FROM reservas WHERE requisitor='{$id}' ORDER BY data DESC limit 5;");
         if ($reservas->num_rows > 0) {
             echo "<div class='mt-3 alert alert-primary text-center' role='alert'>As suas reservas recentes:";
             echo "<table class='mt-2 table table-bordered'><thead><tr><th scope='col'>Sala</th><th scope='col'>Data</th><th scope='col'>Tempo</th><th scope='col'>Estado</th></tr></thead><tbody>";
