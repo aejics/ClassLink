@@ -13,10 +13,10 @@ Este projeto é possível graças aos trabalhos das seguintes turmas:
 - 1ºD - Design de Funcionalidades Possíveis para a Aplicação
 - 2ºE - Criação das Expressões para o Backend SQL, e criação da aplicação.
 
-# ⚠️ Aviso! Instável!
-Este código não está estável para utilização fora de um ambiente de desenvolvimento. Quando estiver pronto a uma utilização de produção (geral, de toda a gente), será feita uma release no GitHub, e daqui à frente serão atualizações pequenas (funcionalidades novas, bugfixes, etc.)
+# ⚠️ Aviso! Em desenvolvimento!
+Enquanto este código está estável o suficiente para ser usado por utilizadores, irão sempre ser adicionadas funcionalidades novas e talvez sejam removidas algumas funcionalidades.
 
-Caso escolha experimentar o código ou aproveitar o código e descobrir um Bug, agradecemos que seja criado um pull request ou uma issue pelos separadores do topo do GitHub :)
+Caso descubra um Bug, agradecemos que seja criado um pull request ou uma issue pelos separadores do topo do GitHub :)
 
 ## Instalação
 
