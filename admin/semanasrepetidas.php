@@ -2,24 +2,38 @@
 <h1>Semanas repetidas</h1>
 <p>Esta funcionalidade permite repetir uma ocupação de sala para um dia específico em várias semanas.</p>
 <p>Por exemplo, se o primeiro dia for o dia 1, e repetir-se 5 semanas, é o dia 1, 8, 15, 22 e 29.</p>
-<form action="/admin/horariosforcados.php" method="POST">
-    <div class="form-floating me-2">
-        <input type="number" class="form-control form-control-sm" id="sala" name="sala" placeholder="ID Sala" value="">
-        <label for="sala">ID Sala</label>
+<form action="/admin/semanasrepetidas.php" method="POST" class="mt-4">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="form-floating">
+                <input type="number" class="form-control" id="sala" name="sala" placeholder="ID Sala" value="">
+                <label for="sala">ID Sala</label>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-floating">
+                <input type="number" class="form-control" id="tempo" name="tempo" placeholder="Tempo (número)" value="">
+                <label for="tempo">Tempo (número)</label>
+            </div>
+        </div>
     </div>
-    <div class="form-floating me-2">
-        <input type="number" class="form-control form-control-sm" id="tempo" name="tempo" placeholder="Tempo (número)" value="">
-        <label for="tempo">Tempo (número)</label>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="form-floating">
+                <input type="text" class="form-control" id="data" name="data" placeholder="Data" value="">
+                <label for="data">Primeiro Dia</label>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-floating">
+                <input type="text" class="form-control" id="semanas" name="semanas" placeholder="Semanas a repetir" value="">
+                <label for="semanas">Semanas a repetir</label>
+            </div>
+        </div>
     </div>
-    <div class="form-floating me-2">
-        <input type="text" class="form-control form-control-sm" id="data" name="data" placeholder="Data" value="">
-        <label for="data">Primeiro Dia</label>
+    <div class="d-grid">
+        <button type="submit" class="btn btn-primary btn-lg">Submeter</button>
     </div>
-    <div class="form-floating me-2">
-        <input type="text" class="form-control form-control-sm" id="semanas" name="semanas" placeholder="Semanas" value="">
-        <label for="semanas">Quantas semanas é que repete-se?</label>
-    </div>
-    <button type="submit" class="btn btn-primary btn-sm" style="height: 38px;">Submeter</button>
 </form>
 
 <?php 

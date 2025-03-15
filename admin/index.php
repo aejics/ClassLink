@@ -41,9 +41,16 @@
     // Conteúdos para a Dashboard Administrativa. Apenas colocar o conteúdo neste bloco, pois
     // este módulo é reutilizado para as subpáginas.
     if($_SERVER['REQUEST_URI'] == "/admin/") {
+        $pedidospendentes = $db->query("SELECT * FROM reservas WHERE aprovado = 0;")->num_rows;
         echo "<div class='flex-grow-1 d-flex align-items-center justify-content-center flex-column'>
             <h1>Dashboard Administrativo</h1>
-            <p>Conteúdos TBA</p>";
+            <p class='h4 fw-lighter'>O que vamos fazer hoje?</p>
+            <p class='h6 fw-lighter'>Existem <b>$pedidospendentes</b> pedidos de reserva pendentes.</p>
+            <div class='botoes_dashboardadmin d-flex justify-content-center'>
+            <a href='/admin/pedidos.php' class='btn btn-success w-20 me-2'>Responder a pedidos</a>
+            <a href='/admin/admins.php' class='btn btn-success w-20 me-2'>Gerir os administradores da aplicação</a>
+            <a href='/admin/semanasrepetidas.php' class='btn btn-danger w-20 me-2'>Criar reservas em grande escala no horário</a>
+            </div>";
     }
 
     // criação rápida de formulários
