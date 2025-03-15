@@ -65,7 +65,7 @@
                         $sala = $_POST['sala'];
                     }
                     $tempoatualdb = $tempoatualdb->fetch_assoc();
-                    if (!$tempoatualdb){
+                    if (!$tempoatualdb || $tempoatualdb['aprovado'] == -1){
                         echo "<td class='bg-success text-white text-center'>
                         <a class='reserva' href='/reservas/manage.php?tempo={$row['id']}&sala={$sala}&data={$diacheckdb}'>
                         Livre

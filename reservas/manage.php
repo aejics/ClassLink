@@ -16,7 +16,7 @@
                 header("Location: /reservas/?sala={$sala}&tempo={$tempo}");
                 break;
             case null:
-                $detalhesreserva = $db->query("SELECT * FROM reservas WHERE sala='{$sala}' AND tempo='{$tempo}' AND data='{$data}';")->fetch_assoc();
+                $detalhesreserva = $db->query("SELECT * FROM reservas WHERE sala='{$sala}' AND tempo='{$tempo}' AND data='{$data}' AND aprovado!=-1;")->fetch_assoc();
                 if (!$detalhesreserva){
                     $salaextenso = $db->query("SELECT nome FROM salas WHERE id='{$sala}';")->fetch_assoc()['nome'];
                     echo "<h2>Reservar Sala</h2>";
@@ -49,6 +49,8 @@
                     echo "<p class='fw-bold'>Aprovado: ";
                     if ($detalhesreserva['aprovado'] == 1){
                         echo "<span class='fw-normal'>Sim</span></p>";
+                    } if ($detalhesreserva['aprovado'] == -1) {
+                        echo "<span class='fw-normal'>Rejeitado</span></p>";
                     } else {
                         echo "<span class='fw-normal'>Não</span></p>";
                     }
