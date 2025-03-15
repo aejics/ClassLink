@@ -29,7 +29,7 @@
                     echo "<tr><td>{$sala['nome']}</td><td>{$reserva['data']}</td><td>{$tempo['horashumanos']}</td><td><span class='badge bg-warning' data-bs-toggle='tooltip' data-placement='top' title='A sua reserva foi enviada e está a ser revista. Irá receber um email com mais informações em breve'>Pendente</span></td></tr>";
                 }
             }
-            echo "</div>";
+            echo "</table></div>";
         } else {
         echo "<div class='mt-3 alert alert-danger text-center' role='alert'>Ainda não tem reservas. Irão aparecer as suas reservas aqui:</div>";
         }
