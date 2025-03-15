@@ -40,10 +40,11 @@
         switch ($_GET['subaction']){
             case "aprovar":
                 $db->query("UPDATE reservas SET aprovado=1 WHERE sala='{$_GET['sala']}' AND tempo='{$_GET['tempo']}' AND data='{$_GET['data']}';");
+                $requisitor = $db->query("SELECT requisitor FROM reservas WHERE sala='{$_GET['sala']}' AND tempo='{$_GET['tempo']}' AND data='{$_GET['data']}';")->fetch_assoc()['requisitor'];
                 echo "<div class='mt-2 alert alert-success fade show' role='alert'>Reserva aprovada com sucesso.</div>";
                 echo "<a href='/admin/pedidos.php'><button class='btn btn-primary'>Voltar</button></a>";
                 $sala = $db->query("SELECT nome FROM salas WHERE id='{$_GET['sala']}';")->fetch_assoc()['nome'];
-                $requisitor = $db->query("SELECT email FROM cache_giae WHERE id='{$_GET['requisitor']}';")->fetch_assoc()['email'];
+                $requisitor = $db->query("SELECT email FROM cache_giae WHERE id='{$requisitor}';")->fetch_assoc()['email'];
                 $tempohumano = $db->query("SELECT horashumanos FROM tempos WHERE id='{$_GET['tempo']}';")->fetch_assoc()['horashumanos'];
                 // aparentemente o phpmailer não lê dados de arrays...?
                 $servidorenviar = $email['servidor'];
@@ -72,10 +73,11 @@
                 break;
             case "rejeitar":
                 $db->query("UPDATE reservas SET aprovado=-1 WHERE sala='{$_GET['sala']}' AND tempo='{$_GET['tempo']}' AND data='{$_GET['data']}';");
+                $requisitor = $db->query("SELECT requisitor FROM reservas WHERE sala='{$_GET['sala']}' AND tempo='{$_GET['tempo']}' AND data='{$_GET['data']}';")->fetch_assoc()['requisitor'];
                 echo "<div class='mt-2 alert alert-danger fade show' role='alert'>Reserva rejeitada com sucesso.</div>";
                 echo "<a href='/admin/pedidos.php'><button class='btn btn-primary'>Voltar</button></a>";
                 $sala = $db->query("SELECT nome FROM salas WHERE id='{$_GET['sala']}';")->fetch_assoc()['nome'];
-                $requisitor = $db->query("SELECT email FROM cache_giae WHERE id='{$_GET['requisitor']}';")->fetch_assoc()['email'];
+                $requisitor = $db->query("SELECT email FROM cache_giae WHERE id='{$requisitor}';")->fetch_assoc()['email'];
                 $tempohumano = $db->query("SELECT horashumanos FROM tempos WHERE id='{$_GET['tempo']}';")->fetch_assoc()['horashumanos'];
                 
                 // aparentemente o phpmailer não lê dados de arrays...?
