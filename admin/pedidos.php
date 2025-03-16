@@ -25,10 +25,10 @@
         </select>
         <label for="sala" class="form-label">Escolha uma sala</label>
     </div>
-    <div class="form-floating me-2">
+    <!-- <div class="form-floating me-2">
         <input type="text" class="form-control form-control-sm" id="requisitor" name="requisitor" placeholder="Requisitor" value="">
         <label for="requisitor">Requisitor</label>
-    </div>
+    </div> -->
 </form>
 
 <?php
