@@ -21,7 +21,7 @@
     }
 
     // Criação da Sidebar no HTML
-    echo "</div><div class='d-flex' style='height: 85vh;'>
+    echo "</div><div class='d-flex' style='height: 100vh;'>
     <div class='flex-shrink-0 p-3 text-bg-dark' style='width: 280px;'>
     <h1>Administração</h1>        
     <ul class='nav nav-pills flex-column mb-auto'>
