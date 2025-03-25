@@ -26,4 +26,4 @@ Caso descubra um Bug, agradecemos que seja criado um pull request ou uma issue p
 
 ## Créditos
 - Marco Pisco - Escrita da Aplicação
-- [@juoum](https://github.com/itsjuoum/) - Pela escrita da bibilioteca maravailhosa do [GIAEConnect](https://github.com/itsjuoum/GIAEConnect), a biblioteca que permite a conexão ao GIAE.
+- [@juoum](https://github.com/itsjuoum/) - Pela escrita da bibilioteca maravilhosa do [GIAEConnect](https://github.com/itsjuoum/GIAEConnect), a biblioteca que permite a conexão ao GIAE.
