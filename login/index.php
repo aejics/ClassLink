@@ -1,6 +1,14 @@
 <?php
     require_once '../vendor/autoload.php';
-    if ($_GET['action'] == "login"){
+    if ($_GET['action'] == "logout"){
+        $giae = new \juoum\GiaeConnect\GiaeConnect("giae.aejics.org");
+        $giae->session=$_COOKIE["session"];
+        $giae->logout();
+        setcookie("loggedin", "", time() - 3600, "/");
+        die("<div class='alert alert-success text-center' role='alert'>A sua sessão foi terminada com sucesso.</div>
+        <div class='text-center'>
+        <button type='button' class='btn btn-primary w-100' onclick='history.back()'>Voltar</button></div>");
+    } else if ($_GET['action'] == "login"){
         $user = filter_input(INPUT_POST, 'username', FILTER_UNSAFE_RAW);
         $pass = filter_input(INPUT_POST, 'password', FILTER_UNSAFE_RAW);
         $giae = new \juoum\GiaeConnect\GiaeConnect("giae.aejics.org");
@@ -22,19 +30,14 @@
             setcookie("token", $session, time() + 3599, "/");
             setcookie("user", $user, time() + 3599, "/");
             require '../src/db.php';
-            $db->exec("CREATE TABLE cache_giae (id VARCHAR(99), nome VARCHAR(99), nomecompleto VARCHAR(99), email VARCHAR(99), PRIMARY KEY (id));");
-            $db->exec("CREATE TABLE admins (id VARCHAR(99), atividade BOOLEAN, PRIMARY KEY (id));");
-            $valordb = $db->prepare("INSERT INTO cache_giae(id, nome, nomecompleto, email) VALUES (:1, :2, :3, :4);");
-            $valordb->bindValue(':1', mb_convert_encoding($_POST["user"], 'ISO-8859-1', 'auto'), SQLITE3_TEXT);
-            $valordb->bindValue(':2', mb_convert_encoding(json_decode($config)['nomeutilizador'], 'ISO-8859-1', 'auto'), SQLITE3_TEXT);
-            $valordb->bindValue(':3', mb_convert_encoding($perfil['perfil']['nome'], 'ISO-8859-1', 'auto'), SQLITE3_TEXT);
-            $valordb->bindValue(':4', mb_convert_encoding($perfil['perfil']['email'], 'ISO-8859-1', 'auto'), SQLITE3_TEXT);
-            $valordb->execute();
+            $stmt = $db->prepare("INSERT IGNORE INTO cache_giae(id, nome, nomecompleto, email) VALUES (?, ?, ?, ?);");
+            $stmt->bind_param("ssss", $user, json_decode($config, true)['nomeutilizador'], $perfil['perfil']['nome'], $perfil['perfil']['email']);
+            $stmt->execute();
             $db->close();
             header('Location: /');
+            die();
         }
-    };
-    if ($loggedin){
+    } else if ($_COOKIE['token']){
         $session = filter_input(INPUT_COOKIE, 'token', FILTER_UNSAFE_RAW);
         $giae = new \juoum\GiaeConnect\GiaeConnect("giae.aejics.org");
         $giae->session=$session;
@@ -47,16 +50,6 @@
             <button type='button' class='btn btn-primary w-100' onclick='history.back()'>Voltar</button></div>");
         }
     }
-    if ($action == "logout"){
-        $giae = new \juoum\GiaeConnect\GiaeConnect("giae.aejics.org");
-        $giae->session=$_COOKIE["session"];
-        $giae->logout();
-        setcookie("loggedin", "", time() - 3600, "/");
-        echo("<div class='alert alert-success text-center' role='alert'>A sua sessão foi terminada com sucesso.</div>
-        <div class='text-center'>
-        <button type='button' class='btn btn-primary w-100' onclick='history.back()'>Voltar</button></div>");
-        include 'src/footer.php';
-    };
 ?>
 
 
@@ -105,7 +98,6 @@
                      -5.92867e-05 427L-2.37629e-05 20.6546C-2.24466e-05 5.598 16.0091 -4.05922 29.3278 
                      2.96307L259.328 124.23C265.892 127.691 270 134.501 270 141.922L270 427Z" fill="white" />
             </svg>
-            <script src="loginjs.js"></script>    
 </body>
 
 </html>
