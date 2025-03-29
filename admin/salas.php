@@ -40,10 +40,12 @@ $temposatuais = $db->query("SELECT * FROM salas;");
 if ($temposatuais->num_rows == 0) {
     echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>Não existem salas.</div>\n";
 }
+echo "<div style='max-height: 400px; overflow-y: auto; width: 90%;'>";
 echo "<table class='table'><tr><th scope='col'>ID</th><th scope='col'>Nome Sala</th><th scope='col'>AÇÕES</th></tr>";
 while ($row = $temposatuais->fetch_assoc()) {
     echo "<tr><td>{$row['id']}</td><td>{$row['nome']}</td><td><a href='/admin/salas.php?action=edit&id={$row['id']}'>EDITAR</a>  <a href='/admin/salas.php?action=apagar&id={$row['id']}'>APAGAR</a></tr>";
 }
+echo "</table>";
 $db->close();
 echo "</div></table>"
 ?>

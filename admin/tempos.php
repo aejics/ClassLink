@@ -40,6 +40,7 @@ $temposatuais = $db->query("SELECT * FROM tempos;");
 if ($temposatuais->num_rows == 0) {
     echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>Não existem tempos.</div>\n";
 }
+echo "<div style='max-height: 400px; overflow-y: auto; width: 90%;'>";
 echo "<table class='table'><tr><th scope='col'>ID</th><th scope='col'>Hora Humana</th><th scope='col'>AÇÕES</th></tr>";
 while ($row = $temposatuais->fetch_assoc()) {
     echo "<tr><td>{$row['id']}</td><td>{$row['horashumanos']}</td><td><a href='/admin/tempos.php?action=edit&id={$row['id']}'>EDITAR</a>  <a href='/admin/tempos.php?action=apagar&id={$row['id']}'>APAGAR</a></tr>";
