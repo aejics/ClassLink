@@ -1,5 +1,8 @@
 <?php
-    require_once (__DIR__ . '/../vendor/autoload.php');
+    require_once(__DIR__ . '/../vendor/autoload.php');
+    require_once(__DIR__ . '/../src/config.php');
+    require_once(__DIR__ . '/../src/db.php');
+    
     if ($_GET['action'] == "logout"){
         $giae = new \juoum\GiaeConnect\GiaeConnect("giae.aejics.org");
         $giae->session=$_COOKIE["session"];
@@ -91,11 +94,14 @@
         $session = filter_input(INPUT_COOKIE, 'token', FILTER_UNSAFE_RAW);
         $giae = new \juoum\GiaeConnect\GiaeConnect("giae.aejics.org");
         $giae->session=$session;
+        $confinfo = $giae->getConfInfo();
         // Este código funciona especificamente com a maneira de verificação no GIAE AEJICS.
         // Pode não funcionar da mesma maneira nos outros GIAEs. Caso não funcione na mesma maneira, corriga este código e faça um pull request!
-        if (str_contains($giae->getConfInfo(), 'Erro do Servidor')){
+        if (str_contains($confinfo, 'Erro do Servidor')){
             setcookie("loggedin", "", time() - 3600, "/");
             setcookie("user", "", time() - 3600, "/");
         }
+        $confinfo = json_decode($confinfo, true);
+        $perfil = json_decode($giae->getPerfil(), true);
     }
 ?>
