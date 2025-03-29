@@ -4,7 +4,7 @@
     require_once(__DIR__ . '/../src/db.php');
     
     if ($_GET['action'] == "logout"){
-        $giae = new \juoum\GiaeConnect\GiaeConnect("giae.aejics.org");
+        $giae = new \juoum\GiaeConnect\GiaeConnect($info['giae']);
         $giae->session=$_COOKIE["session"];
         $giae->logout();
         setcookie("loggedin", "", time() - 3600, "/");
@@ -16,7 +16,7 @@
     } else if ($_GET['action'] == "login"){
         $user = filter_input(INPUT_POST, 'username', FILTER_UNSAFE_RAW);
         $pass = filter_input(INPUT_POST, 'password', FILTER_UNSAFE_RAW);
-        $giae = new \juoum\GiaeConnect\GiaeConnect("giae.aejics.org");
+        $giae = new \juoum\GiaeConnect\GiaeConnect($info['giae']);
         $session = $giae->getSession($user, $pass);
         $giae->session=$session;
         $config = $giae->getConfInfo();
@@ -92,7 +92,7 @@
             </html>";
     } else {
         $session = filter_input(INPUT_COOKIE, 'token', FILTER_UNSAFE_RAW);
-        $giae = new \juoum\GiaeConnect\GiaeConnect("giae.aejics.org");
+        $giae = new \juoum\GiaeConnect\GiaeConnect($info['giae']);
         $giae->session=$session;
         $confinfo = $giae->getConfInfo();
         // Este código funciona especificamente com a maneira de verificação no GIAE AEJICS.
