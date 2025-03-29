@@ -14,5 +14,5 @@
     $db->query("CREATE TABLE IF NOT EXISTS reservas (sala VARCHAR(99) NOT NULL, tempo INTEGER NOT NULL, requisitor VARCHAR(99) NOT NULL, data DATE NOT NULL, aprovado BOOLEAN, motivo VARCHAR(99), extra VARCHAR(99), FOREIGN KEY (tempo) REFERENCES tempos(id), FOREIGN KEY (sala) REFERENCES salas(id), FOREIGN KEY (requisitor) REFERENCES cache_giae(id));");
 
     // Forçar a criação de um administrador.
-    //$db->query("INSERT IGNORE INTO admins (id, permitido) VALUES ('{$info['adminforcado']}', 1);");
+    $db->query("INSERT IGNORE INTO admins (id, permitido) VALUES ('{$info['adminforcado']}', 1);");
 ?>
