@@ -1,29 +1,32 @@
 <?php
     require_once '../vendor/autoload.php';
-    if ($action == "loginform"){
-        print("");
-        include 'src/footer.php';
-    }
-    if ($action == "login"){
-        $user = filter_input(INPUT_POST, 'user', FILTER_UNSAFE_RAW);
-        $pass = filter_input(INPUT_POST, 'pass', FILTER_UNSAFE_RAW);
-        $giae = new \juoum\GiaeConnect\GiaeConnect("giae.aejics.org", $user, $pass);
-        $config = json_decode($giae->getConfInfo(), true);
+    if ($_GET['action'] == "login"){
+        $user = filter_input(INPUT_POST, 'username', FILTER_UNSAFE_RAW);
+        $pass = filter_input(INPUT_POST, 'password', FILTER_UNSAFE_RAW);
+        $giae = new \juoum\GiaeConnect\GiaeConnect("giae.aejics.org");
+        $session = $giae->getSession($user, $pass);
+        $giae->session=$session;
+        $config = $giae->getConfInfo();
         $perfil = json_decode($giae->getPerfil(), true);
-        if (strpos($giae->getConfInfo(), 'Erro do Servidor') !== false){
-            die("<div class='alert alert-danger text-center' role='alert'>A sua palavra-passe está errada.</div>
-            <div class='text-center'>
-            <button type='button' class='btn btn-primary w-100' onclick='history.back()'>Voltar</button></div>");
+        if (strpos($config, 'Erro do Servidor') !== false){
+            die("<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>
+                <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js'></script>
+                <div class='w-45 alert alert-danger text-center' role='alert'>A sua palavra-passe está errada.</div>
+                    <div class='text-center'>
+                        <button type='button' class='btn btn-primary w-100' onclick='history.back()'>
+                            Voltar
+                        </button>
+                    </div>
+                </div>");
         } else {
-            setcookie("loggedin", "true", time() + 3599, "/");
-            setcookie("token", $giae->session, time() + 3599, "/");
-            setcookie("user", $_POST["user"], time() + 3599, "/");
-            $db = new SQLite3('db.sqlite3');
+            setcookie("token", $session, time() + 3599, "/");
+            setcookie("user", $user, time() + 3599, "/");
+            require '../src/db.php';
             $db->exec("CREATE TABLE cache_giae (id VARCHAR(99), nome VARCHAR(99), nomecompleto VARCHAR(99), email VARCHAR(99), PRIMARY KEY (id));");
             $db->exec("CREATE TABLE admins (id VARCHAR(99), atividade BOOLEAN, PRIMARY KEY (id));");
             $valordb = $db->prepare("INSERT INTO cache_giae(id, nome, nomecompleto, email) VALUES (:1, :2, :3, :4);");
             $valordb->bindValue(':1', mb_convert_encoding($_POST["user"], 'ISO-8859-1', 'auto'), SQLITE3_TEXT);
-            $valordb->bindValue(':2', mb_convert_encoding($config['nomeutilizador'], 'ISO-8859-1', 'auto'), SQLITE3_TEXT);
+            $valordb->bindValue(':2', mb_convert_encoding(json_decode($config)['nomeutilizador'], 'ISO-8859-1', 'auto'), SQLITE3_TEXT);
             $valordb->bindValue(':3', mb_convert_encoding($perfil['perfil']['nome'], 'ISO-8859-1', 'auto'), SQLITE3_TEXT);
             $valordb->bindValue(':4', mb_convert_encoding($perfil['perfil']['email'], 'ISO-8859-1', 'auto'), SQLITE3_TEXT);
             $valordb->execute();
@@ -65,17 +68,10 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOGIN</title>
-    <!-- CSS -->
-    <link rel="stylesheet" href="logincss.css">
-    <!-- Fontawsome Icon -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!-- jquery -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
-        integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <title>Iniciar Sessão | Reserva Salas</title>
+    <link rel="stylesheet" href="/assets/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 
 <body>
@@ -86,7 +82,7 @@
                     391.222 240.473 384.002L10.4726 259.388C4.01969 255.892 0 249.143 0 241.803V20Z" fill="white" />
             </svg>
                 <h2 class="heading">Iniciar Sessão</h2>
-            <form action="/login/" method="POST">
+            <form action="/login/?action=login" method="POST">
                 <div class="input-grup">
                     <input type="text" name="username" placeholder="Nome de Utilizador" id="username" required>
                     <span class="border"></span>
