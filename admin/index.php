@@ -10,8 +10,8 @@
 <body>
 <?php
     require "../login/index.php";
-    $user = 
-    $isAdmin = $db->query("SELECT permitido FROM utilizadores WHERE ")->fetch_assoc()['permitido'];
+    $dados = $db->query("SELECT * FROM cache_giae WHERE email = '{$perfil['perfil']['email']}';")->fetch_assoc();
+    $isAdmin = $db->query("SELECT permitido FROM admins WHERE id = '{$dados['id']}'")->fetch_assoc()['permitido'];
     if (!$isAdmin == 1) {
         http_response_code(403);
         die("<h2>403 - Não tem acesso para aceder a esta página.</h2>");
@@ -51,7 +51,7 @@
     // Ainda não existe backend para verificar isto.
 
     echo "<div class='flex-grow-1 d-flex align-items-center justify-content-center flex-column'>
-        <h1>Dashboard Administrativo</h1>
+        <h1>Olá, {$dados['nome']}</h1>
         <p class='h4 fw-lighter'>O que vamos fazer hoje?</p>
         <div class='botoes_dashboardadmin d-flex justify-content-center'>
         </div>";

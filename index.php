@@ -1,12 +1,10 @@
 <?php
-    include 'login/index.php';
-    // Redirecionar a login caso não exista token
+    require 'login/index.php';
     if (!isset($_COOKIE['token'])){
         http_response_code(403);
         header("Location: /login");
         die("Não tem a sessão iniciada.");
     } else {
-        require 'src/db.php';
         $dados = $db->query("SELECT * FROM cache_giae WHERE email = '{$perfil['perfil']['email']}';")->fetch_assoc();
         $isadmin = $db->query("SELECT * FROM admins WHERE id = '{$dados['id']}' AND permitido = 1;")->num_rows;
     }
