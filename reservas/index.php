@@ -12,7 +12,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <link href="/assets/index.css" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/reservar.css">
+    <link rel="stylesheet" href="/assets/reservar.css">´
+    <script src="/assets/tooltips.js"></script>
 </head>
 <body>
 <nav>
@@ -34,7 +35,7 @@
     <div style="width: 80%; max-width: 600px; height: 100%; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
 <?php     
     echo "<p class='h2 fw-light text-center'>As suas reservas:</p>";
-    $requisitor = filter_var($_COOKIE['user'], FILTER_SANITIZE_STRING);
+    $requisitor = $dados['id'];
     $reservas = $db->query("SELECT * FROM reservas WHERE requisitor='{$requisitor}' ORDER BY data DESC;");
     echo "<div class='mt-3 text-center'>";
     echo "<table class='mt-2 table table-bordered'><thead><tr><th scope='col'>Sala</th><th scope='col'>Data</th><th scope='col'>Tempo</th><th scope='col'>Estado</th></tr></thead><tbody>";

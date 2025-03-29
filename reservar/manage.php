@@ -38,7 +38,7 @@
         $tempo = filter_var($_GET['tempo'], FILTER_SANITIZE_NUMBER_INT);
         $data = filter_var($_GET['data'], FILTER_SANITIZE_STRING);
         $sala = filter_var($_GET['sala'], FILTER_SANITIZE_NUMBER_INT);
-        $requisitor = filter_var($_COOKIE['user'], FILTER_SANITIZE_STRING);
+        $requisitor = $dados['id'];
         switch ($_GET['subaction']){
             case "reservar":
                 $motivo = filter_var($_POST['motivo'], FILTER_SANITIZE_STRING);
@@ -46,6 +46,16 @@
                 $db->query("INSERT INTO reservas (sala, tempo, requisitor, data, aprovado, motivo, extra) VALUES ('{$sala}', '{$tempo}', '{$requisitor}', '{$data}', 0, '{$motivo}', '{$extra}');");
                 header("Location: /reservar/?sala={$sala}&tempo={$tempo}");
                 break;
+            case "apagar":
+                $reserva = $db->query("SELECT * FROM reservas WHERE sala='{$sala}' AND tempo='{$tempo}' AND data='{$data}';")->fetch_assoc();
+                if (!$isadmin | $dados['id'] != $reserva['requisitor']){
+                    http_response_code(403);
+                    die("Não tem permissão para apagar esta reserva.");
+                } else {
+                    $db->query("DELETE FROM reservas WHERE sala='{$sala}' AND tempo='{$tempo}' AND data='{$data}';");
+                    header("Location: /reservar/?sala={$sala}");
+                    break;
+                }
             case null:
                 $detalhesreserva = $db->query("SELECT * FROM reservas WHERE sala='{$sala}' AND tempo='{$tempo}' AND data='{$data}' AND aprovado!=-1;")->fetch_assoc();
                 if (!$detalhesreserva){
@@ -77,17 +87,22 @@
                     $horastempo = $db->query("SELECT horashumanos FROM tempos WHERE id='{$tempo}';")->fetch_assoc()['horashumanos'];
                     echo "<p class='fw-bold'>Tempo: <span class='fw-normal'>{$horastempo}</span></p>";
                     echo "<p class='fw-bold'>Data: <span class='fw-normal'>{$data}</span></p>";
-                    echo "<p class='fw-bold'>Aprovado: ";
+                    echo "<p class='fw-bold'>Estado: ";
                     if ($detalhesreserva['aprovado'] == 1){
-                        echo "<span class='fw-normal'>Sim</span></p>";
+                        echo "<span class='badge bg-success'>Aprovado</span></p>";
                     } else if ($detalhesreserva['aprovado'] == -1) {
-                        echo "<span class='fw-normal'>Rejeitado</span></p>";
+                        echo "<span class='badge bg-danger'>Rejeitado</span></p>";
                     } else {
-                        echo "<span class='fw-normal'>Não</span></p>";
+                        echo "<span class='badge bg-warning text-dark'>Pendente</span></p>";
                     }
                     echo "<p class='fw-bold'>Motivo: <span class='fw-normal'>{$detalhesreserva['motivo']}</span></p>";
                     echo "<p class='fw-bold'>Informação Extra:</p>
                         <textarea rows='4' cols='50' class='fw-normal' disabled>{$detalhesreserva['extra']}</textarea>";
+                    if ($dados['id'] == $detalhesreserva['requisitor'] | $isadmin){
+                        echo "<a href='/reservar/manage.php?subaction=apagar&tempo={$tempo}&data={$data}&sala={$sala}' class='btn btn-danger mt-2'>Apagar Reserva</a>";
+                    } else {
+                        echo "<p class='fw-bold'>Requisitada por: <span class='fw-normal'>{$requisitorextenso}</span></p>";
+                    }
                     if (strpos($_SERVER['HTTP_REFERER'], '/admin/pedidos.php') !== false) {
                         echo "<a href='/admin/pedidos.php' class='btn btn-primary mt-2'>Voltar</a>";
                     } else {

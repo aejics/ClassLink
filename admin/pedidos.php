@@ -25,10 +25,10 @@
         </select>
         <label for="sala" class="form-label">Escolha uma sala</label>
     </div>
-    <!-- <div class="form-floating me-2">
+    <div class="form-floating me-2">
         <input type="text" class="form-control form-control-sm" id="requisitor" name="requisitor" placeholder="Requisitor" value="">
         <label for="requisitor">Requisitor</label>
-    </div> -->
+    </div>
 </form>
 
 <?php
@@ -107,7 +107,7 @@
             case "detalhes":
                 
         }
-    } elseif ($_POST['sala'] | $_GET['sala']){
+    } elseif ($_POST['sala'] | $_GET['sala'] | isset($_POST['requisitor'])){
         echo "<div style='max-height: 400px; overflow-y: auto; width: 100%;'>";
         echo "<table class='table'><tr><th scope='col'>Data</th><th scope='col'>Tempo</th><th scope='col'>Requisitor</th><th scope='col'>Motivo</th><th scope='col'>AÇÕES</th></tr>";
         if ($_POST['sala']){
@@ -116,7 +116,7 @@
             $sala = $_GET['sala'];
         }
         if ($_POST['requisitor']){ 
-            $pedidos = $db->query("SELECT * FROM reservas WHERE aprovado=0 AND sala={$sala} AND requisitor='{$_POST['requisitor']}' ORDER BY data ASC;");
+            $pedidos = $db->query("SELECT * FROM reservas WHERE requisitor='{$_POST['requisitor']}' ORDER BY data DESC;");
             while ($pedido = $pedidos->fetch_assoc()){
                 $salaextenso = $db->query("SELECT nome FROM salas WHERE id='{$pedido['sala']}';")->fetch_assoc()['nome'];
                 $requisitorextenso = $db->query("SELECT nomecompleto FROM cache_giae WHERE id='{$pedido['requisitor']}';")->fetch_assoc()['nomecompleto'];
@@ -124,8 +124,14 @@
                 echo "<tr><td>{$pedido['data']}</td>
                 <td>{$horastempo}</td>
                 <td>{$requisitorextenso}</td>
-                <td>{$pedido['motivo']}</td>
-                <td><a href='/reservas/manage.php?subaction=reservar&tempo={$pedido['tempo']}&data={$pedido['data']}&sala={$pedido['sala']}' class='btn btn-success'>Aprovar</a> <a href='/reservas/manage.php?subaction=delete&tempo={$pedido['tempo']}&data={$pedido['data']}&sala={$pedido['sala']}' class='btn btn-danger'>Rejeitar</a></td></tr>";
+                <td>{$pedido['motivo']}</td>";
+                if ($pedido['aprovado'] == 0) {
+                echo "<td><a href='/admin/pedidos.php?subaction=aprovar&tempo={$pedido['tempo']}&data={$pedido['data']}&sala={$pedido['sala']}' class='btn btn-success'>Aprovar</a>
+                 <a href='/admin/pedidos.php?subaction=rejeitar&tempo={$pedido['tempo']}&data={$pedido['data']}&sala={$pedido['sala']}' class='btn btn-danger'>Rejeitar</a>";
+                } else {
+                    echo "<td>";
+                }
+                echo " <a href='/reservar/manage.php?&tempo={$pedido['tempo']}&data={$pedido['data']}&sala={$pedido['sala']}' class='btn btn-secondary'>Detalhes</a></td></tr>";
             }    
         } else {
             $pedidos = $db->query("SELECT * FROM reservas WHERE aprovado=0 AND sala={$sala};");
@@ -136,10 +142,14 @@
                 echo "<tr><td>{$pedido['data']}</td>
                 <td>{$horastempo}</td>
                 <td>{$requisitorextenso}</td>
-                <td>{$pedido['motivo']}</td>
-                <td><a href='/admin/pedidos.php?subaction=aprovar&tempo={$pedido['tempo']}&data={$pedido['data']}&sala={$pedido['sala']}' class='btn btn-success'>Aprovar</a>
-                 <a href='/admin/pedidos.php?subaction=rejeitar&tempo={$pedido['tempo']}&data={$pedido['data']}&sala={$pedido['sala']}' class='btn btn-danger'>Rejeitar</a>
-                 <a href='/reservas/manage.php?&tempo={$pedido['tempo']}&data={$pedido['data']}&sala={$pedido['sala']}' class='btn btn-secondary'>Detalhes</a></td></tr>";
+                <td>{$pedido['motivo']}</td>";
+                if ($pedido['aprovado'] == 0) {
+                echo "<td><a href='/admin/pedidos.php?subaction=aprovar&tempo={$pedido['tempo']}&data={$pedido['data']}&sala={$pedido['sala']}' class='btn btn-success'>Aprovar</a>
+                 <a href='/admin/pedidos.php?subaction=rejeitar&tempo={$pedido['tempo']}&data={$pedido['data']}&sala={$pedido['sala']}' class='btn btn-danger'>Rejeitar</a>";
+                } else {
+                    echo "<td>";
+                }
+                echo " <a href='/reservar/manage.php?&tempo={$pedido['tempo']}&data={$pedido['data']}&sala={$pedido['sala']}' class='btn btn-secondary'>Detalhes</a></td></tr>";
             }
         }
         echo "</table>";
