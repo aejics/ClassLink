@@ -13,18 +13,11 @@ Este projeto é possível graças aos trabalhos das seguintes turmas:
 - 1ºD - Design de Funcionalidades Possíveis para a Aplicação
 - 2ºE - Criação das Expressões para o Backend SQL, e criação da aplicação.
 
-# ⚠️ Aviso! Em desenvolvimento!
-Enquanto este código está estável o suficiente para ser usado por utilizadores, irão sempre ser adicionadas funcionalidades novas e talvez sejam removidas algumas funcionalidades.
-
-<i>Este código está a ser rescrito! Use a [release estável](https://github.com/aejics/ReservaSalas/releases/tag/v1.0) até a rescrita ficar acabada!</i>
-
-Caso descubra um Bug, agradecemos que seja criado um pull request ou uma issue :)
-
 ## Instalação
 
 - Necessário um servidor com PHP
 - Composer (para o Windows, descarregar [esta versão](https://getcomposer.org/Composer-Setup.exe))
-- Com o composer, fazer `composer install` através de um terminal.
+- Com o composer, fazer `composer install` através de um terminal, para instalar as dependências.
 
 ## Menções especiais
 - Marco Pisco - Gestão do Projeto
