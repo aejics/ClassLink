@@ -99,7 +99,6 @@
         // Pode não funcionar da mesma maneira nos outros GIAEs. Caso não funcione na mesma maneira, corriga este código e faça um pull request!
         if (str_contains($confinfo, 'Erro do Servidor')){
             setcookie("loggedin", "", time() - 3600, "/");
-            setcookie("user", "", time() - 3600, "/");
         }
         $confinfo = json_decode($confinfo, true);
         $perfil = json_decode($giae->getPerfil(), true);
