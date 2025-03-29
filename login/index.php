@@ -52,8 +52,6 @@
     }
 ?>
 
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -64,17 +62,18 @@
     <title>Iniciar Sessão | Reserva Salas</title>
     <link rel="stylesheet" href="/assets/login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <meta 
 </head>
 
 <body>
     <div class="container">
         <div class="cardLogin">
-            <svg xmlns="http://www.w3.org/2000/svg" width="270" height="387" viewBox="0 0 270 387" fill="none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="270" height="400" viewBox="0 0 270 387" fill="none">
                 <path d="M0 20C0 8.9543 8.95431 0 20 0H250C261.046 0 270 8.95431 270 20V366.417C270 381.573 253.799 
                     391.222 240.473 384.002L10.4726 259.388C4.01969 255.892 0 249.143 0 241.803V20Z" fill="white" />
             </svg>
                 <h2 class="heading">Iniciar Sessão</h2>
+                <p class="heading-nospacing">em ReservaSalas, com as suas credenciais GIAE.</p>
             <form action="/login/?action=login" method="POST">
                 <div class="input-grup">
                     <input type="text" name="username" placeholder="Nome de Utilizador" id="username" required>
@@ -98,6 +97,7 @@
                      -5.92867e-05 427L-2.37629e-05 20.6546C-2.24466e-05 5.598 16.0091 -4.05922 29.3278 
                      2.96307L259.328 124.23C265.892 127.691 270 134.501 270 141.922L270 427Z" fill="white" />
             </svg>
+    </div>
 </body>
 
 </html>
