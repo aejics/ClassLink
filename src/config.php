@@ -1,7 +1,7 @@
 <?php
     $info = array(
         'adminforcado' => 'a11531',
-        'servidor' => 'giae.aejics.org'
+        'giae' => 'giae.aejics.org'
     );
 
     $mail = array(
