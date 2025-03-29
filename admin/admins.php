@@ -40,14 +40,18 @@ $temposatuais = $db->query("SELECT * FROM admins;");
 if ($temposatuais->num_rows == 0) {
     echo "Está a ocorrer um bug no Painel. Por favor corra o ficheiro src/db.php para configurar as DBs.";
 }
-echo "<table class='table'><tr><th scope='col'>ID</th><th scope='col'>Permitido</th><th scope='col'>AÇÕES</th></tr>";
+echo "<table class='table'><tr><th scope='col'>ID</th><th scope='col'>Nome</th><th scope='col'>Permitido</th><th scope='col'>AÇÕES</th></tr>";
 while ($row = $temposatuais->fetch_assoc()) {
     if ($row['permitido'] == 1) {
         $row['permitido'] = "Sim";
     } else {
         $row['permitido'] = "Não";
     }
-    echo "<tr><td>{$row['id']}</td><td>{$row['permitido']}</td><td><a href='/admin/admins.php?action=edit&id={$row['id']}'>EDITAR</a>  <a href='/admin/admins.php?action=apagar&id={$row['id']}'>APAGAR</a></tr>";
+    $nome = $db->query("SELECT nome FROM cache_giae WHERE id = '{$row['id']}';")->fetch_assoc()['nome'];
+    if ($nome == null) {
+        $nome = "Desconhecido";
+    }
+    echo "<tr><td>{$row['id']}</td><td>{$nome}</td><td>{$row['permitido']}</td><td><a href='/admin/admins.php?action=edit&id={$row['id']}'>EDITAR</a>  <a href='/admin/admins.php?action=apagar&id={$row['id']}'>APAGAR</a></tr>";
 }
 $db->close();
 echo "</div></table>"
