@@ -1,7 +1,36 @@
+
 <?php 
-    require '../src/config.php';
-    require '../src/db.php';
-    require '../src/base.php';
+    require '../login/index.php';
+?>
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Tempo | Reserva Salas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <link href="/assets/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/reservar.css">
+</head>
+<body>
+<nav>
+    <a href="/"><img src="/assets/logo.png" class="logo"></a>
+    <div class="list">
+        <ul>
+            <li><a href="/reservas">As minhas reservas</a></li>
+            <li><a href="/reservar">Reservar sala</a></li>
+            <?php
+                if ($isadmin) {
+                echo "<li><a href='/admin'>Painel administrativo</a></li>";
+                }
+            ?>
+            <li><a href="/login/?action=logout">Terminar sessão</a></li>
+        </ul> 
+    </div>
+</nav>
+<div class="d-flex justify-content-center align-items-center vh-100 flex-column">
+<?php
 
     if ($_GET['tempo'] && $_GET['data'] && $_GET['sala']){
         $tempo = filter_var($_GET['tempo'], FILTER_SANITIZE_NUMBER_INT);
@@ -13,14 +42,14 @@
                 $motivo = filter_var($_POST['motivo'], FILTER_SANITIZE_STRING);
                 $extra = filter_var($_POST['extra'], FILTER_SANITIZE_STRING);
                 $db->query("INSERT INTO reservas (sala, tempo, requisitor, data, aprovado, motivo, extra) VALUES ('{$sala}', '{$tempo}', '{$requisitor}', '{$data}', 0, '{$motivo}', '{$extra}');");
-                header("Location: /reservas/?sala={$sala}&tempo={$tempo}");
+                header("Location: /reservar/?sala={$sala}&tempo={$tempo}");
                 break;
             case null:
                 $detalhesreserva = $db->query("SELECT * FROM reservas WHERE sala='{$sala}' AND tempo='{$tempo}' AND data='{$data}' AND aprovado!=-1;")->fetch_assoc();
                 if (!$detalhesreserva){
                     $salaextenso = $db->query("SELECT nome FROM salas WHERE id='{$sala}';")->fetch_assoc()['nome'];
                     echo "<h2>Reservar Sala</h2>";
-                    echo "<form class='form w-50' action='/reservas/manage.php?subaction=reservar&tempo={$tempo}&data={$data}&sala={$_GET['sala']}' method='POST'>
+                    echo "<form class='form w-50' action='/reservar/manage.php?subaction=reservar&tempo={$tempo}&data={$data}&sala={$_GET['sala']}' method='POST'>
                     <div class='form-floating me-2'>
                     <input type='text' class='form-control form-control-sm' id='sala' name='sala' placeholder='Sala' value='{$salaextenso}' disabled>
                     <label for='sala'>Sala</label>
@@ -65,3 +94,7 @@
                 }
         }
     }
+?>
+</div>
+</body>
+</html>

@@ -7,6 +7,11 @@
     text-align:center;
 }
 
+a {
+    text-decoration: none;
+    color:white;
+}
+
 th .center {
     text-align: center;
 }
