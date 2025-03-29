@@ -1,4 +1,5 @@
 <?php
+    include 'login/index.php';
     // Redirecionar a login caso não exista token
     if (!isset($_COOKIE['token'])){
         http_response_code(403);
