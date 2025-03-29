@@ -31,7 +31,7 @@
         </ul> 
     </div>
 </nav>
-<div class="d-flex justify-content-center align-items-center vh-100 flex-column">
+<div class="d-flex justify-content-center align-items-center vh-100 flex-column" style="margin-top: -50px;">
 <?php
 
     if ($_GET['tempo'] && $_GET['data'] && $_GET['sala']){
@@ -91,7 +91,7 @@
                     if (strpos($_SERVER['HTTP_REFERER'], '/admin/pedidos.php') !== false) {
                         echo "<a href='/admin/pedidos.php' class='btn btn-primary mt-2'>Voltar</a>";
                     } else {
-                        echo "<a href='/reservas/?sala={$sala}' class='btn btn-primary mt-2'>Voltar</a>";
+                        echo "<a href='/reservar/?sala={$sala}' class='btn btn-primary mt-2'>Voltar</a>";
                     }
                 }
         }
