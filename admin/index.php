@@ -14,7 +14,7 @@
     $isAdmin = $db->query("SELECT permitido FROM admins WHERE id = '{$dados['id']}'")->fetch_assoc()['permitido'];
     if (!$isAdmin == 1) {
         http_response_code(403);
-        die("<h2>403 - Não tem acesso para aceder a esta página.</h2>");
+        die("<div class='text-center mt-2'><h2>403 - Não tem acesso para aceder a esta página.</h2></div>");
     }
 ?>
 <?php
