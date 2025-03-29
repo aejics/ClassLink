@@ -1,4 +1,5 @@
-<img src="src/logo.png" width="100">
+<img src="assets/logo.png" width="100">
+<img src="assets/aejics.png" width="100">
 
 # Reserva de Salas
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/t/aejics/reservasalas)
@@ -16,7 +17,9 @@ Este projeto é possível graças aos trabalhos das seguintes turmas:
 # ⚠️ Aviso! Em desenvolvimento!
 Enquanto este código está estável o suficiente para ser usado por utilizadores, irão sempre ser adicionadas funcionalidades novas e talvez sejam removidas algumas funcionalidades.
 
-Caso descubra um Bug, agradecemos que seja criado um pull request ou uma issue pelos separadores do topo do GitHub :)
+<i>Este código está a ser rescrito! Use a [release estável](https://github.com/aejics/ReservaSalas/releases/tag/v1.0) até a rescrita ficar acabada!</i>
+
+Caso descubra um Bug, agradecemos que seja criado um pull request ou uma issue :)
 
 ## Instalação
 
