@@ -7,8 +7,8 @@
         die("Não tem a sessão iniciada.");
     } else {
         require 'src/db.php';
-        $dados= $db->query("SELECT * FROM cache_giae WHERE id = '{$_COOKIE['user']}';")->fetch_assoc();
-        $isadmin = $db->query("SELECT * FROM admins WHERE id = '{$_COOKIE['user']}' AND permitido = 1;")->num_rows;
+        $dados = $db->query("SELECT * FROM cache_giae WHERE email = '{$perfil['perfil']['email']}';")->fetch_assoc();
+        $isadmin = $db->query("SELECT * FROM admins WHERE id = '{$dados['id']}' AND permitido = 1;")->num_rows;
     }
 ?>
 <!DOCTYPE html>
