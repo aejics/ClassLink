@@ -45,7 +45,7 @@
         // Pode não funcionar da mesma maneira nos outros GIAEs. Caso não funcione na mesma maneira, corriga este código e faça um pull request!
         if (str_contains($giae->getConfInfo(), 'Erro do Servidor')){
             setcookie("loggedin", "", time() - 3600, "/");
-            echo("<div class='alert alert-danger text-center' role='alert'>A sua sessão expirou.</div>
+            die("<div class='alert alert-danger text-center' role='alert'>A sua sessão expirou.</div>
             <div class='text-center'>
             <button type='button' class='btn btn-primary w-100' onclick='history.back()'>Voltar</button></div>");
         }

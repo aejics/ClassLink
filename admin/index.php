@@ -10,9 +10,9 @@
 <body>
 <?php
     require "../src/db.php";
+    require "../login/giaeconnect.php";
     
-    $isAdmin = 1;
-
+    $isAdmin = $db->query("SELECT isAdmin FROM utilizadores WHERE id = "$_COOKIE)->num_rows;
     if (!$isAdmin == 1) {
         http_response_code(403);
         die("<h2>403 - Não tem acesso para aceder a esta página.</h2>");
