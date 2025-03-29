@@ -9,8 +9,8 @@
 </head>
 <body>
 <?php
-    // Enquanto não for feito um backend, a variável (que é verificada contra a db)
-    // fica a 1, para o ambiente de desenvolvimento.
+    require "../src/db.php";
+    
     $isAdmin = 1;
 
     if (!$isAdmin == 1) {
