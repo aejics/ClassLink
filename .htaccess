@@ -1,0 +1,22 @@
+RewriteEngine On
+RewriteBase /
+
+# Protect the htaccess file
+<Files .htaccess>
+Order Allow,Deny
+Deny from all
+</Files>
+
+# Protect config
+<Files config.json>
+Order Allow,Deny
+Deny from all
+</Files>
+
+<Files configexample.json>
+Order Allow,Deny
+Deny from all
+</Files>
+
+# Disable directory browsing
+Options All -Indexes
