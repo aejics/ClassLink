@@ -40,9 +40,11 @@
     <div class="text">
         <h3>BEM VINDO, <?php echo "{$dados['nome']}"; ?>, à <br> <span>Reserva De Salas</span> </h3>
         <p>Projeto elaborado pela turma 2ºE e 1ºD 2024/25</p>
-        <button class="btn">Reservar uma Sala
-        <a href="/reserva_prof"></a>
-        </button>
+        <a href="/reservar">
+            <button class="btn">
+                Reservar uma Sala
+            </button>
+        </a>
         <br>
         <br>
         <img src="/assets/poch.png" class="img-thumbnail" alt="Pessoas 2030 | Portugal 2030 | Cofinanciado pela União Europeia" style="max-width: 25%">
