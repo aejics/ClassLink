@@ -24,7 +24,7 @@
     function sidebarLink($url, $nome) {
         if ($url == "/admin/" && $_SERVER['REQUEST_URI'] == "/admin/") {
             echo "<li class='nav-item'><a href='$url' class='nav-link active'>$nome</a></li>";
-        } else if (str_starts_with($_SERVER['REQUEST_URI'], $url) && $url != "/admin/") {
+        } else if (str_starts_with($_SERVER['REQUEST_URI'], $url) && $url != "/admin/" && $url != "/") {
             echo "<li class='nav-item'><a href='$url' class='nav-link active'>$nome</a></li>";
         } else {
             echo "<li class='nav-item'><a href='$url' class='nav-link'>$nome</a></li>";
@@ -39,6 +39,7 @@
     <li class='nav-item'>";
     // Links da Sidebar
     sidebarLink('/admin/', 'Dashboard');
+    sidebarLink('/', 'Voltar para a página principal');
     // Fechar Sidebar no HTML, e passar o conteúdo para a direita
     echo "</ul></div><div class='flex-grow-1 d-flex align-items-center justify-content-center flex-column'>";
 
