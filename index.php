@@ -22,7 +22,7 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"></script>
     <link rel="stylesheet" href="/assets/index.css">
     <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='icon' href='/src/logo.png'>
+    <link rel='icon' href='/assets/logo.png'>
 </head>
 <body>
     <nav>
