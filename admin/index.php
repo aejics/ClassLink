@@ -9,10 +9,9 @@
 </head>
 <body>
 <?php
-    require "../src/db.php";
     require "../login/index.php";
-    
-    $isAdmin = $db->query("SELECT isAdmin FROM utilizadores WHERE id = ")->num_rows;
+    $user = 
+    $isAdmin = $db->query("SELECT permitido FROM utilizadores WHERE ")->fetch_assoc()['permitido'];
     if (!$isAdmin == 1) {
         http_response_code(403);
         die("<h2>403 - Não tem acesso para aceder a esta página.</h2>");
