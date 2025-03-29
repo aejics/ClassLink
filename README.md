@@ -1,5 +1,4 @@
 <img src="assets/logo.png" width="100">
-<img src="assets/aejics.png" width="100">
 
 # Reserva de Salas
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/t/aejics/reservasalas)
