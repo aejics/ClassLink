@@ -1,11 +1,13 @@
 <?php
     // Redirecionar a login caso não exista token
-    if (!isset($_COOKIE['token']) && $_SERVER['REMOTE_ADDR'] != "127.0.0.1"){
+    if (!isset($_COOKIE['token'])){
         http_response_code(403);
         header("Location: /login");
         die("Não tem a sessão iniciada.");
     } else {
-
+        require 'src/db.php';
+        $dados= $db->query("SELECT * FROM cache_giae WHERE id = '{$_COOKIE['user']}';")->fetch_assoc();
+        $isadmin = $db->query("SELECT * FROM admins WHERE id = '{$_COOKIE['user']}' AND permitido = 1;")->num_rows;
     }
 ?>
 <!DOCTYPE html>
@@ -24,20 +26,28 @@
         <a href=""><img src="/assets/logo.png" class="logo"></a>
         <div class="list">
             <ul>
-                <li><a href="/iniciar_sessao">Login</a></li>
-                <li><a href="/perfil">Perfil</a></li>
-                <li><a href="/suporte">Suporte</a></li>
+                <li><a href="/reservas">As minhas reservas</a></li>
+                <li><a href="/reservar">Reservar sala</a></li>
+                <?php
+                    if ($isadmin) {
+                    echo "<li><a href='/admin'>Painel administrativo</a></li>";
+                    }
+                ?>
+                <li><a href="/login/?action=logout">Terminar sessão</a></li>
             </ul> 
         </div>
     </nav>
     <div class="text">
-        <h2>BEM VINDO, <?php echo "{$_COOKIE['nome_pessoa']}"; ?> ,à<br> <span>Reserva De Salas</span> </h2>
+        <h3>BEM VINDO, <?php echo "{$dados['nome']}"; ?>, à <br> <span>Reserva De Salas</span> </h3>
         <p>Projeto elaborado pela turma 2ºE e 1ºD 2024/25</p>
-        <button class="btn">Reservar Sala
+        <button class="btn">Reservar uma Sala
         <a href="/reserva_prof"></a>
         </button>
+        <br>
+        <br>
+        <img src="/assets/poch.png" class="img-thumbnail" alt="Pessoas 2030 | Portugal 2030 | Cofinanciado pela União Europeia" style="max-width: 25%">
+        <img src="/assets/rep_edu.png" class="img-thumbnail" alt="República Portuguesa Educação Ciência e Inovação" style="max-width: 10%">
     </div>
-    <img src="coloca a imagem" alt="" class="img">
     <div class="circle"></div>
 </body>
 </html>

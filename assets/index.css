@@ -95,12 +95,13 @@ nav{
     transform: translateY(-20px);
 }
 
-.circle{
-    position:absolute;
-    top: 0;
+.circle {
+    position: absolute;
+    bottom: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background: linear-gradient(-90deg, rgb(0, 238, 255) 0%, rgb(13, 4, 66) 85%);
-    clip-path: circle(650px at right 800px);
+    clip-path: circle(50vw at right 60%);
+    z-index: -1;
 }
