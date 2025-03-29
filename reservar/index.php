@@ -23,7 +23,7 @@
             <li><a href="/reservar">Reservar sala</a></li>
             <?php
                 if ($isadmin) {
-                echo "<li><a href='/admin'>Painel administrativo</a></li>";
+                echo "<li><a href='/admin'>Painel Administrativo</a></li>";
                 }
             ?>
             <li><a href="/login/?action=logout">Terminar sessão</a></li>
