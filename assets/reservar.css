@@ -1,6 +1,3 @@
-div {align-content: center;}
-.fotoutente{width: 1em}
-
 .reserva{
     display:block;
     width:100%;
@@ -8,6 +5,11 @@ div {align-content: center;}
     color:white;
     text-decoration:none;
     text-align:center;
+}
+
+a {
+    text-decoration: none;
+    color:white;
 }
 
 th .center {

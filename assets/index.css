@@ -105,3 +105,8 @@ nav{
     clip-path: circle(50vw at right 120%);
     z-index: -1;
 }
+
+a {
+    text-decoration: none;
+    color: white;
+}

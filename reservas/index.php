@@ -1,143 +1,63 @@
+<?php 
+    require '../login/index.php';
+    $dados = $db->query("SELECT * FROM cache_giae WHERE email = '{$perfil['perfil']['email']}';")->fetch_assoc();
+    $isadmin = $db->query("SELECT * FROM admins WHERE id = '{$dados['id']}' AND permitido = 1;")->num_rows;
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reserva Salas</title>
+    <title>As suas reservas | Reserva Salas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="style.css">
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-        }
-        .left-icons {
-            position: fixed;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            background-color: #f0f0f0;
-            padding: 15px 8px;
-            border-top-right-radius: 15px;
-            border-bottom-right-radius: 15px;
-        }
-        .left-icons .icon {
-            font-size: 30px;
-            width: 70px;
-            height: 70px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 50%;
-            background-color: white;
-            transition: transform 0.3s ease;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.1);
-        }
-        .left-icons .icon:hover {
-            transform: scale(1.1);
-        }
-        .left-icons .icon i {
-            color: #333;
-        }
-        .main-content {
-            margin-left: 90px;
-            padding: 20px;
-        }
-    </style>
+    <link href="/assets/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/reservar.css">´
+    <script src="/assets/tooltips.js"></script>
 </head>
 <body>
-    <div class="left-icons">
-        <div class="icon icon-fill">
-        <a href="/">
-            <i class="fa fa-home"></i>
-    </a>
-        </div>
-        <div class="icon icon-enter">
-        <a href="/perfil">
-            <i class="fa fa-user"></i>
-    </a>
-        </div>
-        <div class="icon icon-collapse">
-        <a href="/sign_in">
-            <i class="fa fa-sign-in"></i>
-    </a>
-        </div>
-        <div class="icon icon-rotate">
-        <a href="/suporte">
-            <i class="fa fa-phone"></i>
-    </a>
-        </div>
+<nav>
+    <a href="/"><img src="/assets/logo.png" class="logo"></a>
+    <div class="list">
+        <ul>
+            <li><a href="/reservas">As minhas reservas</a></li>
+            <li><a href="/reservar">Reservar sala</a></li>
+            <?php
+                if ($isadmin) {
+                echo "<li><a href='/admin'>Painel Administrativo</a></li>";
+                }
+            ?>
+            <li><a href="/login/?action=logout">Terminar sessão</a></li>
+        </ul> 
     </div>
-
-    <div class="main-content">
-        <h1 class="text-center mt-4 mb-4">Reserva Salas</h1>
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-12">
-                    <div class="content">
-                        <h2>Formulário de Reserva</h2>
-                        <form action="" method="POST" class="mb-4">
-                            <div class="mb-3">
-                                <label for="tempo" class="form-label">Tempo</label>
-                                <input type="time" id="tempo" name="tempo" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="dia" class="form-label">Dia</label>
-                                <input type="date" id="dia" name="dia" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="sala" class="form-label">Sala</label>
-                                <input type="text" id="sala" name="sala" class="form-control" placeholder="Ex: Sala 46" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="turma" class="form-label">Turma</label>
-                                <input type="text" id="turma" name="turma" class="form-control" placeholder="Ex: Turma 2ºE" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Reservar</button>
-                            <button type="submit" class="btn btn-primary">Deletar</button>
-                        </form>
-
-                        <h2>Reservas Existentes</h2>
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Tempo</th>
-                                    <th>Dia</th>
-                                    <th>Sala</th>
-                                    <th>Turma</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                // Verifica se o formulário foi enviado
-                                if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                                    // Recebe os dados do formulário
-                                    $tempo = htmlspecialchars($_POST['tempo']);
-                                    $dia = htmlspecialchars($_POST['dia']);
-                                    $sala = htmlspecialchars($_POST['sala']);
-                                    $turma = htmlspecialchars($_POST['turma']);
-
-                                    // Exibe os dados na tabela
-                                    echo "<tr>";
-                                    echo "<td>$tempo</td>";
-                                    echo "<td>$dia</td>";
-                                    echo "<td>$sala</td>";
-                                    echo "<td>$turma</td>";
-                                    echo "</tr>";
-                                }
-                                ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+</nav>
+<div class="d-flex justify-content-center align-items-center flex-column" style="height: calc(100vh - 120px); width: 100%; padding: 20px; box-sizing: border-box; overflow: hidden;">
+    <div style="width: 80%; max-width: 600px; height: 100%; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; padding: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+<?php     
+    echo "<p class='h2 fw-light text-center'>As suas reservas:</p>";
+    $requisitor = $dados['id'];
+    $reservas = $db->query("SELECT * FROM reservas WHERE requisitor='{$requisitor}' ORDER BY data DESC;");
+    if ($reservas->num_rows == 0) {
+        echo "<div class='alert alert-danger fade show' role='alert'>Não tem reservas no seu nome atualmente.</div>";
+        exit;
+    } else {
+        echo "<div class='mt-3 text-center'>";
+        echo "<table class='mt-2 table table-bordered'><thead><tr><th scope='col'>Sala</th><th scope='col'>Data</th><th scope='col'>Tempo</th><th scope='col'>Estado</th></tr></thead><tbody>";
+        while ($reserva = $reservas->fetch_assoc()) {
+            $sala = $db->query("SELECT nome FROM salas WHERE id='{$reserva['sala']}';")->fetch_assoc();
+            $tempo = $db->query("SELECT horashumanos FROM tempos WHERE id='{$reserva['tempo']}';")->fetch_assoc();
+            if ($reserva['aprovado'] == 1) {
+                echo "<tr><td>{$sala['nome']}</td><td>{$reserva['data']}</td><td>{$tempo['horashumanos']}</td><td><span class='badge bg-success' data-bs-toggle='tooltip' data-placement='top' title='A sua reserva foi aprovada! Um email foi lhe enviado com mais informações.'>Aprovado</span></td></tr>";
+            } else if ($reserva['aprovado'] == -1) {
+                echo "<tr><td>{$sala['nome']}</td><td>{$reserva['data']}</td><td>{$tempo['horashumanos']}</td><td><span class='badge bg-danger' data-bs-toggle='tooltip' data-placement='top' title='Foi lhe enviado um email com mais informações sobre a rejeição.'>Rejeitado</span></td></tr>";
+            } else {
+                echo "<tr><td>{$sala['nome']}</td><td>{$reserva['data']}</td><td>{$tempo['horashumanos']}</td><td><span class='badge bg-warning' data-bs-toggle='tooltip' data-placement='top' title='A sua reserva foi enviada e está a ser revista. Irá receber um email com mais informações em breve'>Pendente</span></td></tr>";
+            }
+        }
+        echo "</table></div>";
+    }
+?>
+</div>
+</div>
 </body>
 </html>
