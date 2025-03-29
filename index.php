@@ -42,7 +42,7 @@
     </nav>
     <div class="text">
         <h3>Seja bem vindo, <?php echo "{$dados['nome']}"; ?>, à <br> <span>Reserva De Salas</span> </h3>
-        <p>Projeto elaborado pela turma 2ºE e 1ºD 2024/25</p>
+        <p>Projeto elaborado pelas turmas 2ºE e 1ºD 2024/25</p>
         <a href="/reservar">
             <button class="btn">
                 Reservar uma Sala
