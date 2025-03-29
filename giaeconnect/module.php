@@ -14,7 +14,7 @@
 // Este módulo depende da versão mais recente do GIAEConnect do itsjuoum.
 
 function loginGiae($user, $pass){
-    require 'giaeConnect.php';
+    require '../vendor/autoload.php';
     $giaeConnect = new \juoum\GiaeConnect\GiaeConnect("giae.aejics.org");
     $sessao = $giaeConnect->getSession($user, $pass);
     $giaeConnect->session=$sessao;
