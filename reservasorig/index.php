@@ -1,8 +1,4 @@
-<?php 
-    require '../src/config.php';
-    require '../src/db.php';
-    require '../src/base.php';
-    
+<?php     
     echo "<p class='h2 fw-light'>As suas reservas:</p>";
     $requisitor = filter_var($_COOKIE['user'], FILTER_SANITIZE_STRING);
     $reservas = $db->query("SELECT * FROM reservas WHERE requisitor='{$requisitor}' ORDER BY data DESC;");
