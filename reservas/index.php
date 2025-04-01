@@ -14,6 +14,7 @@
     <link href="/assets/index.css" rel="stylesheet">
     <link rel="stylesheet" href="/assets/reservar.css">´
     <script src="/assets/tooltips.js"></script>
+    <link rel='icon' href='/assets/logo.png'>
 </head>
 <body>
 <nav>
