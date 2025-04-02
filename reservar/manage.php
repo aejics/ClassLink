@@ -82,7 +82,7 @@
                     echo "<h2>Detalhes da Reserva:</h2>";
                     $salaextenso = $db->query("SELECT nome FROM salas WHERE id='{$sala}';")->fetch_assoc()['nome'];
                     echo "<p class='fw-bold'>Sala: <span class='fw-normal'>{$salaextenso}</span></p>";
-                    $requisitorextenso = $db->query("SELECT nomecompleto FROM cache_giae WHERE id='{$requisitor}';")->fetch_assoc()['nomecompleto'];
+                    $requisitorextenso = $db->query("SELECT nomecompleto FROM cache_giae WHERE id='{$detalhesreserva['requisitor']}';")->fetch_assoc()['nomecompleto'];
                     echo "<p class='fw-bold'>Requisitada por: <span class='fw-normal'>{$requisitorextenso}</span></p>";
                     $horastempo = $db->query("SELECT horashumanos FROM tempos WHERE id='{$tempo}';")->fetch_assoc()['horashumanos'];
                     echo "<p class='fw-bold'>Tempo: <span class='fw-normal'>{$horastempo}</span></p>";
