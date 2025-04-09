@@ -8,7 +8,7 @@
     "packages": [
         {
             "name": "juoum/giaeconnect",
-            "version": "v1.2.1",
+            "version": "v1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/itsjuoum/GIAEConnect.git",

@@ -98,7 +98,16 @@
         // Este código funciona especificamente com a maneira de verificação no GIAE AEJICS.
         // Pode não funcionar da mesma maneira nos outros GIAEs. Caso não funcione na mesma maneira, corriga este código e faça um pull request!
         if (str_contains($confinfo, 'Erro do Servidor')){
-            setcookie("loggedin", "", time() - 3600, "/");
+            setcookie("token", "", time() - 3600, "/");
+            die("<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>
+                <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js'></script>
+                <div class='w-45 alert alert-danger text-center' role='alert'>A sua sessão expirou.</div>
+                    <div class='text-center'>
+                        <button type='button' class='btn btn-primary w-100' onclick='history.back()'>
+                            Voltar
+                        </button>
+                    </div>
+                </div>");
         }
         $confinfo = json_decode($confinfo, true);
         $perfil = json_decode($giae->getPerfil(), true);
