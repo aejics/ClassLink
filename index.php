@@ -1,12 +1,12 @@
 <?php
-    require 'login/index.php';
+        require 'login/index.php';
     if (!isset($_COOKIE['token'])){
         http_response_code(403);
         header("Location: /login");
         die("Não tem a sessão iniciada.");
     } else {
-        $dados = $db->query("SELECT * FROM cache_giae WHERE email = '{$perfil['perfil']['email']}';")->fetch_assoc();
-        $isadmin = $db->query("SELECT * FROM admins WHERE id = '{$dados['id']}' AND permitido = 1;")->num_rows;
+        $dados = $db->query("SELECT * FROM cache_giae WHERE id = '{$user}'")->fetch_assoc();
+        $isadmin = $db->query("SELECT * FROM admins WHERE id = '{$user}' AND permitido = 1;")->num_rows;
     }
 ?>
 <!DOCTYPE html>
