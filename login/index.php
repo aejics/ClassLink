@@ -32,11 +32,17 @@
                     </div>
                 </div>");
         } else {
-            setcookie("token", $session, time() + 3599, "/");
             require '../src/db.php';
+            $tempoagora = time();
+            $tempofim = $tempoagora + 3600;
+            $newtoken = md5($user . $tempoagora . $tempofim, false);
             $stmt = $db->prepare("INSERT IGNORE INTO cache_giae(id, nome, nomecompleto, email) VALUES (?, ?, ?, ?);");
             $stmt->bind_param("ssss", $user, json_decode($config, true)['nomeutilizador'], $perfil['perfil']['nome'], $perfil['perfil']['email']);
             $stmt->execute();
+            $stmttok = $db->prepare("INSERT INTO tokens (id, token, validofrom, validotill) VALUES (?, ?, ?, ?);");
+            $stmttok->bind_param("ssss", $user, $newtoken, $tempoagora, $tempofim);
+            $stmttok->execute();
+            setcookie("token", $newtoken, time() + 3599, "/");
             $db->close();
             header('Location: /');
             die();
@@ -91,7 +97,26 @@
             </body>
             </html>";
     } else {
+        require '../src/db.php';
         $session = filter_input(INPUT_COOKIE, 'token', FILTER_UNSAFE_RAW);
+        $tokenindb = $db->query("SELECT id FROM tokens WHERE token={$session};");
+        if ($tokenindb->num_rows() == 0){
+            die("<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>
+                <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js'></script>
+                <div class='w-45 alert alert-danger text-center' role='alert'>A sua sessão expirou.</div>
+                    <div class='text-center'>
+                        <button type='button' class='btn btn-primary w-100' onclick='history.back()'>
+                            Voltar
+                        </button>
+                    </div>
+                </div>");
+        } else {
+            $tokenindb = $tokenindb->fetch_assoc();
+            $tempoatual = time();
+            $validotill = $db->query("SELECT validotill FROM tokens WHERE token={$session};")->fetch_assoc()['validotill'];
+            
+            $user = $tokenindb['id'];
+        }
         $giae = new \juoum\GiaeConnect\GiaeConnect($info['giae']);
         $giae->session=$session;
         $confinfo = $giae->getConfInfo();
