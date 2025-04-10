@@ -1,7 +1,7 @@
 <?php 
     require '../login/index.php';
-    $dados = $db->query("SELECT * FROM cache_giae WHERE email = '{$perfil['perfil']['email']}';")->fetch_assoc();
-    $isadmin = $db->query("SELECT * FROM admins WHERE id = '{$dados['id']}' AND permitido = 1;")->num_rows;
+    $dados = $db->query("SELECT * FROM cache_giae WHERE id = '{$user}'")->fetch_assoc();
+    $isadmin = $db->query("SELECT * FROM admins WHERE id = '{$user}' AND permitido = 1;")->num_rows;
 ?>
 <!DOCTYPE html>
 <html lang="pt">
