@@ -20,7 +20,7 @@
     $db = array(
         'tipo' => 'mysql',
         'servidor' => 'localhost',
-        'user' => 'salasuser',
+        'user' => 'reservasalas',
         'password' => 'salaspass',
         'db' => 'reservasalas',
         'porta' => 3306
