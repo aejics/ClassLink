@@ -51,7 +51,7 @@ while ($row = $temposatuais->fetch_assoc()) {
     if ($nome == null) {
         $nome = "Desconhecido";
     }
-    echo "<tr><td>{$row['id']}</td><td>{$nome}</td><td>{$row['permitido']}</td><td><a href='/admin/admins.php?action=edit&id={$row['id']}'>EDITAR</a>  <a href='/admin/admins.php?action=apagar&id={$row['id']}'>APAGAR</a></tr>";
+    echo "<tr><td>{$row['id']}</td><td>{$nome}</td><td>{$row['permitido']}</td><td><a href='/admin/admins.php?action=edit&id={$row['id']}'>EDITAR</a>  <a href='/admin/admins.php?action=apagar&id={$row['id']}' onclick='return confirm('Tem a certeza que pretende apagar este Administrador?');'>APAGAR</a></tr>";
 }
 $db->close();
 echo "</div></table>"
