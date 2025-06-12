@@ -41,7 +41,7 @@
             } else {
                 echo "<option value='0' disabled>Escolha uma sala</option>";
             }
-            $salas = $db->query("SELECT * FROM salas;");
+            $salas = $db->query("SELECT * FROM salas ORDER BY nome ASC;");
             while ($sala = $salas->fetch_assoc()){
                 if ($_POST['sala'] == $sala['id'] || $_GET['sala'] == $sala['id']){
                     echo "<option value='{$sala['id']}' selected>{$sala['nome']}</option>";
