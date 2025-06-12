@@ -56,7 +56,7 @@
 </form>
 </div>
 <?php
-    if ($_POST['sala'] | $_GET['sala']){
+    if (isset($_POST['sala']) | isset($_GET['sala'])){
         echo(
             "<div class='mt-3 h-100 d-flex align-items-center justify-content-center flex-column'>
             <table class='table table-bordered'><thead><tr><th scope='col'>Tempos</th>"
