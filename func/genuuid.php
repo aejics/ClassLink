@@ -2,7 +2,7 @@
 // Esta função gera UUIDs V4, que são compliant com a especificação que é suposta ser utilizada.
 // Todos os IDs eventualmente acabam por usar esta função.
 
-function uuidv4()
+function uuid4()
 {
   $data = random_bytes(16);
 
