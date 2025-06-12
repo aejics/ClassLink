@@ -42,7 +42,7 @@ if ($temposatuais->num_rows == 0) {
 echo "<div style='max-height: 400px; overflow-y: auto; width: 90%;'>";
 echo "<table class='table'><tr><th scope='col'>Hora Humana</th><th scope='col'>AÇÕES</th></tr>";
 while ($row = $temposatuais->fetch_assoc()) {
-    echo "<tr><td>{$row['horashumanos']}</td><td><a href='/admin/tempos.php?action=edit&id={$row['id']}'>EDITAR</a>  <a href='/admin/tempos.php?action=apagar&id={$row['id']}'>APAGAR</a></tr>";
+    echo "<tr><td>{$row['horashumanos']}</td><td><a href='/admin/tempos.php?action=edit&id={$row['id']}'>EDITAR</a>  <a href='/admin/tempos.php?action=apagar&id={$row['id']}' onclick='return confirm('Tem a certeza que pretende apagar o tempo? Isto irá causar problemas se a sala tiver reservas passadas.');'>APAGAR</a></tr>";
 }
 echo "</div></table>"
 ?>
