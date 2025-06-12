@@ -75,7 +75,7 @@
             echo "<th scope='col'>{$dia}</th>";
         };
         echo "</tr></thead><tbody>";
-        $tempos = $db->query("SELECT * FROM tempos;");
+        $tempos = $db->query("SELECT * FROM tempos ORDER BY horashumanos ASC;");
         // por cada tempo:
         for ($i = 1; $i <= $tempos->num_rows; $i++){
             while ($row = $tempos->fetch_assoc()){
