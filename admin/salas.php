@@ -17,7 +17,7 @@ switch ($_GET['action']){
         break;
     // caso execute a ação apagar:
     case "apagar":
-        $db->query("DELETE FROM salas WHERE id = {$_GET['id']};");
+        $db->query("DELETE FROM salas WHERE id = '{$_GET['id']}';");
         acaoexecutada("Eliminação de Sala");
         break;
     // caso execute a ação editar:
