@@ -35,15 +35,21 @@
 <?php
 
     if ($_GET['tempo'] && $_GET['data'] && $_GET['sala']){
-        $tempo = filter_var($_GET['tempo'], FILTER_SANITIZE_NUMBER_INT);
-        $data = filter_var($_GET['data'], FILTER_SANITIZE_STRING);
-        $sala = filter_var($_GET['sala'], FILTER_SANITIZE_NUMBER_INT);
-        $requisitor = $dados['id'];
+        $tempo = $_GET['tempo'];
+        $data = $_GET['data'];
+        $sala = $_GET['sala'];
+        $motivo = $_POST['motivo'] ?? '';
+        $extra = $_POST['extra'] ?? '';
+        $id = $dados['id'];
         switch ($_GET['subaction']){
             case "reservar":
-                $motivo = filter_var($_POST['motivo'], FILTER_SANITIZE_STRING);
-                $extra = filter_var($_POST['extra'], FILTER_SANITIZE_STRING);
-                $db->query("INSERT INTO reservas (sala, tempo, requisitor, data, aprovado, motivo, extra) VALUES ('{$sala}', '{$tempo}', '{$requisitor}', '{$data}', 0, '{$motivo}', '{$extra}');");
+                var_dump($sala, $tempo, $data, $motivo, $extra);
+                $stmt = $db->prepare("INSERT INTO reservas (sala, tempo, requisitor, data, aprovado, motivo, extra) VALUES (?, ?, ?, ?, 0, ?, ?);");
+                $stmt->bind_param("ssssss", $sala, $tempo, $id, $data, $motivo, $extra);
+                if (!$stmt->execute()){
+                    http_response_code(500);
+                    die("Houve um problema a reservar a sala. Contacte um administrador, ou tente novamente mais tarde.");
+                }
                 header("Location: /reservar/?sala={$sala}&tempo={$tempo}");
                 break;
             case "apagar":
@@ -52,7 +58,12 @@
                     http_response_code(403);
                     die("Não tem permissão para apagar esta reserva.");
                 } else {
-                    $db->query("DELETE FROM reservas WHERE sala='{$sala}' AND tempo='{$tempo}' AND data='{$data}';");
+                    $db->prepare("DELETE FROM reservas WHERE sala=? AND tempo=? AND data=?;");
+                    $stmt->bind_param("sss", $sala, $tempo, $data);
+                    if (!$stmt->execute()){
+                        http_response_code(500);
+                        die("Houve um problema a apagar a reserva. Contacte um administrador, ou tente novamente mais tarde.");
+                    }
                     header("Location: /reservar/?sala={$sala}");
                     break;
                 }
@@ -90,8 +101,6 @@
                     echo "<p class='fw-bold'>Estado: ";
                     if ($detalhesreserva['aprovado'] == 1){
                         echo "<span class='badge bg-success'>Aprovado</span></p>";
-                    } else if ($detalhesreserva['aprovado'] == -1) {
-                        echo "<span class='badge bg-danger'>Rejeitado</span></p>";
                     } else {
                         echo "<span class='badge bg-warning text-dark'>Pendente</span></p>";
                     }
