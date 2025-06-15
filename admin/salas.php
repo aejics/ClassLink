@@ -17,6 +17,15 @@ switch ($_GET['action']){
         break;
     // caso execute a ação apagar:
     case "apagar":
+        try {
+            $db->query("SELECT * FROM reservas WHERE sala = '{$_GET['id']}' AND aprovado != -1;");
+            if ($db->affected_rows > 0) {
+                throw new Exception("Existem reservas associadas a esta sala. Por segurança, é necessária uma intervenção manual.");
+            }
+        } catch (Exception $e) {
+            echo "<div class='alert alert-danger fade show' role='alert'>Erro: {$e->getMessage()}</div>";
+            break;
+        }
         $db->query("DELETE FROM salas WHERE id = '{$_GET['id']}';");
         acaoexecutada("Eliminação de Sala");
         break;
