@@ -49,6 +49,10 @@
 ?>
 
 <?php
+    if ($_SERVER['REQUEST_URI'] == "/admin") {
+        header("Location: /admin/");
+        die();
+    }
     if ($_SERVER['REQUEST_URI'] == "/admin/") {
         // Conteúdos para a Dashboard Administrativa. Apenas colocar o conteúdo neste bloco, pois
         // este módulo é reutilizado para as subpáginas.
