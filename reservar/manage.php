@@ -58,7 +58,7 @@
                     http_response_code(403);
                     die("Não tem permissão para apagar esta reserva.");
                 } else {
-                    $db->prepare("DELETE FROM reservas WHERE sala=? AND tempo=? AND data=?;");
+                    $stmt = $db->prepare("DELETE FROM reservas WHERE sala=? AND tempo=? AND data=?;");
                     $stmt->bind_param("sss", $sala, $tempo, $data);
                     if (!$stmt->execute()){
                         http_response_code(500);
