@@ -17,6 +17,15 @@ switch ($_GET['action']){
         break;
     // caso execute a ação apagar:
     case "apagar":
+        try {
+            $db->query("SELECT * FROM reservas WHERE tempo = '{$_GET['id']}' AND aprovado != -1;");
+            if ($db->affected_rows > 0) {
+                throw new Exception("Existem reservas associadas a este tempo. Por segurança, é necessária uma intervenção manual.");
+            }
+        } catch (Exception $e) {
+            echo "<div class='alert alert-danger fade show' role='alert'>Erro: {$e->getMessage()}</div>";
+            break;
+        }
         $db->query("DELETE FROM tempos WHERE id = '{$_GET['id']}';");
         acaoexecutada("Eliminação de Tempo");
         break;
