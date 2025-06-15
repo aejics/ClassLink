@@ -30,7 +30,7 @@ switch ($_GET['action']){
         break;
     // caso seja submetida a edição:
     case "update":
-        $db->query("UPDATE tempos SET horashumanos = '{$_POST['horahumana']}' WHERE id = {$_GET['id']};");
+        $db->query("UPDATE tempos SET horashumanos = '{$_POST['horahumana']}' WHERE id = '{$_GET['id']}';");
         acaoexecutada("Atualização de Tempo");
         break;
 }

@@ -30,7 +30,7 @@ switch ($_GET['action']){
         break;
     // caso seja submetida a edição:
     case "update":
-        $c = $db->query("UPDATE salas SET nome = '{$_POST['nomesala']}' WHERE id = {$_GET['id']};");
+        $c = $db->query("UPDATE salas SET nome = '{$_POST['nomesala']}' WHERE id = '{$_GET['id']}';");
         acaoexecutada("Atualização de Sala");
         break;
 }
