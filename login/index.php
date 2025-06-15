@@ -5,8 +5,6 @@
     require_once(__DIR__ . '/../src/db.php');
     require_once(__DIR__ . '/../func/showbanner.php');
     require_once(__DIR__ . '/../func/genuuid.php');
-    showBanner();
-
     if ($_GET['action'] == "logout"){
         $token = filter_var($_COOKIE['token'], FILTER_SANITIZE_STRING);
         $stmt = $db->prepare("DELETE FROM tokens WHERE token=?;");
@@ -59,13 +57,16 @@
                 <meta http-equiv='X-UA-Compatible' content='IE=edge'>
                 <meta name='viewport' content='width=device-width, initial-scale=1.0'>
                 <title>Iniciar Sessão | Reserva Salas</title>
+                <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css' rel='stylesheet' integrity='sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT' crossorigin='anonymous'>
                 <link rel='stylesheet' href='/assets/login.css'>
                 <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css' />
                 <meta name='viewport' content='width=device-width, initial-scale=1'>
                 <link rel='icon' href='/assets/logo.png'>
             </head>
 
-            <body>
+            <body>";
+        showBanner();
+        echo "
                 <div class='container'>
                     <div class='cardLogin'>
                         <svg xmlns='http://www.w3.org/2000/svg' width='270' height='400' viewBox='0 0 270 387' fill='none'>
@@ -101,6 +102,7 @@
             </body>
             </html>";
     } else {
+        showBanner();
         $session = filter_input(INPUT_COOKIE, 'token', FILTER_UNSAFE_RAW);
         $tokenindb = $db->query("SELECT * FROM tokens WHERE token='{$session}';");
         if ($tokenindb->num_rows == 0){

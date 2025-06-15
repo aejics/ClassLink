@@ -166,11 +166,11 @@ form a:hover{
     color: rgb(64, 179, 255);
 }
  form button{
+    font-size:15px;
     position: absolute;
     margin-top: 10px;
-    width: max-content;
+    width: 65%;
     height: 35px;
-    padding: 0 60px;
     border: none;
     border-radius: 50px;
     color: #FFF;
