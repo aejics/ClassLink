@@ -134,7 +134,7 @@
                 echo " <a href='/reservar/manage.php?&tempo={$pedido['tempo']}&data={$pedido['data']}&sala={$pedido['sala']}' class='btn btn-secondary'>Detalhes</a></td></tr>";
             }    
         } else {
-            $pedidos = $db->query("SELECT * FROM reservas WHERE aprovado=0 AND sala={$sala};");
+            $pedidos = $db->query("SELECT * FROM reservas WHERE aprovado=0 AND sala='{$sala}';");
             while ($pedido = $pedidos->fetch_assoc()){
                 $salaextenso = $db->query("SELECT nome FROM salas WHERE id='{$pedido['sala']}';")->fetch_assoc()['nome'];
                 $requisitorextenso = $db->query("SELECT nomecompleto FROM cache_giae WHERE id='{$pedido['requisitor']}';")->fetch_assoc()['nomecompleto'];
