@@ -31,7 +31,7 @@
         </ul> 
     </div>
 </nav>
-<div class="h-100 d-flex align-items-center justify-content-center flex-column">
+<div class="d-flex align-items-center justify-content-center flex-column">
     <p class="h2 fw-light">Reservar uma Sala</p>    
 <form action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="POST" class="d-flex align-items-center">
     <div class="form-floating me-2">
@@ -58,7 +58,7 @@
 <?php
     if (isset($_POST['sala']) | isset($_GET['sala'])){
         echo(
-            "<div class='mt-3 h-100 d-flex align-items-center justify-content-center flex-column'>
+            "<div class='container mt-3 d-flex align-items-center justify-content-center flex-column'>
             <table class='table table-bordered'><thead><tr><th scope='col'>Tempos</th>"
         );
         for ($i = 0; $i < 7; $i++){
