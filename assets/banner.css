@@ -1,0 +1,11 @@
+/* FOLHA DE ESTILO PARA O BANNER DE FEEDBACK */
+
+.fixed-top-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1050;
+    border-radius: 0;
+    margin-bottom: 0;
+}
