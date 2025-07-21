@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0ab1c109d38121d5e7a71482269ccd88",
+    "content-hash": "d340f2d9632c6b26d9921f9465ea303c",
     "packages": [
         {
             "name": "juoum/giaeconnect",
-            "version": "v1.2.0",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/itsjuoum/GIAEConnect.git",
-                "reference": "4c43234fdb700de5c1cbc03856863570ea430600"
+                "reference": "61f37ffb6faa1d5ca0f087b6391bd58ca40d8f81"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/itsjuoum/GIAEConnect/zipball/4c43234fdb700de5c1cbc03856863570ea430600",
-                "reference": "4c43234fdb700de5c1cbc03856863570ea430600",
+                "url": "https://api.github.com/repos/itsjuoum/GIAEConnect/zipball/61f37ffb6faa1d5ca0f087b6391bd58ca40d8f81",
+                "reference": "61f37ffb6faa1d5ca0f087b6391bd58ca40d8f81",
                 "shasum": ""
             },
             "type": "library",
@@ -38,22 +38,22 @@
             "description": "This PHP class provides an unofficial API for the GIAE platform (Gestão Integrada para Administração Escolar), widely used on Portuguese public schools, on behalf of a given user.",
             "support": {
                 "issues": "https://github.com/itsjuoum/GIAEConnect/issues",
-                "source": "https://github.com/itsjuoum/GIAEConnect/tree/v1.2.1"
+                "source": "https://github.com/itsjuoum/GIAEConnect/tree/v2.0.0"
             },
-            "time": "2025-01-31T23:39:10+00:00"
+            "time": "2025-07-16T14:59:18+00:00"
         },
         {
             "name": "phpmailer/phpmailer",
-            "version": "v6.9.3",
+            "version": "v6.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPMailer/PHPMailer.git",
-                "reference": "2f5c94fe7493efc213f643c23b1b1c249d40f47e"
+                "reference": "bf74d75a1fde6beaa34a0ddae2ec5fce0f72a144"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/2f5c94fe7493efc213f643c23b1b1c249d40f47e",
-                "reference": "2f5c94fe7493efc213f643c23b1b1c249d40f47e",
+                "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/bf74d75a1fde6beaa34a0ddae2ec5fce0f72a144",
+                "reference": "bf74d75a1fde6beaa34a0ddae2ec5fce0f72a144",
                 "shasum": ""
             },
             "require": {
@@ -113,7 +113,7 @@
             "description": "PHPMailer is a full-featured email creation and transfer class for PHP",
             "support": {
                 "issues": "https://github.com/PHPMailer/PHPMailer/issues",
-                "source": "https://github.com/PHPMailer/PHPMailer/tree/v6.9.3"
+                "source": "https://github.com/PHPMailer/PHPMailer/tree/v6.10.0"
             },
             "funding": [
                 {
@@ -121,16 +121,16 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-11-24T18:04:13+00:00"
+            "time": "2025-04-24T15:19:31+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
-    "platform-dev": [],
+    "platform": {},
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }

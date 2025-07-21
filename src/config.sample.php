@@ -5,6 +5,7 @@
     );
 
     $mail = array(
+        'ativado' => false,
         'servidor' => 'smtp.gmail.com',
         'porta' => 465,
         'autenticacao' => true,
