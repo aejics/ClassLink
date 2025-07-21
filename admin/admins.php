@@ -4,7 +4,7 @@
     <span class="me-3">Adicionar um admin</span>
     <?php formulario("admins.php?action=criar", [
         ["type" => "text", "id" => "id", "placeholder" => "ID do Admin", "label" => "ID do Admin", "value" => null],
-        ["type" => "text", "id" => "permitido", "placeholder" => "Permitido (1 ou 0)", "label" => "Permitido (1 ou 0)", "value" => null]
+        ["type" => "checkbox", "id" => "permitido", "placeholder" => "Permitido", "label" => "Permitido", "value" => "1"]
     ]); ?>
 </div>
 
@@ -27,7 +27,7 @@ switch ($_GET['action']){
         echo "<div class='alert alert-warning fade show' role='alert'>A editar o Administrador {$d['id']}.</div>";
         formulario("admins.php?action=update&id={$d['id']}", [
             ["type" => "text", "id" => "id", "placeholder" => "ID do Admin", "label" => "ID do Admin", "value" => $d['id']],
-            ["type" => "text", "id" => "permitido", "placeholder" => "Permitido (1 ou 0)", "label" => "Permitido (1 ou 0)", "value" => $d['permitido']]]);
+            ["type" => "checkbox", "id" => "permitido", "placeholder" => "Permitido", "label" => "Permitido", "value" => "1"]]);
             break;
     // caso seja submetida a edição:
     case "update":

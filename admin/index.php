@@ -67,11 +67,18 @@
         function formulario($action, $inputs) {
             echo "<form action='$action' method='POST' class='d-flex align-items-center'>";
             foreach ($inputs as $input) {
+                if ($input['type'] == "checkbox") {
+                    echo "<div class='form-check me-2' style='flex: 1;'>
+                        <input type='checkbox' class='form-check-input' id='{$input['id']}' name='{$input['id']}' value='{$input['value']}'>
+                        <label class='form-check-label' for='{$input['id']}'>{$input['label']}</label>
+                        </div>";
+                } else {
                 echo "<div class='form-floating me-2' style='flex: 1;'>
                 <input type='{$input['type']}' class='form-control form-control-sm' id='{$input['id']}' name='{$input['id']}' placeholder='{$input['placeholder']}' value='{$input['value']}' required>
                 <label for='{$input['id']}'>{$input['label']}</label>
                 </div>";
                 }
+            }
             echo "<button type='submit' class='btn btn-primary btn-sm' style='height: 38px;'>Submeter</button></form>";
         }
     
