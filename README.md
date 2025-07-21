@@ -15,9 +15,10 @@ Este projeto é possível graças aos trabalhos das seguintes turmas:
 
 ## Instalação
 
-- Necessário um servidor com PHP
+- Necessário um servidor com PHP e uma DB MariaDB
 - Composer (para o Windows, descarregar [esta versão](https://getcomposer.org/Composer-Setup.exe))
 - Com o composer, fazer `composer install` através de um terminal, para instalar as dependências.
+- Montar o utilizador usando as instruções [na wiki](https://github.com/aejics/ReservaSalas/wiki/Configura%C3%A7%C3%A3o-MYSQL) (brevemente haverá mais documentação na Wiki)
 
 ## Menções especiais
 - Marco Pisco - Gestão do Projeto
