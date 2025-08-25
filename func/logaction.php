@@ -1,5 +1,5 @@
 <?php
-function addlog(string $loginfo, string $userid){
+function logaction(string $loginfo, string $userid){
     require_once(__DIR__ . '/../func/genuuid.php');
     require_once(__DIR__ . '/../src/db.php');
 
