@@ -1,8 +1,8 @@
-<?php require 'index.php'; ?>
+<?php require '../index.php'; ?>
 <h1>Semanas repetidas</h1>
 <p>Este script permite repetir uma ocupação de sala para um dia específico em várias semanas.</p>
 <p>Por exemplo, se o primeiro dia for o dia 1, e repetir-se 5 semanas, é o dia 1, 8, 15, 22 e 29.</p>
-<form action="/admin/semanasrepetidas.php" method="POST" class="mt-4">
+<form action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="POST" class="mt-4">
     <div class="row mb-3">
         <div class="col-md-6">
             <div class="form-floating">

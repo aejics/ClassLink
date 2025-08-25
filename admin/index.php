@@ -9,7 +9,7 @@
 </head>
 <body>
 <?php
-    require "../login/index.php";
+    require_once(__DIR__ . "/../login/index.php");
     $dados = $db->query("SELECT * FROM cache_giae WHERE id = '{$user}'")->fetch_assoc();
     $isAdmin = $db->query("SELECT * FROM admins WHERE id = '{$user}' AND permitido = 1;")->num_rows;
     if (!$isAdmin == 1) {
@@ -37,6 +37,20 @@
     <ul class='nav nav-pills flex-column mb-auto text-center justify-content-center align-items-center' style='height: 100%;'>
     <li class='nav-item'>";
     // Links da Sidebar
+    echo "<li class='nav-item dropdown'>
+            <a class='nav-link dropdown-toggle' href='#' id='extensibilidadeDropdown' role='button' data-bs-toggle='dropdown' aria-expanded='false'>
+                Extensibilidade
+            </a>
+            <ul class='dropdown-menu' aria-labelledby='extensibilidadeDropdown'>";
+    foreach (glob(__DIR__ . "/scripts/*.php") as $scriptFile) {
+        if (basename($scriptFile) !== "example.php") {
+            $scriptName = basename($scriptFile, ".php");
+            echo "<li>";
+            sidebarLink("/admin/scripts/$scriptName.php", ucfirst($scriptName));
+            echo "</li>";
+        }
+    }
+    echo "</ul></li>";
     sidebarLink('/admin/', 'Dashboard');
     sidebarLink('/admin/pedidos.php', 'Pedidos de Reserva');
     sidebarLink('/admin/tempos.php', 'Gestão de Tempos');
