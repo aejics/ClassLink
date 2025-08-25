@@ -13,6 +13,7 @@
     $db->query("CREATE TABLE IF NOT EXISTS tempos (id VARCHAR(99) UNIQUE, horashumanos VARCHAR(99), PRIMARY KEY (id));");
     $db->query("CREATE TABLE IF NOT EXISTS reservas (sala VARCHAR(99) NOT NULL, tempo VARCHAR(99) NOT NULL, requisitor VARCHAR(99) NOT NULL, data DATE NOT NULL, aprovado BOOLEAN, motivo VARCHAR(99), extra VARCHAR(9999), UNIQUE (sala, tempo, data), FOREIGN KEY (tempo) REFERENCES tempos(id), FOREIGN KEY (sala) REFERENCES salas(id), FOREIGN KEY (requisitor) REFERENCES cache_giae(id));");
     $db->query("CREATE TABLE IF NOT EXISTS tokens (id VARCHAR(99), token VARCHAR(99), validofrom INT(11), validotill INT(11), UNIQUE(id, token), FOREIGN KEY (id) REFERENCES cache_giae(id));");
+    $db->query("CREATE TABLE IF NOT EXISTS logs (id VARCHAR(99), loginfo VARCHAR(9999), userid VARCHAR(99), timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (id), FOREIGN KEY (userid) REFERENCES cache_giae(id));");
 
     // Forçar a criação de um administrador.
     $db->query("INSERT IGNORE INTO admins (id, permitido) VALUES ('{$info['adminforcado']}', 1);");
