@@ -102,8 +102,10 @@
     
         // ação executada
         function acaoexecutada($acao) {
+            require_once(__DIR__ . '/../func/logaction.php');
             echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>Ação executada. <b>$acao</b>
                 <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Fechar'></button></div>";
+            logaction($acao, $_COOKIE['user']);
         }    
 ?>
 
