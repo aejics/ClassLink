@@ -6,15 +6,15 @@
     <title>Painel Administrativo - ReservaSalas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <link rel='icon' href='/assets/logo.png'>
 </head>
 <body>
 <?php
-// MUDAR DADOS PARA SESSION
-    $dados = $db->query("SELECT * FROM cache_giae WHERE id = '{$user}'")->fetch_assoc();
-    $isAdmin = $db->query("SELECT * FROM admins WHERE id = '{$user}' AND permitido = 1;")->num_rows;
-    if (!$isAdmin == 1) {
+    require_once(__DIR__ . '/../src/db.php');
+    session_start();
+    if (!$_SESSION['admin']) {
         http_response_code(403);
-        die("<br><div class='text-center mt-5'><h2>403 - Não tem acesso para aceder a esta página.</h2></div>");
+        die("Não pode entrar no Painel Administrativo. <a href='/'>Voltar para a página inicial</a>");
     }
 ?>
 <?php
@@ -55,7 +55,6 @@
     sidebarLink('/admin/pedidos.php', 'Pedidos de Reserva');
     sidebarLink('/admin/tempos.php', 'Gestão de Tempos');
     sidebarLink('/admin/salas.php', 'Gestão de Salas');
-    sidebarLink('/admin/admins.php', 'Gestão de Administradores');
     sidebarLink('/', 'Voltar para a página principal');
     // Fechar Sidebar no HTML, e passar o conteúdo para a direita
     echo "</ul></div><div class='flex-grow-1 d-flex align-items-center justify-content-center flex-column'>";
@@ -72,7 +71,7 @@
         // este módulo é reutilizado para as subpáginas.
         $pedidospendentes = $db->query("SELECT * FROM reservas WHERE aprovado = 0;")->num_rows;
         echo "<div class='flex-grow-1 d-flex align-items-center justify-content-center flex-column'>
-        <h1>Olá, {$dados['nome']}</h1>
+        <h1>Olá, {$_SESSION['nome']}</h1>
         <p class='h4 fw-lighter'>O que vamos fazer hoje?</p>
         <p class='h6 fw-lighter'>Existem <b>$pedidospendentes</b> pedidos de reserva pendentes.</p>
         <div class='botoes_dashboardadmin d-flex justify-content-center'>
