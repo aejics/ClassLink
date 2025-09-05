@@ -113,7 +113,7 @@ use PHPMailer\PHPMailer\Exception;
             $pedidos = $db->query("SELECT * FROM reservas WHERE requisitor='{$_POST['requisitor']}' ORDER BY data DESC;");
             while ($pedido = $pedidos->fetch_assoc()) {
                 $salaextenso = $db->query("SELECT nome FROM salas WHERE id='{$pedido['sala']}';")->fetch_assoc()['nome'];
-                $requisitorextenso = $db->query("SELECT nomecompleto FROM cache WHERE id='{$pedido['requisitor']}';")->fetch_assoc()['nomecompleto'];
+                $requisitorextenso = $db->query("SELECT nome FROM cache WHERE id='{$pedido['requisitor']}';")->fetch_assoc()['nome'];
                 $horastempo = $db->query("SELECT horashumanos FROM tempos WHERE id='{$pedido['tempo']}';")->fetch_assoc()['horashumanos'];
                 echo "<tr><td>{$pedido['data']}</td>
                 <td>{$horastempo}</td>
@@ -131,7 +131,7 @@ use PHPMailer\PHPMailer\Exception;
             $pedidos = $db->query("SELECT * FROM reservas WHERE aprovado=0 AND sala='{$sala}';");
             while ($pedido = $pedidos->fetch_assoc()) {
                 $salaextenso = $db->query("SELECT nome FROM salas WHERE id='{$pedido['sala']}';")->fetch_assoc()['nome'];
-                $requisitorextenso = $db->query("SELECT nomecompleto FROM cache WHERE id='{$pedido['requisitor']}';")->fetch_assoc()['nomecompleto'];
+                $requisitorextenso = $db->query("SELECT nome FROM cache WHERE id='{$pedido['requisitor']}';")->fetch_assoc()['nome'];
                 $horastempo = $db->query("SELECT horashumanos FROM tempos WHERE id='{$pedido['tempo']}';")->fetch_assoc()['horashumanos'];
                 echo "<tr><td>{$pedido['data']}</td>
                 <td>{$horastempo}</td>
