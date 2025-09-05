@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "685f358d26d26baee8ec9789947f66a3",
+    "content-hash": "032bad4b7c2263e603c55e5102fe5451",
     "packages": [
         {
             "name": "guzzlehttp/guzzle",
@@ -330,42 +330,6 @@
                 }
             ],
             "time": "2025-08-23T21:21:41+00:00"
-        },
-        {
-            "name": "juoum/giaeconnect",
-            "version": "v2.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/itsjuoum/GIAEConnect.git",
-                "reference": "61f37ffb6faa1d5ca0f087b6391bd58ca40d8f81"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/itsjuoum/GIAEConnect/zipball/61f37ffb6faa1d5ca0f087b6391bd58ca40d8f81",
-                "reference": "61f37ffb6faa1d5ca0f087b6391bd58ca40d8f81",
-                "shasum": ""
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "juoum\\GiaeConnect\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-3.0-only"
-            ],
-            "authors": [
-                {
-                    "name": "juoum"
-                }
-            ],
-            "description": "This PHP class provides an unofficial API for the GIAE platform (Gestão Integrada para Administração Escolar), widely used on Portuguese public schools, on behalf of a given user.",
-            "support": {
-                "issues": "https://github.com/itsjuoum/GIAEConnect/issues",
-                "source": "https://github.com/itsjuoum/GIAEConnect/tree/v2.0.0"
-            },
-            "time": "2025-07-16T14:59:18+00:00"
         },
         {
             "name": "league/oauth2-client",
