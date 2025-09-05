@@ -85,7 +85,7 @@ session_start();
                             $enviarmail->Body = utf8_decode("A sua reserva da sala {$salaextenso} para a data de {$_GET['data']} às {$tempohumano} foi removida.\nEsta ação pode ser realizada por administradores, ou por si mesmo.\n\nObrigado.");
                             $enviarmail->send();
                         } catch (Exception $e) {
-                            die("<div class='mt-2 alert alert-warning fade show' role='alert'>A reserva foi rejeitada, mas o email de notificação não foi enviado. Contacte o Postmaster.\nErro do PHPMailer: {$enviarmail->ErrorInfo}</div>");
+                            echo("<div class='mt-2 alert alert-warning fade show' role='alert'>A reserva foi rejeitada, mas o email de notificação não foi enviado. Contacte o Postmaster.\nErro do PHPMailer: {$enviarmail->ErrorInfo}</div>");
                         }
 
                         if (!$stmt->execute()) {
