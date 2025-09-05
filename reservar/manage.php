@@ -56,7 +56,7 @@ session_start();
                     break;
                 case "apagar":
                     $reserva = $db->query("SELECT * FROM reservas WHERE sala='{$sala}' AND tempo='{$tempo}' AND data='{$data}';")->fetch_assoc();
-                    if (!$_SESSION['admin'] | $_SESSION['id'] != $reserva['requisitor']) {
+                    if (!($_SESSION['admin']) && ($_SESSION['id'] != $reserva['requisitor'])) {
                         http_response_code(403);
                         die("Não tem permissão para apagar esta reserva.");
                     } else {
