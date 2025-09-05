@@ -32,7 +32,7 @@ if (isset($_GET['code'])) {
         $accessToken = $provider->getAccessToken('authorization_code', [
             'code' => $_GET['code']
         ]);
-
+        $_SESSION['oauth2state'] = "valid";
         echo 'Access Token: ' . $accessToken->getToken() . "<br>";
         echo 'Refresh Token: ' . $accessToken->getRefreshToken() . "<br>";
         echo 'Expired in: ' . $accessToken->getExpires() . "<br>";
