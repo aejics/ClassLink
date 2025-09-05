@@ -23,4 +23,4 @@ Este projeto é possível graças aos trabalhos das seguintes turmas:
 ## Menções especiais
 - Marco Pisco - Gestão do Projeto
 - Prof. André Gaspar - Ideia do projeto, gestão do projeto, dedicar aulas deles para podermos criar este projeto.
-- [@juoum](https://github.com/itsjuoum/) - Pela escrita da bibilioteca maravilhosa do [GIAEConnect](https://github.com/itsjuoum/GIAEConnect), a biblioteca que permite a conexão ao GIAE.
+- [@juoum](https://github.com/itsjuoum/) - Pela escrita da bibilioteca maravilhosa do [GIAEConnect](https://github.com/itsjuoum/GIAEConnect), a biblioteca que permite a conexão ao GIAE, na primeira versão do Reserva Salas.
