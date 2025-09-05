@@ -26,6 +26,7 @@
             $_SESSION['email'] = $_SESSION['resourceOwner']['email'];
             $_SESSION['id'] = $_SESSION['resourceOwner']['sub'];
             var_dump($_SESSION);
+            $db->query("INSERT IGNORE INTO cache (id, nome, email) VALUES ('{$_SESSION['id']}', '{$_SESSION['nome']}', '{$_SESSION['email']}');");
             header('Location: /');
             exit();
         } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
