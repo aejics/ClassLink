@@ -1,6 +1,8 @@
 <?php
 require_once(__DIR__ . '/../func/logaction.php');
 require_once(__DIR__ . '/../src/db.php');
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 session_start();
 ?>
 <!DOCTYPE html>
@@ -44,7 +46,6 @@ session_start();
             $id = $_SESSION['id'];
             switch ($_GET['subaction']) {
                 case "reservar":
-                    var_dump($sala, $tempo, $data, $motivo, $extra);
                     $stmt = $db->prepare("INSERT INTO reservas (sala, tempo, requisitor, data, aprovado, motivo, extra) VALUES (?, ?, ?, ?, 0, ?, ?);");
                     $stmt->bind_param("ssssss", $sala, $tempo, $id, $data, $motivo, $extra);
                     if (!$stmt->execute()) {
@@ -62,6 +63,31 @@ session_start();
                         $stmt = $db->prepare("DELETE FROM reservas WHERE sala=? AND tempo=? AND data=?;");
                         $stmt->bind_param("sss", $sala, $tempo, $data);
                         logAction("Apagou a reserva da sala {$salaextenso} no dia {$data} no tempo com ID {$tempo}.", $_SESSION['id'],);
+                        try {
+                            $salaextenso = $db->query("SELECT nome FROM salas WHERE id='{$_GET['sala']}';")->fetch_assoc()['nome'];
+                            $requisitor = $db->query("SELECT email FROM cache WHERE id='{$id}';")->fetch_assoc()['email'];
+                            $tempohumano = $db->query("SELECT horashumanos FROM tempos WHERE id='{$_GET['tempo']}';")->fetch_assoc()['horashumanos'];
+                            if ($mail['ativado'] != true) {
+                                break;
+                            }
+                            $enviarmail = new PHPMailer(true);
+                            $enviarmail->isSMTP();
+                            $enviarmail->Host       = $mail['servidor'];
+                            $enviarmail->SMTPAuth   = $mail['autenticacao'];
+                            $enviarmail->Username   = $mail['username'];
+                            $enviarmail->Password   = $mail['password'];
+                            $enviarmail->SMTPSecure = $mail['tipodeseguranca'];
+                            $enviarmail->Port       = $mail['porta'];
+                            $enviarmail->setFrom($mail['mailfrom'], $mail['fromname']);
+                            $enviarmail->addAddress($requisitor);
+                            $enviarmail->isHTML(false);
+                            $enviarmail->Subject = utf8_decode("Reserva da Sala {$salaextenso} Removida");
+                            $enviarmail->Body = utf8_decode("A sua reserva da sala {$salaextenso} para a data de {$_GET['data']} às {$tempohumano} foi removida.\nEsta ação pode ser realizada por administradores, ou por si mesmo.\n\nObrigado.");
+                            $enviarmail->send();
+                        } catch (Exception $e) {
+                            die("<div class='mt-2 alert alert-warning fade show' role='alert'>A reserva foi rejeitada, mas o email de notificação não foi enviado. Contacte o Postmaster.\nErro do PHPMailer: {$enviarmail->ErrorInfo}</div>");
+                        }
+
                         if (!$stmt->execute()) {
                             http_response_code(500);
                             die("Houve um problema a apagar a reserva. Contacte um administrador, ou tente novamente mais tarde.");
