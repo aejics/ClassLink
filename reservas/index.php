@@ -1,5 +1,5 @@
 <?php 
-    require '../login/index.php';
+    // MUDAR DADOS PARA SESSION
     $dados = $db->query("SELECT * FROM cache_giae WHERE id = '{$user}'")->fetch_assoc();
     $isadmin = $db->query("SELECT * FROM admins WHERE id = '{$user}' AND permitido = 1;")->num_rows;
 ?>

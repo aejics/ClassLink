@@ -3,17 +3,6 @@ require_once('vendor/autoload.php');
 var_dump($_SERVER);
 echo "<br>";
 
-use League\OAuth2\Client\Provider\GenericProvider;
-
-// Set up the OAuth 2.0 provider
-$provider = new GenericProvider([
-    'urlAuthorize'            => 'https://authentik.devenv.marcopisco.com/application/o/authorize/',
-    'urlAccessToken'          => 'https://authentik.devenv.marcopisco.com/application/o/token/',
-    'urlResourceOwnerDetails' => 'https://authentik.devenv.marcopisco.com/application/o/userinfo/',
-    'clientId'     => 'Cn5tPoeJIjoWnvUJLKdxe63yHx3UnuhLegpLDPUY',
-    'clientSecret' => '0U9jm7iA3WZy27j3x1fAJxWIRcNC4sGqaQt3yKS55Orw4e1y0TuoYPX0nGMZBbUIr4vJl8MG11Vto9UDLwlYJqibIHDj6ClU22yccaKTw6PpHO8IXcy4DbuHAPNeSrSz',
-    'redirectUri'  => 'https://' . $_SERVER['HTTP_HOST'] . '/testauth.php',
-]);
 
 session_start();
 

@@ -1,7 +1,7 @@
 <?php
 function logaction(string $loginfo, string $tokenid){
     require_once(__DIR__ . '/../func/genuuid.php');
-    require_once(__DIR__ . "/../login/index.php");
+    require_once(__DIR__ . "/../src/db.php");
     global $db;
 
     $id = uuid4();

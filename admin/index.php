@@ -9,7 +9,7 @@
 </head>
 <body>
 <?php
-    require_once(__DIR__ . "/../login/index.php");
+// MUDAR DADOS PARA SESSION
     $dados = $db->query("SELECT * FROM cache_giae WHERE id = '{$user}'")->fetch_assoc();
     $isAdmin = $db->query("SELECT * FROM admins WHERE id = '{$user}' AND permitido = 1;")->num_rows;
     if (!$isAdmin == 1) {
