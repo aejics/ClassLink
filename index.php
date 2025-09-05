@@ -1,13 +1,13 @@
 <?php
-        require 'login/index.php';
-    if (!isset($_COOKIE['token'])){
+    session_start();
+    // Check if user is logged in and session is valid
+    if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
         http_response_code(403);
         header("Location: /login");
-        die("Não tem a sessão iniciada.");
-    } else {
-        $dados = $db->query("SELECT * FROM cache_giae WHERE id = '{$user}'")->fetch_assoc();
-        $isadmin = $db->query("SELECT * FROM admins WHERE id = '{$user}' AND permitido = 1;")->num_rows;
+        die("A reencaminhar para iniciar sessão...");
     }
+    
+    require_once(__DIR__ . '/src/db.php');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -31,7 +31,7 @@
                 <li><a href="/reservas">As minhas reservas</a></li>
                 <li><a href="/reservar">Reservar sala</a></li>
                 <?php
-                    if ($isadmin) {
+                    if ($_SESSION['admin']) {
                     echo "<li><a href='/admin/'>Painel Administrativo</a></li>";
                     }
                 ?>
@@ -40,7 +40,7 @@
         </div>
     </nav>
     <div class="text">
-        <h3>Seja bem vindo, <?php echo "{$dados['nome']}"; ?>, à <br> <span>Reserva De Salas</span> </h3>
+        <h3>Seja bem vindo, <?php echo "{$_SESSION['nome']}"; ?>, à <br> <span>Reserva De Salas</span> </h3>
         <p>Projeto elaborado pelas turmas 2ºE e 1ºD 2024/25</p>
         <a href="/reservar">
             <button class="btn">
