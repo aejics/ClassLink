@@ -116,7 +116,7 @@
         }
     } else if (str_starts_with($_SERVER['REQUEST_URI'], "/login")) {
 	$scopes = [
-		'scope' => ['openid', 'profile']
+		'scope' => ['openid profile email']
 	];
         $authorizationUrl = $provider->getAuthorizationUrl($scopes);
         $_SESSION['oauth2state'] = $provider->getState();
