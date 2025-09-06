@@ -136,7 +136,7 @@ session_start();
                         echo "<p class='fw-bold'>Informação Extra:</p>
                         <textarea rows='4' cols='50' class='fw-normal' disabled>{$detalhesreserva['extra']}</textarea>";
                         if ($_SESSION['id'] == $detalhesreserva['requisitor'] | $_SESSION['admin']) {
-                            echo "<a href='/reservar/manage.php?subaction=apagar&tempo={$tempo}&data={$data}&sala={$sala}' class='btn btn-danger mt-2' onclick='return confirm('Tem a certeza que pretende apagar esta reserva?');'>Apagar Reserva</a>";
+                            echo "<a href='/reservar/manage.php?subaction=apagar&tempo={$tempo}&data={$data}&sala={$sala}' class='btn btn-danger mt-2' onclick='return confirm(\"Tem a certeza que pretende apagar esta reserva?\");'>Apagar Reserva</a>";
                         } else {
                             echo "<p class='fw-bold'>Requisitada por: <span class='fw-normal'>{$requisitorextenso}</span></p>";
                         }
