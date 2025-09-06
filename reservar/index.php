@@ -101,6 +101,7 @@ session_start();
                     } else {
                         $nomerequisitor = $db->query("SELECT nome FROM cache WHERE id='{$tempoatualdb['requisitor']}';");
                         $nomerequisitor = $nomerequisitor->fetch_assoc();
+                        $nomerequisitor['nome'] = preg_replace('/^(\S+).*?(\S+)$/u', '$1 $2', $nomerequisitor['nome']);
                         if ($tempoatualdb['aprovado'] == 0) {
                             echo "<td class='bg-warning text-white text-center'>
                             <a class='reserva' href='/reservar/manage.php?tempo={$row['id']}&sala={$sala}&data={$diacheckdb}'>
