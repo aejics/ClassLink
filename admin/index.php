@@ -105,7 +105,7 @@
             require_once(__DIR__ . '/../func/logaction.php');
             echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>Ação executada. <b>$acao</b>
                 <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Fechar'></button></div>";
-            logaction($acao . ".\nPOST: " . var_export($_POST, true) . "\nGET: " . var_export($_GET, true) . "\nSERVER: " . var_export($_SERVER, true), $_SESSION['id']);
+            logaction($acao . ".\nPOST: " . var_export($_POST, true) . "\nGET: " . var_export($_GET, true), $_SESSION['id']);
         }    
 ?>
 
