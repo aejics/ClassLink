@@ -77,7 +77,6 @@
         <p class='h6 fw-lighter'>Existem <b>$pedidospendentes</b> pedidos de reserva pendentes.</p>
         <div class='botoes_dashboardadmin d-flex justify-content-center'>
         <a href='/admin/pedidos.php' class='btn btn-success w-20 me-2'>Responder a pedidos</a>
-        <a href='/admin/semanasrepetidas.php' class='btn btn-danger w-20 me-2'>Criar reservas de várias semanas no horário</a>
         </div>";
     }
 
