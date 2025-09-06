@@ -138,8 +138,8 @@ use PHPMailer\PHPMailer\Exception;
                 <td>{$requisitorextenso}</td>
                 <td>{$pedido['motivo']}</td>";
                 if ($pedido['aprovado'] == 0) {
-                    echo "<td><a href='/admin/pedidos.php?subaction=aprovar&tempo={$pedido['tempo']}&data={$pedido['data']}&sala={$pedido['sala']}' class='btn btn-success' onclick='return confirm('Tem a certeza que pretende aprovar esta reserva?');'>Aprovar</a>
-                 <a href='/admin/pedidos.php?subaction=rejeitar&tempo={$pedido['tempo']}&data={$pedido['data']}&sala={$pedido['sala']}' class='btn btn-danger' onclick='return confirm('Tem a certeza que pretende rejeitar esta reserva? Esta ação irá notificar o utilizador, e irá apagar a reserva para libertar o tempo.');'>Rejeitar</a>";
+                    echo "<td><a href='/admin/pedidos.php?subaction=aprovar&tempo={$pedido['tempo']}&data={$pedido['data']}&sala={$pedido['sala']}' class='btn btn-success' onclick='return confirm(\"Tem a certeza que pretende aprovar esta reserva?\");'>Aprovar</a>
+                 <a href='/admin/pedidos.php?subaction=rejeitar&tempo={$pedido['tempo']}&data={$pedido['data']}&sala={$pedido['sala']}' class='btn btn-danger' onclick='return confirm(\"Tem a certeza que pretende rejeitar esta reserva? Esta ação irá notificar o utilizador, e irá apagar a reserva para libertar o tempo.\");'>Rejeitar</a>";
                 } else {
                     echo "<td>";
                 }
