@@ -40,13 +40,13 @@ use PHPMailer\PHPMailer\Exception;
 
         switch ($_GET['subaction']) {
             case "aprovar":
-                $db->query("UPDATE reservas SET aprovado=1 WHERE sala='{$_GET['sala']}' AND tempo='{$_GET['tempo']}' AND data='{$_GET['data']}';");
                 $requisitor = $db->query("SELECT requisitor FROM reservas WHERE sala='{$_GET['sala']}' AND tempo='{$_GET['tempo']}' AND data='{$_GET['data']}';")->fetch_assoc()['requisitor'];
+                $db->query("UPDATE reservas SET aprovado=1 WHERE sala='{$_GET['sala']}' AND tempo='{$_GET['tempo']}' AND data='{$_GET['data']}';");
                 echo "<div class='mt-2 alert alert-success fade show' role='alert'>Reserva aprovada com sucesso.</div>";
                 echo "<a href='/admin/pedidos.php'><button class='btn btn-primary'>Voltar</button></a>";
                 try {
                     $sala = $db->query("SELECT nome FROM salas WHERE id='{$_GET['sala']}';")->fetch_assoc()['nome'];
-                    $requisitor = $db->query("SELECT email FROM cache WHERE id='{$requisitor}';")->fetch_assoc()['email'];
+                    $maildapessoa = $db->query("SELECT email FROM cache WHERE id='{$requisitor}';")->fetch_assoc()['email'];
                     $tempohumano = $db->query("SELECT horashumanos FROM tempos WHERE id='{$_GET['tempo']}';")->fetch_assoc()['horashumanos'];
                     if ($mail['ativado'] != true) {
                         break;
@@ -60,7 +60,7 @@ use PHPMailer\PHPMailer\Exception;
                     $enviarmail->SMTPSecure = $mail['tipodeseguranca'];
                     $enviarmail->Port       = $mail['porta'];
                     $enviarmail->setFrom($mail['mailfrom'], $mail['fromname']);
-                    $enviarmail->addAddress($requisitor);
+                    $enviarmail->addAddress($maildapessoa);
                     $enviarmail->isHTML(false);
                     $enviarmail->Subject = utf8_decode("Reserva da Sala {$sala} Aprovada");
                     $enviarmail->Body = utf8_decode("A sua reserva da sala {$sala} para a data de {$_GET['data']} às {$tempohumano} foi aprovada.\n\nObrigado.");
@@ -70,13 +70,13 @@ use PHPMailer\PHPMailer\Exception;
                 }
                 break;
             case "rejeitar":
-                $db->query("DELETE FROM reservas WHERE sala='{$_GET['sala']}' AND tempo='{$_GET['tempo']}' AND data='{$_GET['data']}';");
                 $requisitor = $db->query("SELECT requisitor FROM reservas WHERE sala='{$_GET['sala']}' AND tempo='{$_GET['tempo']}' AND data='{$_GET['data']}';")->fetch_assoc()['requisitor'];
+                $db->query("DELETE FROM reservas WHERE sala='{$_GET['sala']}' AND tempo='{$_GET['tempo']}' AND data='{$_GET['data']}';");
                 echo "<div class='mt-2 alert alert-danger fade show' role='alert'>Reserva rejeitada com sucesso.</div>";
                 echo "<a href='/admin/pedidos.php'><button class='btn btn-primary'>Voltar</button></a>";
                 try {
                     $sala = $db->query("SELECT nome FROM salas WHERE id='{$_GET['sala']}';")->fetch_assoc()['nome'];
-                    $requisitor = $db->query("SELECT email FROM cache WHERE id='{$requisitor}';")->fetch_assoc()['email'];
+                    $maildapessoa = $db->query("SELECT email FROM cache WHERE id='{$requisitor}';")->fetch_assoc()['email'];
                     $tempohumano = $db->query("SELECT horashumanos FROM tempos WHERE id='{$_GET['tempo']}';")->fetch_assoc()['horashumanos'];
                     if ($mail['ativado'] != true) {
                         break;
@@ -90,7 +90,7 @@ use PHPMailer\PHPMailer\Exception;
                     $enviarmail->SMTPSecure = $mail['tipodeseguranca'];
                     $enviarmail->Port       = $mail['porta'];
                     $enviarmail->setFrom($mail['mailfrom'], $mail['fromname']);
-                    $enviarmail->addAddress($requisitor);
+                    $enviarmail->addAddress($maildapessoa);
                     $enviarmail->isHTML(false);
                     $enviarmail->Subject = utf8_decode("Reserva da Sala {$sala} Rejeitada");
                     $enviarmail->Body = utf8_decode("A sua reserva da sala {$sala} para a data de {$_GET['data']} às {$tempohumano} foi rejeitada.\n\nObrigado.");
