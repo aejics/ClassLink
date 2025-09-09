@@ -38,6 +38,10 @@
     <ul class='nav nav-pills flex-column mb-auto text-center justify-content-center align-items-center' style='height: 100%;'>
     <li class='nav-item'>";
     // Links da Sidebar
+    sidebarLink('/admin/', 'Dashboard');
+    sidebarLink('/admin/pedidos.php', 'Pedidos de Reserva');
+    sidebarLink('/admin/tempos.php', 'Gestão de Tempos');
+    sidebarLink('/admin/salas.php', 'Gestão de Salas');
     echo "<li class='nav-item dropdown'>
             <a class='nav-link dropdown-toggle' href='#' id='extensibilidadeDropdown' role='button' data-bs-toggle='dropdown' aria-expanded='false'>
                 Extensibilidade
@@ -52,10 +56,6 @@
         }
     }
     echo "</ul></li>";
-    sidebarLink('/admin/', 'Dashboard');
-    sidebarLink('/admin/pedidos.php', 'Pedidos de Reserva');
-    sidebarLink('/admin/tempos.php', 'Gestão de Tempos');
-    sidebarLink('/admin/salas.php', 'Gestão de Salas');
     sidebarLink('/', 'Voltar para a página principal');
     // Fechar Sidebar no HTML, e passar o conteúdo para a direita
     echo "</ul></div><div class='flex-grow-1 d-flex align-items-center justify-content-center flex-column'>";
