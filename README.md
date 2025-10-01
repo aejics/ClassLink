@@ -9,9 +9,10 @@
 Programa para Reservar Salas no AEJICS.
 
 Este projeto é possível graças aos trabalhos das seguintes turmas:
+- 2ºE - Design de Funcionalidades Possíveis para a Aplicação
+- 3ºD - Criação do _frontend_ da plataforma, por recursos de Inteligência Artificial.
 
-- 1ºD - Design de Funcionalidades Possíveis para a Aplicação
-- 2ºE - Criação das Expressões para o Backend SQL, e criação da aplicação.
+Este projeto é PAP (Prova de Aptidão Profissional).
 
 ## Instalação
 
