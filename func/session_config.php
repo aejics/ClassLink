@@ -12,7 +12,17 @@ ini_set('session.use_only_cookies', 1);
 ini_set('session.cookie_httponly', 1);
 
 // Set secure flag if HTTPS is being used
-if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+// Check multiple indicators for HTTPS (handles proxies and load balancers)
+$isHttps = false;
+if (
+    (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
+    (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ||
+    (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)
+) {
+    $isHttps = true;
+}
+
+if ($isHttps) {
     ini_set('session.cookie_secure', 1);
 }
 
