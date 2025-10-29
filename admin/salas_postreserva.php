@@ -39,7 +39,7 @@ switch (isset($_GET['action']) ? $_GET['action'] : null){
         <script>
             ClassicEditor
                 .create(document.querySelector('#post_reservation_content'), {
-                    toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'outdent', 'indent', '|', 'blockQuote', 'insertTable', 'undo', 'redo']
+                    toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'outdent', 'indent', '|', 'blockQuote', 'insertTable', '|', 'imageInsert', '|', 'undo', 'redo']
                 })
                 .catch(error => {
                     console.error(error);
