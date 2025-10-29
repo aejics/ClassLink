@@ -34,7 +34,7 @@ session_start();
             </ul>
         </div>
     </nav>
-    <div class="d-flex justify-content-center align-items-center vh-100 flex-column" style="margin-top: -50px;">
+    <div class="container mt-5 mb-5">
         <?php
         $id = $_SESSION['id'];
         
@@ -196,32 +196,38 @@ session_start();
                         $salaextenso = $stmt->get_result()->fetch_assoc()['nome'];
                         $stmt->close();
                         
-                        echo "<h2>Reservar Sala</h2>";
-                        echo "<form class='form w-50' action='/reservar/manage.php?subaction=reservar&tempo=" . urlencode($tempo) . "&data=" . urlencode($data) . "&sala=" . urlencode($sala) . "' method='POST'>
-                    <div class='form-floating me-2'>
-                    <input type='text' class='form-control form-control-sm' id='sala' name='sala' placeholder='Sala' value='" . htmlspecialchars($salaextenso, ENT_QUOTES, 'UTF-8') . "' disabled>
+                        echo "<div class='row justify-content-center'>";
+                        echo "<div class='col-md-8 col-lg-6'>";
+                        echo "<h2 class='mb-4'>Reservar Sala</h2>";
+                        echo "<form action='/reservar/manage.php?subaction=reservar&tempo=" . urlencode($tempo) . "&data=" . urlencode($data) . "&sala=" . urlencode($sala) . "' method='POST'>
+                    <div class='form-floating mb-3'>
+                    <input type='text' class='form-control' id='sala' name='sala' placeholder='Sala' value='" . htmlspecialchars($salaextenso, ENT_QUOTES, 'UTF-8') . "' disabled>
                     <label for='sala'>Sala</label>
                     </div>
-                    <div class='form-floating me-2 mt-2'>
-                    <input type='text' class='form-control form-control-sm' id='motivo' name='motivo' placeholder='Motivo da Reserva' required>
+                    <div class='form-floating mb-3'>
+                    <input type='text' class='form-control' id='motivo' name='motivo' placeholder='Motivo da Reserva' required>
                     <label for='motivo'>Motivo da Reserva</label>
                     </div>
-                    <div class='form-floating me-2 mt-2'>
-                    <textarea class='form-control form-control-sm' id='extra' name='extra' placeholder='Informação Extra' rows='6' style='height: 150px;'></textarea>
+                    <div class='form-floating mb-3'>
+                    <textarea class='form-control' id='extra' name='extra' placeholder='Informação Extra' rows='6' style='height: 150px;'></textarea>
                     <label for='extra'>Informação Extra</label>
-                    <p class='mt-1 text-center'>Nota: A reserva será submetida para aprovação.</p>
                     </div>
-                    <button type='submit' class='btn btn-success w-100'>Reservar</button>
+                    <p class='text-muted small mb-3'>Nota: A reserva será submetida para aprovação.</p>
+                    <button type='submit' class='btn btn-success w-100 mb-2'>Reservar</button>
                     </form>";
-                        echo "<a href='" . htmlspecialchars($_SERVER['HTTP_REFERER'], ENT_QUOTES, 'UTF-8') . "' class='mt-2 btn btn-primary'>Voltar</a>";
+                        echo "<a href='" . htmlspecialchars($_SERVER['HTTP_REFERER'], ENT_QUOTES, 'UTF-8') . "' class='btn btn-secondary w-100'>Voltar</a>";
+                        echo "</div></div>";
                     } else {
+                        echo "<div class='row justify-content-center'>";
+                        echo "<div class='col-md-10 col-lg-8'>";
+                        
                         // Display appropriate message based on approval status
                         if ($detalhesreserva['aprovado'] == 1) {
-                            echo "<div class='alert alert-success'><h4>Reserva Aprovada!</h4></div>";
+                            echo "<div class='alert alert-success'><h4 class='alert-heading mb-0'>Reserva Aprovada!</h4></div>";
                         } else if ($detalhesreserva['aprovado'] == 0) {
-                            echo "<div class='alert alert-info'><h4>Reserva Submetida!</h4><p>A sua reserva foi submetida e está a aguardar aprovação.</p></div>";
+                            echo "<div class='alert alert-info'><h4 class='alert-heading'>Reserva Submetida!</h4><p class='mb-0'>A sua reserva foi submetida e está a aguardar aprovação.</p></div>";
                         } else {
-                            echo "<div class='alert alert-warning'><h4>Reserva Cancelada</h4></div>";
+                            echo "<div class='alert alert-warning'><h4 class='alert-heading mb-0'>Reserva Cancelada</h4></div>";
                         }
                         
                         echo "<div class='card mb-3'>";
@@ -234,7 +240,7 @@ session_start();
                         $salaData = $stmt->get_result()->fetch_assoc();
                         $stmt->close();
                         
-                        echo "<p><strong>Sala:</strong> " . htmlspecialchars($salaData['nome'], ENT_QUOTES, 'UTF-8') . "</p>";
+                        echo "<p class='mb-2'><strong>Sala:</strong> " . htmlspecialchars($salaData['nome'], ENT_QUOTES, 'UTF-8') . "</p>";
                         
                         $stmt = $db->prepare("SELECT nome FROM cache WHERE id=?");
                         $stmt->bind_param("s", $detalhesreserva['requisitor']);
@@ -242,7 +248,7 @@ session_start();
                         $requisitorextenso = $stmt->get_result()->fetch_assoc()['nome'];
                         $stmt->close();
                         
-                        echo "<p><strong>Requisitada por:</strong> " . htmlspecialchars($requisitorextenso, ENT_QUOTES, 'UTF-8') . "</p>";
+                        echo "<p class='mb-2'><strong>Requisitada por:</strong> " . htmlspecialchars($requisitorextenso, ENT_QUOTES, 'UTF-8') . "</p>";
                         
                         $stmt = $db->prepare("SELECT horashumanos FROM tempos WHERE id=?");
                         $stmt->bind_param("s", $tempo);
@@ -250,13 +256,13 @@ session_start();
                         $horastempo = $stmt->get_result()->fetch_assoc()['horashumanos'];
                         $stmt->close();
                         
-                        echo "<p><strong>Tempo:</strong> " . htmlspecialchars($horastempo, ENT_QUOTES, 'UTF-8') . "</p>";
-                        echo "<p><strong>Data:</strong> " . htmlspecialchars($data, ENT_QUOTES, 'UTF-8') . "</p>";
-                        echo "<p><strong>Motivo:</strong> " . htmlspecialchars($detalhesreserva['motivo'], ENT_QUOTES, 'UTF-8') . "</p>";
+                        echo "<p class='mb-2'><strong>Tempo:</strong> " . htmlspecialchars($horastempo, ENT_QUOTES, 'UTF-8') . "</p>";
+                        echo "<p class='mb-2'><strong>Data:</strong> " . htmlspecialchars($data, ENT_QUOTES, 'UTF-8') . "</p>";
+                        echo "<p class='mb-2'><strong>Motivo:</strong> " . htmlspecialchars($detalhesreserva['motivo'], ENT_QUOTES, 'UTF-8') . "</p>";
                         
                         if (!empty($detalhesreserva['extra'])) {
-                            echo "<p><strong>Informação Extra:</strong></p>";
-                            echo "<div class='border rounded p-2 bg-light'>" . nl2br(htmlspecialchars($detalhesreserva['extra'], ENT_QUOTES, 'UTF-8')) . "</div>";
+                            echo "<p class='mb-2'><strong>Informação Extra:</strong></p>";
+                            echo "<div class='border rounded p-3 bg-light'>" . nl2br(htmlspecialchars($detalhesreserva['extra'], ENT_QUOTES, 'UTF-8')) . "</div>";
                         }
                         echo "</div>";
                         echo "</div>";
@@ -273,15 +279,19 @@ session_start();
                             echo "</div>";
                         }
                         
+                        echo "<div class='d-grid gap-2 d-md-block'>";
                         if ($_SESSION['id'] == $detalhesreserva['requisitor'] | $_SESSION['admin']) {
-                            echo "<a href='/reservar/manage.php?subaction=apagar&tempo=" . urlencode($tempo) . "&data=" . urlencode($data) . "&sala=" . urlencode($sala) . "' class='btn btn-danger' onclick='return confirm(\"Tem a certeza que pretende apagar esta reserva?\");'>Apagar Reserva</a> ";
+                            echo "<a href='/reservar/manage.php?subaction=apagar&tempo=" . urlencode($tempo) . "&data=" . urlencode($data) . "&sala=" . urlencode($sala) . "' class='btn btn-danger me-md-2 mb-2 mb-md-0' onclick='return confirm(\"Tem a certeza que pretende apagar esta reserva?\");'>Apagar Reserva</a> ";
                         }
-                        echo "<a href='/reservar' class='btn btn-success'>Voltar à página de reserva de salas</a> ";
+                        echo "<a href='/reservar' class='btn btn-success me-md-2 mb-2 mb-md-0'>Voltar à página de reserva de salas</a> ";
                         if (strpos($_SERVER['HTTP_REFERER'], '/admin/pedidos.php') !== false) {
                             echo "<a href='/admin/pedidos.php' class='btn btn-primary'>Voltar aos pedidos</a>";
                         } else {
                             echo "<a href='/reservas' class='btn btn-primary'>Ver todas as minhas reservas</a>";
                         }
+                        echo "</div>";
+                        
+                        echo "</div></div>";
                     }
             }
         }
