@@ -3,10 +3,11 @@
     require_once(__DIR__ . '/../src/db.php');
     
     session_start();
-    if ($_GET['action'] == "logout"){
+    if (isset($_GET['action']) && $_GET['action'] == "logout"){
         session_destroy();
         header("Location: " . $logoutUrlProvider);
-    } else if ($_GET['error']) {
+        exit();
+    } else if (isset($_GET['error'])) {
 	?>
 	<!DOCTYPE html>
             <html lang="pt">
@@ -76,14 +77,18 @@
                     <div class="debug-dropdown">
                         <details>
                             <summary>Detalhes do erro (Debug)</summary>
-                            <div class="debug-content"><?php echo htmlspecialchars($_GET['error'], ENT_QUOTES, 'UTF-8'); echo "<br>"; echo htmlspecialchars($_GET['error_description'], ENT_QUOTES, 'UTF-8'); ?></div>
+                            <div class="debug-content"><?php 
+                                echo htmlspecialchars($_GET['error'] ?? '', ENT_QUOTES, 'UTF-8'); 
+                                echo "<br>"; 
+                                echo htmlspecialchars($_GET['error_description'] ?? '', ENT_QUOTES, 'UTF-8'); 
+                            ?></div>
                         </details>
                     </div>
                 </div>
             </body>
             </html>
 <?php
-    }else if ($_GET['code']){
+    }else if (isset($_GET['code'])){
         try {
             $accessToken = $provider->getAccessToken('authorization_code', [
                 'code' => $_GET['code']

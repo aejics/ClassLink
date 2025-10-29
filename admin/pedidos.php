@@ -33,7 +33,11 @@ use PHPMailer\PHPMailer\Exception;
     </form>
 
     <?php
-    if ($_GET['subaction']) {
+    if (isset($_GET['subaction'])) {
+        if (!isset($_GET['sala']) || !isset($_GET['tempo']) || !isset($_GET['data'])) {
+            echo "<div class='alert alert-danger fade show' role='alert'>Parâmetros inválidos.</div>";
+            echo "<a href='/admin/pedidos.php'><button class='btn btn-primary'>Voltar</button></a>";
+        } else {
         require '../vendor/phpmailer/phpmailer/src/Exception.php';
         require '../vendor/phpmailer/phpmailer/src/PHPMailer.php';
         require '../vendor/phpmailer/phpmailer/src/SMTP.php';
@@ -148,6 +152,7 @@ use PHPMailer\PHPMailer\Exception;
                 }
                 break;
             case "detalhes":
+        }
         }
     } elseif (isset($_POST['sala']) | isset($_GET['sala']) | isset($_POST['requisitor'])) {
         echo "<div style='max-height: 400px; overflow-y: auto; width: 100%;'>";

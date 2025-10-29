@@ -8,9 +8,13 @@
 </div>
 
 <?php
-switch ($_GET['action']){
+switch (isset($_GET['action']) ? $_GET['action'] : null){
     // caso seja preenchido o formulário de criação:
     case "criar":
+        if (!isset($_POST['nomesala'])) {
+            echo "<div class='alert alert-danger fade show' role='alert'>Dados inválidos.</div>";
+            break;
+        }
         $randomuuid = uuid4();
         $stmt = $db->prepare("INSERT INTO salas (id, nome) VALUES (?, ?)");
         $stmt->bind_param("ss", $randomuuid, $_POST["nomesala"]);
@@ -20,6 +24,10 @@ switch ($_GET['action']){
         break;
     // caso execute a ação apagar:
     case "apagar":
+        if (!isset($_GET['id'])) {
+            echo "<div class='alert alert-danger fade show' role='alert'>ID inválido.</div>";
+            break;
+        }
         try {
             $stmt = $db->prepare("SELECT * FROM reservas WHERE sala = ? AND aprovado != -1");
             $stmt->bind_param("s", $_GET['id']);
@@ -41,17 +49,29 @@ switch ($_GET['action']){
         break;
     // caso execute a ação editar:
     case "edit":
+        if (!isset($_GET['id'])) {
+            echo "<div class='alert alert-danger fade show' role='alert'>ID inválido.</div>";
+            break;
+        }
         $stmt = $db->prepare("SELECT * FROM salas WHERE id = ?");
         $stmt->bind_param("s", $_GET['id']);
         $stmt->execute();
         $d = $stmt->get_result()->fetch_assoc();
         $stmt->close();
+        if (!$d) {
+            echo "<div class='alert alert-danger fade show' role='alert'>Sala não encontrada.</div>";
+            break;
+        }
         echo "<div class='alert alert-warning fade show' role='alert'>A editar a Sala <b>" . htmlspecialchars($d['nome'], ENT_QUOTES, 'UTF-8') . "</b>.</div>";
         formulario("salas.php?action=update&id=" . urlencode($d['id']), [
             ["type" => "text", "id" => "nomesala", "placeholder" => "Sala", "label" => "Sala", "value" => $d['nome']]]);
         break;
     // caso seja submetida a edição:
     case "update":
+        if (!isset($_GET['id']) || !isset($_POST['nomesala'])) {
+            echo "<div class='alert alert-danger fade show' role='alert'>Dados inválidos.</div>";
+            break;
+        }
         $stmt = $db->prepare("UPDATE salas SET nome = ? WHERE id = ?");
         $stmt->bind_param("ss", $_POST['nomesala'], $_GET['id']);
         $stmt->execute();
