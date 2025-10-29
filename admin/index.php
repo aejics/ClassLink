@@ -73,9 +73,9 @@
         // este módulo é reutilizado para as subpáginas.
         $pedidospendentes = $db->query("SELECT * FROM reservas WHERE aprovado = 0;")->num_rows;
         echo "<div class='flex-grow-1 d-flex align-items-center justify-content-center flex-column'>
-        <h1>Olá, {$_SESSION['nome']}</h1>
+        <h1>Olá, <?php echo htmlspecialchars($_SESSION['nome'], ENT_QUOTES, 'UTF-8'); ?></h1>
         <p class='h4 fw-lighter'>O que vamos fazer hoje?</p>
-        <p class='h6 fw-lighter'>Existem <b>$pedidospendentes</b> pedidos de reserva pendentes.</p>
+        <p class='h6 fw-lighter'>Existem <b><?php echo htmlspecialchars($pedidospendentes, ENT_QUOTES, 'UTF-8'); ?></b> pedidos de reserva pendentes.</p>
         <div class='botoes_dashboardadmin d-flex justify-content-center'>
         <a href='/admin/pedidos.php' class='btn btn-success w-20 me-2'>Responder a pedidos</a>
         </div>";
@@ -83,18 +83,25 @@
 
         // criação rápida de formulários
         function formulario($action, $inputs) {
-            echo "<form action='$action' method='POST' class='d-flex align-items-center'>";
+            $action_safe = htmlspecialchars($action, ENT_QUOTES, 'UTF-8');
+            echo "<form action='$action_safe' method='POST' class='d-flex align-items-center'>";
             foreach ($inputs as $input) {
+                $id_safe = htmlspecialchars($input['id'], ENT_QUOTES, 'UTF-8');
+                $value_safe = htmlspecialchars($input['value'], ENT_QUOTES, 'UTF-8');
+                $label_safe = htmlspecialchars($input['label'], ENT_QUOTES, 'UTF-8');
+                
                 if ($input['type'] == "checkbox") {
                     echo "<div class='form-check me-2' style='flex: 1;'>
-                        <input type='checkbox' class='form-check-input' id='{$input['id']}' name='{$input['id']}' value='{$input['value']}'>
-                        <label class='form-check-label' for='{$input['id']}'>{$input['label']}</label>
+                        <input type='checkbox' class='form-check-input' id='$id_safe' name='$id_safe' value='$value_safe'>
+                        <label class='form-check-label' for='$id_safe'>$label_safe</label>
                         </div>";
                 } else {
-                echo "<div class='form-floating me-2' style='flex: 1;'>
-                <input type='{$input['type']}' class='form-control form-control-sm' id='{$input['id']}' name='{$input['id']}' placeholder='{$input['placeholder']}' value='{$input['value']}' required>
-                <label for='{$input['id']}'>{$input['label']}</label>
-                </div>";
+                    $type_safe = htmlspecialchars($input['type'], ENT_QUOTES, 'UTF-8');
+                    $placeholder_safe = htmlspecialchars($input['placeholder'], ENT_QUOTES, 'UTF-8');
+                    echo "<div class='form-floating me-2' style='flex: 1;'>
+                    <input type='$type_safe' class='form-control form-control-sm' id='$id_safe' name='$id_safe' placeholder='$placeholder_safe' value='$value_safe' required>
+                    <label for='$id_safe'>$label_safe</label>
+                    </div>";
                 }
             }
             echo "<button type='submit' class='btn btn-primary btn-sm' style='height: 38px;'>Submeter</button></form>";
@@ -103,7 +110,8 @@
         // ação executada
         function acaoexecutada($acao) {
             require_once(__DIR__ . '/../func/logaction.php');
-            echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>Ação executada. <b>$acao</b>
+            $acao_safe = htmlspecialchars($acao, ENT_QUOTES, 'UTF-8');
+            echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>Ação executada. <b>$acao_safe</b>
                 <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Fechar'></button></div>";
             logaction($acao . ".\nPOST: " . var_export($_POST, true) . "\nGET: " . var_export($_GET, true), $_SESSION['id']);
         }    

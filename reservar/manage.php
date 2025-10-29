@@ -37,22 +37,28 @@ session_start();
     <div class="d-flex justify-content-center align-items-center vh-100 flex-column" style="margin-top: -50px;">
         <?php
 
-        if ($_GET['tempo'] && $_GET['data'] && $_GET['sala']) {
+        if (isset($_GET['tempo']) && isset($_GET['data']) && isset($_GET['sala'])) {
             $tempo = $_GET['tempo'];
             $data = $_GET['data'];
             $sala = $_GET['sala'];
             $motivo = $_POST['motivo'] ?? '';
             $extra = $_POST['extra'] ?? '';
             $id = $_SESSION['id'];
-            switch ($_GET['subaction']) {
+            switch (isset($_GET['subaction']) ? $_GET['subaction'] : null) {
                 case "reservar":
+                    if (!isset($_POST['motivo'])) {
+                        echo "<div class='alert alert-danger fade show' role='alert'>Motivo é obrigatório.</div>";
+                        break;
+                    }
                     $stmt = $db->prepare("INSERT INTO reservas (sala, tempo, requisitor, data, aprovado, motivo, extra) VALUES (?, ?, ?, ?, 0, ?, ?);");
                     $stmt->bind_param("ssssss", $sala, $tempo, $id, $data, $motivo, $extra);
                     if (!$stmt->execute()) {
                         http_response_code(500);
                         die("Houve um problema a reservar a sala. Contacte um administrador, ou tente novamente mais tarde.");
                     }
-                    header("Location: /reservar/?sala={$sala}&tempo={$tempo}");
+                    $stmt->close();
+                    header("Location: /reservar/?sala=" . urlencode($sala) . "&tempo=" . urlencode($tempo));
+                    exit();
                     break;
                 case "apagar":
                     $stmt = $db->prepare("SELECT * FROM reservas WHERE sala=? AND tempo=? AND data=?");
