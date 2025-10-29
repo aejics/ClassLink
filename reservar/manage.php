@@ -55,19 +55,46 @@ session_start();
                     header("Location: /reservar/?sala={$sala}&tempo={$tempo}");
                     break;
                 case "apagar":
-                    $reserva = $db->query("SELECT * FROM reservas WHERE sala='{$sala}' AND tempo='{$tempo}' AND data='{$data}';")->fetch_assoc();
+                    $stmt = $db->prepare("SELECT * FROM reservas WHERE sala=? AND tempo=? AND data=?");
+                    $stmt->bind_param("sss", $sala, $tempo, $data);
+                    $stmt->execute();
+                    $reserva = $stmt->get_result()->fetch_assoc();
+                    $stmt->close();
+                    
                     if (!($_SESSION['admin']) && ($_SESSION['id'] != $reserva['requisitor'])) {
                         http_response_code(403);
                         die("Não tem permissão para apagar esta reserva.");
                     } else {
-                        $stmt = $db->prepare("DELETE FROM reservas WHERE sala=? AND tempo=? AND data=?;");
-                        $stmt->bind_param("sss", $sala, $tempo, $data);
-                        logAction("Apagou a reserva da sala {$salaextenso} no dia {$data} no tempo com ID {$tempo}.", $_SESSION['id'],);
                         try {
-                            $salaextenso = $db->query("SELECT nome FROM salas WHERE id='{$_GET['sala']}';")->fetch_assoc()['nome'];
-                            $requisitor = $db->query("SELECT email FROM cache WHERE id='{$id}';")->fetch_assoc()['email'];
-                            $tempohumano = $db->query("SELECT horashumanos FROM tempos WHERE id='{$_GET['tempo']}';")->fetch_assoc()['horashumanos'];
+                            $stmt = $db->prepare("SELECT nome FROM salas WHERE id=?");
+                            $stmt->bind_param("s", $sala);
+                            $stmt->execute();
+                            $salaextenso = $stmt->get_result()->fetch_assoc()['nome'];
+                            $stmt->close();
+                            
+                            $stmt = $db->prepare("SELECT email FROM cache WHERE id=?");
+                            $stmt->bind_param("s", $id);
+                            $stmt->execute();
+                            $requisitor = $stmt->get_result()->fetch_assoc()['email'];
+                            $stmt->close();
+                            
+                            $stmt = $db->prepare("SELECT horashumanos FROM tempos WHERE id=?");
+                            $stmt->bind_param("s", $tempo);
+                            $stmt->execute();
+                            $tempohumano = $stmt->get_result()->fetch_assoc()['horashumanos'];
+                            $stmt->close();
+                            
+                            logAction("Apagou a reserva da sala {$salaextenso} no dia {$data} no tempo com ID {$tempo}.", $_SESSION['id']);
+                            
                             if ($mail['ativado'] != true) {
+                                $stmt = $db->prepare("DELETE FROM reservas WHERE sala=? AND tempo=? AND data=?");
+                                $stmt->bind_param("sss", $sala, $tempo, $data);
+                                if (!$stmt->execute()) {
+                                    http_response_code(500);
+                                    die("Houve um problema a apagar a reserva. Contacte um administrador, ou tente novamente mais tarde.");
+                                }
+                                $stmt->close();
+                                header("Location: /reservar/?sala=" . urlencode($sala));
                                 break;
                             }
                             $enviarmail = new PHPMailer(true);
@@ -82,27 +109,40 @@ session_start();
                             $enviarmail->addAddress($requisitor);
                             $enviarmail->isHTML(false);
                             $enviarmail->Subject = utf8_decode("Reserva da Sala {$salaextenso} Removida");
-                            $enviarmail->Body = utf8_decode("A sua reserva da sala {$salaextenso} para a data de {$_GET['data']} às {$tempohumano} foi removida.\nEsta ação pode ser realizada por administradores, ou por si mesmo.\n\nObrigado.");
+                            $enviarmail->Body = utf8_decode("A sua reserva da sala {$salaextenso} para a data de {$data} às {$tempohumano} foi removida.\nEsta ação pode ser realizada por administradores, ou por si mesmo.\n\nObrigado.");
                             $enviarmail->send();
                         } catch (Exception $e) {
                             echo("<div class='mt-2 alert alert-warning fade show' role='alert'>A reserva foi rejeitada, mas o email de notificação não foi enviado. Contacte o Postmaster.\nErro do PHPMailer: {$enviarmail->ErrorInfo}</div>");
                         }
 
+                        $stmt = $db->prepare("DELETE FROM reservas WHERE sala=? AND tempo=? AND data=?");
+                        $stmt->bind_param("sss", $sala, $tempo, $data);
                         if (!$stmt->execute()) {
                             http_response_code(500);
                             die("Houve um problema a apagar a reserva. Contacte um administrador, ou tente novamente mais tarde.");
                         }
-                        header("Location: /reservar/?sala={$sala}");
+                        $stmt->close();
+                        header("Location: /reservar/?sala=" . urlencode($sala));
                         break;
                     }
                 case null:
-                    $detalhesreserva = $db->query("SELECT * FROM reservas WHERE sala='{$sala}' AND tempo='{$tempo}' AND data='{$data}' AND aprovado!=-1;")->fetch_assoc();
+                    $stmt = $db->prepare("SELECT * FROM reservas WHERE sala=? AND tempo=? AND data=? AND aprovado!=-1");
+                    $stmt->bind_param("sss", $sala, $tempo, $data);
+                    $stmt->execute();
+                    $detalhesreserva = $stmt->get_result()->fetch_assoc();
+                    $stmt->close();
+                    
                     if (!$detalhesreserva) {
-                        $salaextenso = $db->query("SELECT nome FROM salas WHERE id='{$sala}';")->fetch_assoc()['nome'];
+                        $stmt = $db->prepare("SELECT nome FROM salas WHERE id=?");
+                        $stmt->bind_param("s", $sala);
+                        $stmt->execute();
+                        $salaextenso = $stmt->get_result()->fetch_assoc()['nome'];
+                        $stmt->close();
+                        
                         echo "<h2>Reservar Sala</h2>";
-                        echo "<form class='form w-50' action='/reservar/manage.php?subaction=reservar&tempo={$tempo}&data={$data}&sala={$_GET['sala']}' method='POST'>
+                        echo "<form class='form w-50' action='/reservar/manage.php?subaction=reservar&tempo=" . urlencode($tempo) . "&data=" . urlencode($data) . "&sala=" . urlencode($sala) . "' method='POST'>
                     <div class='form-floating me-2'>
-                    <input type='text' class='form-control form-control-sm' id='sala' name='sala' placeholder='Sala' value='{$salaextenso}' disabled>
+                    <input type='text' class='form-control form-control-sm' id='sala' name='sala' placeholder='Sala' value='" . htmlspecialchars($salaextenso, ENT_QUOTES, 'UTF-8') . "' disabled>
                     <label for='sala'>Sala</label>
                     </div>
                     <div class='form-floating me-2 mt-2'>
@@ -116,34 +156,52 @@ session_start();
                     </div>
                     <button type='submit' class='btn btn-success w-100'>Reservar</button>
                     </form>";
-                        echo "<a href='{$_SERVER['HTTP_REFERER']}' class='mt-2 btn btn-primary'>Voltar</a>";
+                        echo "<a href='" . htmlspecialchars($_SERVER['HTTP_REFERER'], ENT_QUOTES, 'UTF-8') . "' class='mt-2 btn btn-primary'>Voltar</a>";
                     } else {
                         echo "<h2>Detalhes da Reserva:</h2>";
-                        $salaextenso = $db->query("SELECT nome FROM salas WHERE id='{$sala}';")->fetch_assoc()['nome'];
-                        echo "<p class='fw-bold'>Sala: <span class='fw-normal'>{$salaextenso}</span></p>";
-                        $requisitorextenso = $db->query("SELECT nome FROM cache WHERE id='{$detalhesreserva['requisitor']}';")->fetch_assoc()['nome'];
-                        echo "<p class='fw-bold'>Requisitada por: <span class='fw-normal'>{$requisitorextenso}</span></p>";
-                        $horastempo = $db->query("SELECT horashumanos FROM tempos WHERE id='{$tempo}';")->fetch_assoc()['horashumanos'];
-                        echo "<p class='fw-bold'>Tempo: <span class='fw-normal'>{$horastempo}</span></p>";
-                        echo "<p class='fw-bold'>Data: <span class='fw-normal'>{$data}</span></p>";
+                        
+                        $stmt = $db->prepare("SELECT nome FROM salas WHERE id=?");
+                        $stmt->bind_param("s", $sala);
+                        $stmt->execute();
+                        $salaextenso = $stmt->get_result()->fetch_assoc()['nome'];
+                        $stmt->close();
+                        
+                        echo "<p class='fw-bold'>Sala: <span class='fw-normal'>" . htmlspecialchars($salaextenso, ENT_QUOTES, 'UTF-8') . "</span></p>";
+                        
+                        $stmt = $db->prepare("SELECT nome FROM cache WHERE id=?");
+                        $stmt->bind_param("s", $detalhesreserva['requisitor']);
+                        $stmt->execute();
+                        $requisitorextenso = $stmt->get_result()->fetch_assoc()['nome'];
+                        $stmt->close();
+                        
+                        echo "<p class='fw-bold'>Requisitada por: <span class='fw-normal'>" . htmlspecialchars($requisitorextenso, ENT_QUOTES, 'UTF-8') . "</span></p>";
+                        
+                        $stmt = $db->prepare("SELECT horashumanos FROM tempos WHERE id=?");
+                        $stmt->bind_param("s", $tempo);
+                        $stmt->execute();
+                        $horastempo = $stmt->get_result()->fetch_assoc()['horashumanos'];
+                        $stmt->close();
+                        
+                        echo "<p class='fw-bold'>Tempo: <span class='fw-normal'>" . htmlspecialchars($horastempo, ENT_QUOTES, 'UTF-8') . "</span></p>";
+                        echo "<p class='fw-bold'>Data: <span class='fw-normal'>" . htmlspecialchars($data, ENT_QUOTES, 'UTF-8') . "</span></p>";
                         echo "<p class='fw-bold'>Estado: ";
                         if ($detalhesreserva['aprovado'] == 1) {
                             echo "<span class='badge bg-success'>Aprovado</span></p>";
                         } else {
                             echo "<span class='badge bg-warning text-dark'>Pendente</span></p>";
                         }
-                        echo "<p class='fw-bold'>Motivo: <span class='fw-normal'>{$detalhesreserva['motivo']}</span></p>";
+                        echo "<p class='fw-bold'>Motivo: <span class='fw-normal'>" . htmlspecialchars($detalhesreserva['motivo'], ENT_QUOTES, 'UTF-8') . "</span></p>";
                         echo "<p class='fw-bold'>Informação Extra:</p>
-                        <textarea rows='4' cols='50' class='fw-normal' disabled>{$detalhesreserva['extra']}</textarea>";
+                        <textarea rows='4' cols='50' class='fw-normal' disabled>" . htmlspecialchars($detalhesreserva['extra'], ENT_QUOTES, 'UTF-8') . "</textarea>";
                         if ($_SESSION['id'] == $detalhesreserva['requisitor'] | $_SESSION['admin']) {
-                            echo "<a href='/reservar/manage.php?subaction=apagar&tempo={$tempo}&data={$data}&sala={$sala}' class='btn btn-danger mt-2' onclick='return confirm(\"Tem a certeza que pretende apagar esta reserva?\");'>Apagar Reserva</a>";
+                            echo "<a href='/reservar/manage.php?subaction=apagar&tempo=" . urlencode($tempo) . "&data=" . urlencode($data) . "&sala=" . urlencode($sala) . "' class='btn btn-danger mt-2' onclick='return confirm(\"Tem a certeza que pretende apagar esta reserva?\");'>Apagar Reserva</a>";
                         } else {
-                            echo "<p class='fw-bold'>Requisitada por: <span class='fw-normal'>{$requisitorextenso}</span></p>";
+                            echo "<p class='fw-bold'>Requisitada por: <span class='fw-normal'>" . htmlspecialchars($requisitorextenso, ENT_QUOTES, 'UTF-8') . "</span></p>";
                         }
                         if (strpos($_SERVER['HTTP_REFERER'], '/admin/pedidos.php') !== false) {
                             echo "<a href='/admin/pedidos.php' class='btn btn-primary mt-2'>Voltar</a>";
                         } else {
-                            echo "<a href='/reservar/?sala={$sala}' class='btn btn-primary mt-2'>Voltar</a>";
+                            echo "<a href='/reservar/?sala=" . urlencode($sala) . "' class='btn btn-primary mt-2'>Voltar</a>";
                         }
                     }
             }

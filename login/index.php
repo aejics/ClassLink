@@ -76,7 +76,7 @@
                     <div class="debug-dropdown">
                         <details>
                             <summary>Detalhes do erro (Debug)</summary>
-                            <div class="debug-content"><?php echo $_GET['error']; echo "<br>"; echo $_GET['error_description']; ?></div>
+                            <div class="debug-content"><?php echo htmlspecialchars($_GET['error'], ENT_QUOTES, 'UTF-8'); echo "<br>"; echo htmlspecialchars($_GET['error_description'], ENT_QUOTES, 'UTF-8'); ?></div>
                         </details>
                     </div>
                 </div>
@@ -97,16 +97,24 @@
             $_SESSION['id'] = $_SESSION['resourceOwner']['sub'];
 
             // Atribuir valores à Cache na DB
-            $db->query("INSERT IGNORE INTO cache (id, nome, email) VALUES ('{$_SESSION['id']}', '{$_SESSION['nome']}', '{$_SESSION['email']}');");
+            $stmt = $db->prepare("INSERT IGNORE INTO cache (id, nome, email) VALUES (?, ?, ?)");
+            $stmt->bind_param("sss", $_SESSION['id'], $_SESSION['nome'], $_SESSION['email']);
+            $stmt->execute();
+            $stmt->close();
 
             // Determinar se é Administrador
-            $isadmin = $db->query("SELECT admin FROM cache WHERE id = '{$_SESSION['id']}'");
-            $isadmin = $isadmin->fetch_assoc();
+            $stmt = $db->prepare("SELECT admin FROM cache WHERE id = ?");
+            $stmt->bind_param("s", $_SESSION['id']);
+            $stmt->execute();
+            $isadmin = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
             if ($isadmin['admin'] == 1){
                 $_SESSION['admin'] = true;
             } else {
                 $_SESSION['admin'] = false;
             }
+            // Regenerate session ID for security
+            session_regenerate_id(true);
             header('Location: /');
             exit();
         } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
