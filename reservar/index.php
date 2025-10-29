@@ -162,7 +162,7 @@ session_start();
         <div id='bulkReservationControls' style='display: none; width: 100%; margin-bottom: 15px;'>
             <div class='card'>
                 <div class='card-body'>
-                    <h5 class='card-title'>Reserva Massiva</h5>
+                    <h5 class='card-title'>Reservas em Massa</h5>
                     <p id='selectedCount'>0 tempos selecionados</p>
                     <div class='form-floating mb-2'>
                         <input type='text' class='form-control' id='bulkMotivo' name='motivo' placeholder='Motivo da Reserva' required>
