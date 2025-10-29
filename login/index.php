@@ -89,21 +89,24 @@
                 'code' => $_GET['code']
             ]);
             $resourceOwner = $provider->getResourceOwner($accessToken);
+            // Atribuir valores desta sessão OAuth2
             $_SESSION['validity'] = $now + $accessToken->getExpires();
             $_SESSION['resourceOwner'] = $resourceOwner->toArray();
-            foreach($_SESSION['resourceOwner']['groups'] as $key => $value){
-                if ($value == "ReservaSalas-Administradores"){
-                    $_SESSION['admin'] = true;
-                }
-            }
-            if (!isset($_SESSION['admin'])){
-                $_SESSION['admin'] = false;
-            }
             $_SESSION['nome'] = $_SESSION['resourceOwner']['name'];
             $_SESSION['email'] = $_SESSION['resourceOwner']['email'];
             $_SESSION['id'] = $_SESSION['resourceOwner']['sub'];
-            var_dump($_SESSION);
+
+            // Atribuir valores à Cache na DB
             $db->query("INSERT IGNORE INTO cache (id, nome, email) VALUES ('{$_SESSION['id']}', '{$_SESSION['nome']}', '{$_SESSION['email']}');");
+
+            // Determinar se é Administrador
+            $isadmin = $db->query("SELECT admin FROM cache WHERE id = '{$_SESSION['id']}'");
+            $isadmin = $isadmin->fetch_assoc();
+            if ($isadmin['admin'] == 1){
+                $_SESSION['admin'] = true;
+            } else {
+                $_SESSION['admin'] = false;
+            }
             header('Location: /');
             exit();
         } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
