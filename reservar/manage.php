@@ -41,10 +41,10 @@ session_start();
         // Handle bulk reservation separately since it doesn't require tempo/data/sala in GET
         if (isset($_GET['subaction']) && $_GET['subaction'] === 'bulk') {
             if (!isset($_POST['motivo']) || empty($_POST['motivo'])) {
-                echo "<div class='alert alert-danger fade show' role='alert'>Motivo é obrigatório.</div>";
+                echo "<div class='alert alert-danger show' role='alert'>Motivo é obrigatório.</div>";
                 echo "<a href='" . htmlspecialchars($_SERVER['HTTP_REFERER'], ENT_QUOTES, 'UTF-8') . "' class='btn btn-primary'>Voltar</a>";
             } elseif (!isset($_POST['slots']) || !is_array($_POST['slots']) || count($_POST['slots']) == 0) {
-                echo "<div class='alert alert-danger fade show' role='alert'>Nenhum tempo foi selecionado.</div>";
+                echo "<div class='alert alert-danger show' role='alert'>Nenhum tempo foi selecionado.</div>";
                 echo "<a href='" . htmlspecialchars($_SERVER['HTTP_REFERER'], ENT_QUOTES, 'UTF-8') . "' class='btn btn-primary'>Voltar</a>";
             } else {
                 $motivo = $_POST['motivo'];
@@ -81,13 +81,41 @@ session_start();
                     }
                 }
                 
-                echo "<div class='alert alert-success fade show' role='alert'>{$successCount} reserva(s) criada(s) com sucesso!</div>";
+                echo "<div class='row justify-content-center'>";
+                echo "<div class='col-md-10 col-lg-8'>";
+                
+                echo "<div class='alert alert-success'><h4 class='alert-heading'>Reservas Submetidas!</h4><p class='mb-0'>{$successCount} reserva(s) criada(s) com sucesso e submetidas para aprovação.</p></div>";
                 if (count($failedSlots) > 0) {
-                    echo "<div class='alert alert-warning fade show' role='alert'>Algumas reservas falharam:<br>" . implode('<br>', $failedSlots) . "</div>";
+                    echo "<div class='alert alert-warning'><strong>Algumas reservas falharam:</strong><br>" . implode('<br>', $failedSlots) . "</div>";
                 }
-                echo "<p class='text-center'>As reservas foram submetidas para aprovação.</p>";
-                echo "<a href='/reservar' class='btn btn-success'>Voltar à página de reserva de salas</a> ";
+                
+                // Get the room info and post-reservation content for the first successful reservation
+                if ($successCount > 0 && isset($slotSala)) {
+                    $stmt = $db->prepare("SELECT nome, post_reservation_content FROM salas WHERE id=?");
+                    $stmt->bind_param("s", $slotSala);
+                    $stmt->execute();
+                    $salaData = $stmt->get_result()->fetch_assoc();
+                    $stmt->close();
+                    
+                    // Display post-reservation content if available
+                    if (!empty($salaData['post_reservation_content'])) {
+                        echo "<div class='card mb-3'>";
+                        echo "<div class='card-body'>";
+                        echo "<h5 class='card-title'>Informações Importantes - " . htmlspecialchars($salaData['nome'], ENT_QUOTES, 'UTF-8') . "</h5>";
+                        echo "<div class='post-reservation-content'>";
+                        echo $salaData['post_reservation_content']; // Content is already HTML from CKEditor
+                        echo "</div>";
+                        echo "</div>";
+                        echo "</div>";
+                    }
+                }
+                
+                echo "<div class='d-grid gap-2 d-md-block'>";
+                echo "<a href='/reservar' class='btn btn-success me-md-2 mb-2 mb-md-0'>Voltar à página de reserva de salas</a> ";
                 echo "<a href='/reservas' class='btn btn-primary'>Ver as minhas reservas</a>";
+                echo "</div>";
+                
+                echo "</div></div>";
             }
         } elseif (isset($_GET['tempo']) && isset($_GET['data']) && isset($_GET['sala'])) {
             $tempo = $_GET['tempo'];
@@ -98,7 +126,7 @@ session_start();
             switch (isset($_GET['subaction']) ? $_GET['subaction'] : null) {
                 case "reservar":
                     if (!isset($_POST['motivo'])) {
-                        echo "<div class='alert alert-danger fade show' role='alert'>Motivo é obrigatório.</div>";
+                        echo "<div class='alert alert-danger show' role='alert'>Motivo é obrigatório.</div>";
                         break;
                     }
                     $stmt = $db->prepare("INSERT INTO reservas (sala, tempo, requisitor, data, aprovado, motivo, extra) VALUES (?, ?, ?, ?, 0, ?, ?);");
@@ -169,7 +197,7 @@ session_start();
                             $enviarmail->Body = utf8_decode("A sua reserva da sala {$salaextenso} para a data de {$data} às {$tempohumano} foi removida.\nEsta ação pode ser realizada por administradores, ou por si mesmo.\n\nObrigado.");
                             $enviarmail->send();
                         } catch (Exception $e) {
-                            echo("<div class='mt-2 alert alert-warning fade show' role='alert'>A reserva foi rejeitada, mas o email de notificação não foi enviado. Contacte o Postmaster.\nErro do PHPMailer: {$enviarmail->ErrorInfo}</div>");
+                            echo("<div class='mt-2 alert alert-warning show' role='alert'>A reserva foi rejeitada, mas o email de notificação não foi enviado. Contacte o Postmaster.\nErro do PHPMailer: {$enviarmail->ErrorInfo}</div>");
                         }
 
                         $stmt = $db->prepare("DELETE FROM reservas WHERE sala=? AND tempo=? AND data=?");
