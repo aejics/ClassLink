@@ -56,8 +56,8 @@ use PHPMailer\PHPMailer\Exception;
                 $stmt->close();
                 
                 echo "<div class='mt-2 alert alert-success fade show' role='alert'>Reserva aprovada com sucesso.</div>";
-                $postreservaUrl = "/reservas/postreserva.php?sala=" . urlencode($_GET['sala']) . "&tempo=" . urlencode($_GET['tempo']) . "&data=" . urlencode($_GET['data']);
-                echo "<a href='{$postreservaUrl}' class='btn btn-info me-2' target='_blank'>Ver Página Pós-Reserva</a>";
+                $reservaUrl = "/reservar/manage.php?sala=" . urlencode($_GET['sala']) . "&tempo=" . urlencode($_GET['tempo']) . "&data=" . urlencode($_GET['data']);
+                echo "<a href='{$reservaUrl}' class='btn btn-info me-2' target='_blank'>Ver Detalhes da Reserva</a>";
                 echo "<a href='/admin/pedidos.php'><button class='btn btn-primary'>Voltar</button></a>";
                 try {
                     $stmt = $db->prepare("SELECT nome FROM salas WHERE id=?");
@@ -93,8 +93,8 @@ use PHPMailer\PHPMailer\Exception;
                     $enviarmail->addAddress($maildapessoa);
                     $enviarmail->isHTML(false);
                     $enviarmail->Subject = utf8_decode("Reserva da Sala {$sala} Aprovada");
-                    $postreservaUrl = "https://" . $_SERVER['HTTP_HOST'] . "/reservas/postreserva.php?sala=" . urlencode($_GET['sala']) . "&tempo=" . urlencode($_GET['tempo']) . "&data=" . urlencode($_GET['data']);
-                    $enviarmail->Body = utf8_decode("A sua reserva da sala {$sala} para a data de {$_GET['data']} às {$tempohumano} foi aprovada.\n\nPode ver os detalhes e informações importantes da sua reserva em:\n{$postreservaUrl}\n\nObrigado.");
+                    $reservaUrl = "https://" . $_SERVER['HTTP_HOST'] . "/reservar/manage.php?sala=" . urlencode($_GET['sala']) . "&tempo=" . urlencode($_GET['tempo']) . "&data=" . urlencode($_GET['data']);
+                    $enviarmail->Body = utf8_decode("A sua reserva da sala {$sala} para a data de {$_GET['data']} às {$tempohumano} foi aprovada.\n\nPode ver os detalhes e informações importantes da sua reserva em:\n{$reservaUrl}\n\nObrigado.");
                     $enviarmail->send();
                 } catch (Exception $e) {
                     echo "<div class='mt-2 alert alert-warning fade show' role='alert'>A reserva foi aprovada, mas o email de notificação não foi enviado. Contacte o Postmaster.\nErro do PHPMailer: " . htmlspecialchars($enviarmail->ErrorInfo, ENT_QUOTES, 'UTF-8') . "</div>";
