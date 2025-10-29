@@ -79,7 +79,7 @@ nav{
 }
 
 .btn:hover{
-    letter-spacing: 5px;
+    background: linear-gradient(-90deg, rgb(0, 238, 255) 0%, rgb(13, 4, 66) 100%);
 }
 
 .img{
