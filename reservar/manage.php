@@ -108,7 +108,7 @@ session_start();
                         die("Houve um problema a reservar a sala. Contacte um administrador, ou tente novamente mais tarde.");
                     }
                     $stmt->close();
-                    header("Location: /reservas/postreserva.php?sala=" . urlencode($sala) . "&tempo=" . urlencode($tempo) . "&data=" . urlencode($data));
+                    header("Location: /reservar/manage.php?sala=" . urlencode($sala) . "&tempo=" . urlencode($tempo) . "&data=" . urlencode($data));
                     exit();
                     break;
                 case "apagar":
@@ -215,15 +215,26 @@ session_start();
                     </form>";
                         echo "<a href='" . htmlspecialchars($_SERVER['HTTP_REFERER'], ENT_QUOTES, 'UTF-8') . "' class='mt-2 btn btn-primary'>Voltar</a>";
                     } else {
-                        echo "<h2>Detalhes da Reserva:</h2>";
+                        // Display appropriate message based on approval status
+                        if ($detalhesreserva['aprovado'] == 1) {
+                            echo "<div class='alert alert-success'><h4>Reserva Aprovada!</h4></div>";
+                        } else if ($detalhesreserva['aprovado'] == 0) {
+                            echo "<div class='alert alert-info'><h4>Reserva Submetida!</h4><p>A sua reserva foi submetida e está a aguardar aprovação.</p></div>";
+                        } else {
+                            echo "<div class='alert alert-warning'><h4>Reserva Cancelada</h4></div>";
+                        }
                         
-                        $stmt = $db->prepare("SELECT nome FROM salas WHERE id=?");
+                        echo "<div class='card mb-3'>";
+                        echo "<div class='card-body'>";
+                        echo "<h5 class='card-title'>Detalhes da Reserva</h5>";
+                        
+                        $stmt = $db->prepare("SELECT nome, post_reservation_content FROM salas WHERE id=?");
                         $stmt->bind_param("s", $sala);
                         $stmt->execute();
-                        $salaextenso = $stmt->get_result()->fetch_assoc()['nome'];
+                        $salaData = $stmt->get_result()->fetch_assoc();
                         $stmt->close();
                         
-                        echo "<p class='fw-bold'>Sala: <span class='fw-normal'>" . htmlspecialchars($salaextenso, ENT_QUOTES, 'UTF-8') . "</span></p>";
+                        echo "<p><strong>Sala:</strong> " . htmlspecialchars($salaData['nome'], ENT_QUOTES, 'UTF-8') . "</p>";
                         
                         $stmt = $db->prepare("SELECT nome FROM cache WHERE id=?");
                         $stmt->bind_param("s", $detalhesreserva['requisitor']);
@@ -231,7 +242,7 @@ session_start();
                         $requisitorextenso = $stmt->get_result()->fetch_assoc()['nome'];
                         $stmt->close();
                         
-                        echo "<p class='fw-bold'>Requisitada por: <span class='fw-normal'>" . htmlspecialchars($requisitorextenso, ENT_QUOTES, 'UTF-8') . "</span></p>";
+                        echo "<p><strong>Requisitada por:</strong> " . htmlspecialchars($requisitorextenso, ENT_QUOTES, 'UTF-8') . "</p>";
                         
                         $stmt = $db->prepare("SELECT horashumanos FROM tempos WHERE id=?");
                         $stmt->bind_param("s", $tempo);
@@ -239,26 +250,37 @@ session_start();
                         $horastempo = $stmt->get_result()->fetch_assoc()['horashumanos'];
                         $stmt->close();
                         
-                        echo "<p class='fw-bold'>Tempo: <span class='fw-normal'>" . htmlspecialchars($horastempo, ENT_QUOTES, 'UTF-8') . "</span></p>";
-                        echo "<p class='fw-bold'>Data: <span class='fw-normal'>" . htmlspecialchars($data, ENT_QUOTES, 'UTF-8') . "</span></p>";
-                        echo "<p class='fw-bold'>Estado: ";
-                        if ($detalhesreserva['aprovado'] == 1) {
-                            echo "<span class='badge bg-success'>Aprovado</span></p>";
-                        } else {
-                            echo "<span class='badge bg-warning text-dark'>Pendente</span></p>";
+                        echo "<p><strong>Tempo:</strong> " . htmlspecialchars($horastempo, ENT_QUOTES, 'UTF-8') . "</p>";
+                        echo "<p><strong>Data:</strong> " . htmlspecialchars($data, ENT_QUOTES, 'UTF-8') . "</p>";
+                        echo "<p><strong>Motivo:</strong> " . htmlspecialchars($detalhesreserva['motivo'], ENT_QUOTES, 'UTF-8') . "</p>";
+                        
+                        if (!empty($detalhesreserva['extra'])) {
+                            echo "<p><strong>Informação Extra:</strong></p>";
+                            echo "<div class='border rounded p-2 bg-light'>" . nl2br(htmlspecialchars($detalhesreserva['extra'], ENT_QUOTES, 'UTF-8')) . "</div>";
                         }
-                        echo "<p class='fw-bold'>Motivo: <span class='fw-normal'>" . htmlspecialchars($detalhesreserva['motivo'], ENT_QUOTES, 'UTF-8') . "</span></p>";
-                        echo "<p class='fw-bold'>Informação Extra:</p>
-                        <textarea rows='4' cols='50' class='fw-normal' disabled>" . htmlspecialchars($detalhesreserva['extra'], ENT_QUOTES, 'UTF-8') . "</textarea>";
+                        echo "</div>";
+                        echo "</div>";
+                        
+                        // Display post-reservation content if available
+                        if (!empty($salaData['post_reservation_content'])) {
+                            echo "<div class='card mb-3'>";
+                            echo "<div class='card-body'>";
+                            echo "<h5 class='card-title'>Informações Importantes</h5>";
+                            echo "<div class='post-reservation-content'>";
+                            echo $salaData['post_reservation_content']; // Content is already HTML from CKEditor
+                            echo "</div>";
+                            echo "</div>";
+                            echo "</div>";
+                        }
+                        
                         if ($_SESSION['id'] == $detalhesreserva['requisitor'] | $_SESSION['admin']) {
-                            echo "<a href='/reservar/manage.php?subaction=apagar&tempo=" . urlencode($tempo) . "&data=" . urlencode($data) . "&sala=" . urlencode($sala) . "' class='btn btn-danger mt-2' onclick='return confirm(\"Tem a certeza que pretende apagar esta reserva?\");'>Apagar Reserva</a>";
-                        } else {
-                            echo "<p class='fw-bold'>Requisitada por: <span class='fw-normal'>" . htmlspecialchars($requisitorextenso, ENT_QUOTES, 'UTF-8') . "</span></p>";
+                            echo "<a href='/reservar/manage.php?subaction=apagar&tempo=" . urlencode($tempo) . "&data=" . urlencode($data) . "&sala=" . urlencode($sala) . "' class='btn btn-danger' onclick='return confirm(\"Tem a certeza que pretende apagar esta reserva?\");'>Apagar Reserva</a> ";
                         }
+                        echo "<a href='/reservar' class='btn btn-success'>Voltar à página de reserva de salas</a> ";
                         if (strpos($_SERVER['HTTP_REFERER'], '/admin/pedidos.php') !== false) {
-                            echo "<a href='/admin/pedidos.php' class='btn btn-primary mt-2'>Voltar</a>";
+                            echo "<a href='/admin/pedidos.php' class='btn btn-primary'>Voltar aos pedidos</a>";
                         } else {
-                            echo "<a href='/reservar/?sala=" . urlencode($sala) . "' class='btn btn-primary mt-2'>Voltar</a>";
+                            echo "<a href='/reservas' class='btn btn-primary'>Ver todas as minhas reservas</a>";
                         }
                     }
             }
