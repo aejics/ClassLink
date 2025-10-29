@@ -77,6 +77,11 @@ session_start();
                         $salaInfo = $salaStmt->get_result()->fetch_assoc();
                         $salaStmt->close();
                         
+                        if (!$salaInfo) {
+                            $failedSlots[] = htmlspecialchars($slotData, ENT_QUOTES, 'UTF-8') . " - " . htmlspecialchars($slotTempo, ENT_QUOTES, 'UTF-8') . " (sala não encontrada)";
+                            continue;
+                        }
+                        
                         // Auto-approve if tipo_sala is 2 (autonomous), otherwise set to 0 (pending)
                         $aprovado = ($salaInfo['tipo_sala'] == 2) ? 1 : 0;
                         if ($aprovado == 1) {
@@ -154,6 +159,11 @@ session_start();
                     $stmt->execute();
                     $salaInfo = $stmt->get_result()->fetch_assoc();
                     $stmt->close();
+                    
+                    if (!$salaInfo) {
+                        http_response_code(404);
+                        die("Sala não encontrada.");
+                    }
                     
                     // Auto-approve if tipo_sala is 2 (autonomous), otherwise set to 0 (pending)
                     $aprovado = ($salaInfo['tipo_sala'] == 2) ? 1 : 0;
