@@ -52,6 +52,7 @@ session_start();
                 $extra = $_POST['extra'] ?? '';
                 $successCount = 0;
                 $failedSlots = [];
+                $isAutonomous = false;
                 
                 foreach ($_POST['slots'] as $slot) {
                     $parts = explode('|', $slot);
@@ -69,8 +70,21 @@ session_start();
                     $checkStmt->close();
                     
                     if (!$existing) {
-                        $stmt = $db->prepare("INSERT INTO reservas (sala, tempo, requisitor, data, aprovado, motivo, extra) VALUES (?, ?, ?, ?, 0, ?, ?);");
-                        $stmt->bind_param("ssssss", $slotSala, $slotTempo, $id, $slotData, $motivo, $extra);
+                        // Check if room has autonomous reservation (tipo_sala = 2)
+                        $salaStmt = $db->prepare("SELECT tipo_sala FROM salas WHERE id = ?");
+                        $salaStmt->bind_param("s", $slotSala);
+                        $salaStmt->execute();
+                        $salaInfo = $salaStmt->get_result()->fetch_assoc();
+                        $salaStmt->close();
+                        
+                        // Auto-approve if tipo_sala is 2 (autonomous), otherwise set to 0 (pending)
+                        $aprovado = ($salaInfo['tipo_sala'] == 2) ? 1 : 0;
+                        if ($aprovado == 1) {
+                            $isAutonomous = true;
+                        }
+                        
+                        $stmt = $db->prepare("INSERT INTO reservas (sala, tempo, requisitor, data, aprovado, motivo, extra) VALUES (?, ?, ?, ?, ?, ?, ?);");
+                        $stmt->bind_param("sssssss", $slotSala, $slotTempo, $id, $slotData, $aprovado, $motivo, $extra);
                         if ($stmt->execute()) {
                             $successCount++;
                         } else {
@@ -85,7 +99,11 @@ session_start();
                 echo "<div class='row justify-content-center'>";
                 echo "<div class='col-md-10 col-lg-8'>";
                 
-                echo "<div class='alert alert-success'><h4 class='alert-heading'>Reservas Submetidas!</h4><p class='mb-0'>{$successCount} reserva(s) criada(s) com sucesso e submetidas para aprovação.</p></div>";
+                if ($isAutonomous) {
+                    echo "<div class='alert alert-success'><h4 class='alert-heading'>Reservas Aprovadas!</h4><p class='mb-0'>{$successCount} reserva(s) criada(s) com sucesso e aprovadas automaticamente.</p></div>";
+                } else {
+                    echo "<div class='alert alert-success'><h4 class='alert-heading'>Reservas Submetidas!</h4><p class='mb-0'>{$successCount} reserva(s) criada(s) com sucesso e submetidas para aprovação.</p></div>";
+                }
                 if (count($failedSlots) > 0) {
                     echo "<div class='alert alert-warning'><strong>Algumas reservas falharam:</strong><br>" . implode('<br>', $failedSlots) . "</div>";
                 }
@@ -130,8 +148,18 @@ session_start();
                         echo "<div class='alert alert-danger show' role='alert'>Motivo é obrigatório.</div>";
                         break;
                     }
-                    $stmt = $db->prepare("INSERT INTO reservas (sala, tempo, requisitor, data, aprovado, motivo, extra) VALUES (?, ?, ?, ?, 0, ?, ?);");
-                    $stmt->bind_param("ssssss", $sala, $tempo, $id, $data, $motivo, $extra);
+                    // Check if room has autonomous reservation (tipo_sala = 2)
+                    $stmt = $db->prepare("SELECT tipo_sala FROM salas WHERE id = ?");
+                    $stmt->bind_param("s", $sala);
+                    $stmt->execute();
+                    $salaInfo = $stmt->get_result()->fetch_assoc();
+                    $stmt->close();
+                    
+                    // Auto-approve if tipo_sala is 2 (autonomous), otherwise set to 0 (pending)
+                    $aprovado = ($salaInfo['tipo_sala'] == 2) ? 1 : 0;
+                    
+                    $stmt = $db->prepare("INSERT INTO reservas (sala, tempo, requisitor, data, aprovado, motivo, extra) VALUES (?, ?, ?, ?, ?, ?, ?);");
+                    $stmt->bind_param("sssssss", $sala, $tempo, $id, $data, $aprovado, $motivo, $extra);
                     if (!$stmt->execute()) {
                         http_response_code(500);
                         die("Houve um problema a reservar a sala. Contacte um administrador, ou tente novamente mais tarde.");
@@ -219,15 +247,21 @@ session_start();
                     $stmt->close();
                     
                     if (!$detalhesreserva) {
-                        $stmt = $db->prepare("SELECT nome FROM salas WHERE id=?");
+                        $stmt = $db->prepare("SELECT nome, tipo_sala FROM salas WHERE id=?");
                         $stmt->bind_param("s", $sala);
                         $stmt->execute();
-                        $salaextenso = $stmt->get_result()->fetch_assoc()['nome'];
+                        $salaData = $stmt->get_result()->fetch_assoc();
                         $stmt->close();
+                        
+                        $salaextenso = $salaData['nome'];
+                        $isAutonomous = ($salaData['tipo_sala'] == 2);
                         
                         echo "<div class='row justify-content-center'>";
                         echo "<div class='col-md-8 col-lg-6'>";
                         echo "<h2 class='mb-4'>Reservar Sala</h2>";
+                        if ($isAutonomous) {
+                            echo "<div class='alert alert-info mb-3'><strong>Reserva Autónoma:</strong> Esta sala é de reserva autónoma. A sua reserva será aprovada automaticamente.</div>";
+                        }
                         echo "<form action='/reservar/manage.php?subaction=reservar&tempo=" . urlencode($tempo) . "&data=" . urlencode($data) . "&sala=" . urlencode($sala) . "' method='POST'>
                     <div class='form-floating mb-3'>
                     <input type='text' class='form-control' id='sala' name='sala' placeholder='Sala' value='" . htmlspecialchars($salaextenso, ENT_QUOTES, 'UTF-8') . "' disabled>
@@ -240,9 +274,11 @@ session_start();
                     <div class='form-floating mb-3'>
                     <textarea class='form-control' id='extra' name='extra' placeholder='Informação Extra' rows='6' style='height: 150px;'></textarea>
                     <label for='extra'>Informação Extra</label>
-                    </div>
-                    <p class='text-muted small mb-3'>Nota: A reserva será submetida para aprovação.</p>
-                    <button type='submit' class='btn btn-success w-100 mb-2'>Reservar</button>
+                    </div>";
+                        if (!$isAutonomous) {
+                            echo "<p class='text-muted small mb-3'>Nota: A reserva será submetida para aprovação.</p>";
+                        }
+                        echo "<button type='submit' class='btn btn-success w-100 mb-2'>Reservar</button>
                     </form>";
                         echo "<a href='" . htmlspecialchars($_SERVER['HTTP_REFERER'], ENT_QUOTES, 'UTF-8') . "' class='btn btn-secondary w-100'>Voltar</a>";
                         echo "</div></div>";

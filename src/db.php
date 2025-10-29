@@ -10,14 +10,21 @@
     // Criar bases de dados. Todas.
     $db->query("CREATE TABLE IF NOT EXISTS cache (id VARCHAR(99) UNIQUE, nome VARCHAR(99), email VARCHAR(99), admin BOOL, PRIMARY KEY (id));");
     
-    // Create salas table with post_reservation_content column for new installations
-    $db->query("CREATE TABLE IF NOT EXISTS salas (id VARCHAR(99) UNIQUE, nome VARCHAR(99), post_reservation_content TEXT, PRIMARY KEY (id));");
+    // Create salas table with post_reservation_content and tipo_sala columns for new installations
+    // tipo_sala: 1 = normal (requires approval), 2 = autonomous (auto-approved)
+    $db->query("CREATE TABLE IF NOT EXISTS salas (id VARCHAR(99) UNIQUE, nome VARCHAR(99), post_reservation_content TEXT, tipo_sala INT DEFAULT 1, PRIMARY KEY (id));");
     
     // For existing installations, add the column if it doesn't exist
     // This check is safe because CREATE TABLE IF NOT EXISTS ensures the table exists
     $result = $db->query("SHOW COLUMNS FROM salas LIKE 'post_reservation_content'");
     if ($result && $result->num_rows == 0) {
         $db->query("ALTER TABLE salas ADD COLUMN post_reservation_content TEXT;");
+    }
+    
+    // Add tipo_sala column for existing installations
+    $result = $db->query("SHOW COLUMNS FROM salas LIKE 'tipo_sala'");
+    if ($result && $result->num_rows == 0) {
+        $db->query("ALTER TABLE salas ADD COLUMN tipo_sala INT DEFAULT 1;");
     }
     
     $db->query("CREATE TABLE IF NOT EXISTS tempos (id VARCHAR(99) UNIQUE, horashumanos VARCHAR(99), PRIMARY KEY (id));");
