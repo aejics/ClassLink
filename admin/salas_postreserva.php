@@ -1,5 +1,5 @@
 <?php require 'index.php'; ?>
-<script src="https://cdn.ckeditor.com/ckeditor5/40.1.0/classic/ckeditor.js"></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/40.1.0/super-build/ckeditor.js"></script>
 <h3>Gestão de Páginas Pós-Reserva</h3>
 <div class="d-flex align-items-center mb-3">
     <span class="me-3">Selecione uma sala para editar a página pós-reserva</span>
@@ -37,9 +37,11 @@ switch (isset($_GET['action']) ? $_GET['action'] : null){
             <a href="salas_postreserva.php" class="btn btn-secondary">Voltar</a>
         </form>
         <script>
-            ClassicEditor
+            CKEDITOR.ClassicEditor
                 .create(document.querySelector('#post_reservation_content'), {
-                    toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'outdent', 'indent', '|', 'blockQuote', 'insertTable', '|', 'imageInsert', '|', 'undo', 'redo']
+                    toolbar: {
+                        items: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'outdent', 'indent', '|', 'blockQuote', 'insertTable', '|', 'imageInsert', '|', 'undo', 'redo']
+                    }
                 })
                 .catch(error => {
                     console.error(error);
