@@ -2,6 +2,7 @@
     require_once(__DIR__ . '/../vendor/autoload.php');
     use League\OAuth2\Client\Provider\GenericProvider;
 
+    // Email configuration
     $mail = array(
         'ativado' => true,
         'servidor' => 'smtp.gmail.com',
@@ -17,23 +18,25 @@
         'password' => ''
     );
 
-    // A base de dados deste projeto é MySQL.
+    // Database configuration (MySQL/MariaDB)
+    // SECURITY: Use strong passwords and restrict database user permissions
     $db = array(
         'tipo' => 'mysql',
         'servidor' => 'localhost',
         'user' => 'reservasalas',
-        'password' => 'salaspass',
+        'password' => 'salaspass',  // CHANGE THIS to a strong password
         'db' => 'reservasalas',
         'porta' => 3306
     );
 
-    // Set up the OAuth 2.0 provider
+    // OAuth 2.0 configuration
+    // SECURITY: Keep clientId and clientSecret confidential
     $provider = new GenericProvider([
         'urlAuthorize'            => 'https://authentik.devenv.marcopisco.com/application/o/authorize/',
         'urlAccessToken'          => 'https://authentik.devenv.marcopisco.com/application/o/token/',
         'urlResourceOwnerDetails' => 'https://authentik.devenv.marcopisco.com/application/o/userinfo/',
-        'clientId'     => 'clientid',
-        'clientSecret' => 'clientsecret',
+        'clientId'     => 'clientid',  // CHANGE THIS
+        'clientSecret' => 'clientsecret',  // CHANGE THIS and keep it secret
         'redirectUri'  => 'https://' . $_SERVER['HTTP_HOST'] . '/login'
     ]);
     $logoutUrlProvider = 'https://authentik.devenv.marcopisco.com/application/o/reserva-salas/end-session/';

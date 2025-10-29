@@ -1,11 +1,32 @@
 RewriteEngine On
 RewriteBase /
 
+# Security Headers
+<IfModule mod_headers.c>
+    # Prevent clickjacking
+    Header always set X-Frame-Options "SAMEORIGIN"
+    # Prevent MIME type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    # Enable XSS protection
+    Header always set X-XSS-Protection "1; mode=block"
+    # Referrer policy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    # Remove server signature
+    Header unset Server
+    Header unset X-Powered-By
+</IfModule>
+
 # Protect the htaccess file
 <Files .htaccess>
 Order Allow,Deny
 Deny from all
 </Files>
+
+# Protect config and sensitive files
+<FilesMatch "(config\.php|config\.sample\.php|\.git|\.env)">
+Order Allow,Deny
+Deny from all
+</FilesMatch>
 
 # Protect config
 <Files config.json>
@@ -20,3 +41,9 @@ Deny from all
 
 # Disable directory browsing
 Options All -Indexes
+
+# Protect sensitive directories
+<DirectoryMatch "^/.*(vendor|\.git|func|src)">
+    Order Deny,Allow
+    Deny from all
+</DirectoryMatch>
