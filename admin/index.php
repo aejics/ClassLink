@@ -72,10 +72,12 @@
         // Conteúdos para a Dashboard Administrativa. Apenas colocar o conteúdo neste bloco, pois
         // este módulo é reutilizado para as subpáginas.
         $pedidospendentes = $db->query("SELECT * FROM reservas WHERE aprovado = 0;")->num_rows;
+        $nome_safe = htmlspecialchars($_SESSION['nome'], ENT_QUOTES, 'UTF-8');
+        $pedidos_safe = htmlspecialchars($pedidospendentes, ENT_QUOTES, 'UTF-8');
         echo "<div class='flex-grow-1 d-flex align-items-center justify-content-center flex-column'>
-        <h1>Olá, <?php echo htmlspecialchars($_SESSION['nome'], ENT_QUOTES, 'UTF-8'); ?></h1>
+        <h1>Olá, {$nome_safe}</h1>
         <p class='h4 fw-lighter'>O que vamos fazer hoje?</p>
-        <p class='h6 fw-lighter'>Existem <b><?php echo htmlspecialchars($pedidospendentes, ENT_QUOTES, 'UTF-8'); ?></b> pedidos de reserva pendentes.</p>
+        <p class='h6 fw-lighter'>Existem <b>{$pedidos_safe}</b> pedidos de reserva pendentes.</p>
         <div class='botoes_dashboardadmin d-flex justify-content-center'>
         <a href='/admin/pedidos.php' class='btn btn-success w-20 me-2'>Responder a pedidos</a>
         </div>";
