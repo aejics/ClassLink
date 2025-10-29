@@ -62,6 +62,6 @@ while ($row = $utilizadores->fetch_assoc()) {
     echo "<tr><td>{$row['id']}</td><td>{$row['nome']}</td><td>{$row['email']}</td><td>{$adminStatus}</td><td><a href='/admin/users.php?action=edit&id={$row['id']}'>EDITAR</a>  <a href='/admin/users.php?action=apagar&id={$row['id']}' onclick='return confirm(\"Tem a certeza que pretende apagar o utilizador? Isto irá causar problemas se o utilizador tiver reservas passadas.\");'>APAGAR</a></tr>";
 }
 echo "</table>";
+echo "</div>";
 $db->close();
-echo "</div></table>"
 ?>
