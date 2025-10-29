@@ -40,7 +40,7 @@
         </div>
     </nav>
     <div class="text">
-        <h3>Seja bem vindo, <?php echo "{$_SESSION['nome']}"; ?>, ao <br> <span>ClassLink</span> </h3>
+        <h3>Seja bem vindo, <?php echo htmlspecialchars($_SESSION['nome'], ENT_QUOTES, 'UTF-8'); ?>, ao <br> <span>ClassLink</span> </h3>
         <p>O que é que vamos fazer hoje?</p>
         <a href="/reservar">
             <button class="btn">

@@ -12,34 +12,50 @@ switch ($_GET['action']){
     // caso seja preenchido o formulário de criação:
     case "criar":
         $randomuuid = uuid4();
-        $db->query("INSERT INTO salas (id, nome) VALUES ('{$randomuuid}', '{$_POST["nomesala"]}');");
+        $stmt = $db->prepare("INSERT INTO salas (id, nome) VALUES (?, ?)");
+        $stmt->bind_param("ss", $randomuuid, $_POST["nomesala"]);
+        $stmt->execute();
+        $stmt->close();
         acaoexecutada("Criação de Sala");
         break;
     // caso execute a ação apagar:
     case "apagar":
         try {
-            $db->query("SELECT * FROM reservas WHERE sala = '{$_GET['id']}' AND aprovado != -1;");
-            if ($db->affected_rows > 0) {
+            $stmt = $db->prepare("SELECT * FROM reservas WHERE sala = ? AND aprovado != -1");
+            $stmt->bind_param("s", $_GET['id']);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows > 0) {
                 throw new Exception("Existem reservas associadas a esta sala. Por segurança, é necessária uma intervenção manual.");
             }
+            $stmt->close();
         } catch (Exception $e) {
-            echo "<div class='alert alert-danger fade show' role='alert'>Erro: {$e->getMessage()}</div>";
+            echo "<div class='alert alert-danger fade show' role='alert'>Erro: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . "</div>";
             break;
         }
-        $db->query("DELETE FROM salas WHERE id = '{$_GET['id']}';");
+        $stmt = $db->prepare("DELETE FROM salas WHERE id = ?");
+        $stmt->bind_param("s", $_GET['id']);
+        $stmt->execute();
+        $stmt->close();
         acaoexecutada("Eliminação de Sala");
         break;
     // caso execute a ação editar:
     case "edit":
-        $c = $db->query("SELECT * FROM salas WHERE id = '{$_GET['id']}';");
-        $d = $c->fetch_assoc();
-        echo "<div class='alert alert-warning fade show' role='alert'>A editar a Sala <b>{$d['nome']}</b>.</div>";
-        formulario("salas.php?action=update&id={$d['id']}", [
+        $stmt = $db->prepare("SELECT * FROM salas WHERE id = ?");
+        $stmt->bind_param("s", $_GET['id']);
+        $stmt->execute();
+        $d = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        echo "<div class='alert alert-warning fade show' role='alert'>A editar a Sala <b>" . htmlspecialchars($d['nome'], ENT_QUOTES, 'UTF-8') . "</b>.</div>";
+        formulario("salas.php?action=update&id=" . urlencode($d['id']), [
             ["type" => "text", "id" => "nomesala", "placeholder" => "Sala", "label" => "Sala", "value" => $d['nome']]]);
         break;
     // caso seja submetida a edição:
     case "update":
-        $c = $db->query("UPDATE salas SET nome = '{$_POST['nomesala']}' WHERE id = '{$_GET['id']}';");
+        $stmt = $db->prepare("UPDATE salas SET nome = ? WHERE id = ?");
+        $stmt->bind_param("ss", $_POST['nomesala'], $_GET['id']);
+        $stmt->execute();
+        $stmt->close();
         acaoexecutada("Atualização de Sala");
         break;
 }
@@ -51,7 +67,8 @@ if ($temposatuais->num_rows == 0) {
 echo "<div style='max-height: 400px; overflow-y: auto; width: 90%;'>";
 echo "<table class='table'><tr><th scope='col'>Sala</th><th scope='col'>AÇÕES</th></tr>";
 while ($row = $temposatuais->fetch_assoc()) {
-    echo "<tr><td>{$row['nome']}</td><td><a href='/admin/salas.php?action=edit&id={$row['id']}'>EDITAR</a>  <a href='/admin/salas.php?action=apagar&id={$row['id']}' onclick='return confirm(\"Tem a certeza que pretende apagar a sala? Isto irá causar problemas se a sala tiver reservas passadas.\");'>APAGAR</a></tr>";
+    $idEnc = urlencode($row['id']);
+    echo "<tr><td>" . htmlspecialchars($row['nome'], ENT_QUOTES, 'UTF-8') . "</td><td><a href='/admin/salas.php?action=edit&id={$idEnc}'>EDITAR</a>  <a href='/admin/salas.php?action=apagar&id={$idEnc}' onclick='return confirm(\"Tem a certeza que pretende apagar a sala? Isto irá causar problemas se a sala tiver reservas passadas.\");'>APAGAR</a></tr>";
 }
 echo "</table>";
 $db->close();

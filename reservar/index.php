@@ -85,36 +85,41 @@ session_start();
                 for ($j = 0; $j < 7; $j++) {
                     $diacheckdb = $segunda + ($j * 86400);
                     $diacheckdb = date("Y-m-d", $diacheckdb);
-                    if ($_GET['sala']) {
-                        $tempoatualdb = $db->query("SELECT * FROM reservas WHERE sala='{$_GET['sala']}' AND data='{$diacheckdb}' AND tempo='{$row['id']}';");
-                        $sala = $_GET['sala'];
-                    } else {
-                        $tempoatualdb = $db->query("SELECT * FROM reservas WHERE sala='{$_POST['sala']}' AND data='{$diacheckdb}' AND tempo='{$row['id']}';");
-                        $sala = $_POST['sala'];
-                    }
-                    $tempoatualdb = $tempoatualdb->fetch_assoc();
+                    
+                    $sala = isset($_GET['sala']) ? $_GET['sala'] : $_POST['sala'];
+                    
+                    $stmt = $db->prepare("SELECT * FROM reservas WHERE sala=? AND data=? AND tempo=?");
+                    $stmt->bind_param("sss", $sala, $diacheckdb, $row['id']);
+                    $stmt->execute();
+                    $tempoatualdb = $stmt->get_result()->fetch_assoc();
+                    $stmt->close();
+                    
                     if (!$tempoatualdb || $tempoatualdb['aprovado'] == -1) {
                         echo "<td class='bg-success text-white text-center'>
-                        <a class='reserva' href='/reservar/manage.php?tempo={$row['id']}&sala={$sala}&data={$diacheckdb}'>
+                        <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "'>
                         Livre
                         </a></td>";
                     } else {
-                        $nomerequisitor = $db->query("SELECT nome FROM cache WHERE id='{$tempoatualdb['requisitor']}';");
-                        $nomerequisitor = $nomerequisitor->fetch_assoc();
+                        $stmt = $db->prepare("SELECT nome FROM cache WHERE id=?");
+                        $stmt->bind_param("s", $tempoatualdb['requisitor']);
+                        $stmt->execute();
+                        $nomerequisitor = $stmt->get_result()->fetch_assoc();
+                        $stmt->close();
+                        
                         $nomerequisitor['nome'] = preg_replace('/^(\S+).*?(\S+)$/u', '$1 $2', $nomerequisitor['nome']);
                         if ($tempoatualdb['aprovado'] == 0) {
                             echo "<td class='bg-warning text-white text-center'>
-                            <a class='reserva' href='/reservar/manage.php?tempo={$row['id']}&sala={$sala}&data={$diacheckdb}'>
+                            <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "'>
                             Pendente
                             <br>
-                            {$nomerequisitor['nome']}
+                            " . htmlspecialchars($nomerequisitor['nome'], ENT_QUOTES, 'UTF-8') . "
                             </a></td>";
                         } else if ($tempoatualdb['aprovado'] == 1) {
                             echo "<td class='bg-danger text-white text-center'>
-                            <a class='reserva' href='/reservar/manage.php?tempo={$row['id']}&sala={$sala}&data={$diacheckdb}'>
+                            <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "'>
                             Ocupado
                             <br>
-                            {$nomerequisitor['nome']}
+                            " . htmlspecialchars($nomerequisitor['nome'], ENT_QUOTES, 'UTF-8') . "
                             </a></td>";
                         }
                     }
