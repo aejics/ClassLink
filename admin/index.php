@@ -42,6 +42,7 @@
     sidebarLink('/admin/pedidos.php', 'Pedidos de Reserva');
     sidebarLink('/admin/tempos.php', 'Gestão de Tempos');
     sidebarLink('/admin/salas.php', 'Gestão de Salas');
+    sidebarLink('/admin/users.php', 'Gestão de Utilizadores');
     echo "<li class='nav-item dropdown'>
             <a class='nav-link dropdown-toggle' href='#' id='extensibilidadeDropdown' role='button' data-bs-toggle='dropdown' aria-expanded='false'>
                 Extensibilidade
