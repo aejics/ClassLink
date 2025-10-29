@@ -83,20 +83,17 @@ session_start();
                             if ($stmt->execute()) {
                                 $successCount++;
                             } else {
-                                $failedSlots[] = $slotData . " - " . $slotTempo;
+                                $failedSlots[] = htmlspecialchars($slotData, ENT_QUOTES, 'UTF-8') . " - " . htmlspecialchars($slotTempo, ENT_QUOTES, 'UTF-8');
                             }
                             $stmt->close();
                         } else {
-                            $failedSlots[] = $slotData . " - " . $slotTempo . " (já reservado)";
+                            $failedSlots[] = htmlspecialchars($slotData, ENT_QUOTES, 'UTF-8') . " - " . htmlspecialchars($slotTempo, ENT_QUOTES, 'UTF-8') . " (já reservado)";
                         }
                     }
                     
                     echo "<div class='alert alert-success fade show' role='alert'>{$successCount} reserva(s) criada(s) com sucesso!</div>";
                     if (count($failedSlots) > 0) {
-                        $escapedFailedSlots = array_map(function($slot) {
-                            return htmlspecialchars($slot, ENT_QUOTES, 'UTF-8');
-                        }, $failedSlots);
-                        echo "<div class='alert alert-warning fade show' role='alert'>Algumas reservas falharam:<br>" . implode('<br>', $escapedFailedSlots) . "</div>";
+                        echo "<div class='alert alert-warning fade show' role='alert'>Algumas reservas falharam:<br>" . implode('<br>', $failedSlots) . "</div>";
                     }
                     echo "<p class='text-center'>As reservas foram submetidas para aprovação.</p>";
                     echo "<a href='/reservas' class='btn btn-primary'>Ver as minhas reservas</a>";
