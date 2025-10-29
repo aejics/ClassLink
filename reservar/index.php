@@ -14,6 +14,33 @@ session_start();
     <link href="/assets/index.css" rel="stylesheet">
     <link rel="stylesheet" href="/assets/reservar.css">
     <link rel='icon' href='/assets/logo.png'>
+    <script>
+        function updateBulkControls() {
+            const checkboxes = document.querySelectorAll('.bulk-checkbox:checked');
+            const controls = document.getElementById('bulkReservationControls');
+            const counter = document.getElementById('selectedCount');
+            
+            if (checkboxes.length > 0) {
+                controls.style.display = 'block';
+                counter.textContent = checkboxes.length + ' tempo' + (checkboxes.length > 1 ? 's' : '') + ' selecionado' + (checkboxes.length > 1 ? 's' : '');
+            } else {
+                controls.style.display = 'none';
+            }
+        }
+        
+        function clearBulkSelection() {
+            const checkboxes = document.querySelectorAll('.bulk-checkbox');
+            checkboxes.forEach(cb => cb.checked = false);
+            updateBulkControls();
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkboxes = document.querySelectorAll('.bulk-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateBulkControls);
+            });
+        });
+    </script>
 </head>
 
 <body>
@@ -60,6 +87,7 @@ session_start();
     if (isset($_POST['sala']) | isset($_GET['sala'])) {
         echo (
             "<div class='container mt-3 d-flex align-items-center justify-content-center flex-column'>
+            <form id='bulkReservationForm' method='POST' action='/reservar/manage.php?subaction=bulk'>
             <table class='table table-bordered'><thead><tr><th scope='col'>Tempos</th>"
         );
         for ($i = 0; $i < 7; $i++) {
@@ -96,9 +124,12 @@ session_start();
                     
                     if (!$tempoatualdb || $tempoatualdb['aprovado'] == -1) {
                         echo "<td class='bg-success text-white text-center'>
+                        <div style='display: flex; flex-direction: column; align-items: center; gap: 5px;'>
+                        <input type='checkbox' name='slots[]' value='" . urlencode($row['id']) . "|" . urlencode($sala) . "|" . urlencode($diacheckdb) . "' class='bulk-checkbox' style='width: 20px; height: 20px;'>
                         <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "'>
                         Livre
-                        </a></td>";
+                        </a>
+                        </div></td>";
                     } else {
                         $stmt = $db->prepare("SELECT nome FROM cache WHERE id=?");
                         $stmt->bind_param("s", $tempoatualdb['requisitor']);
@@ -127,7 +158,27 @@ session_start();
                 echo "</tr>";
             }
         }
-        echo "</table><div class='d-flex'><a href='/reservar/?before={$segundadiaantes}&sala=";
+        echo "</table>
+        <div id='bulkReservationControls' style='display: none; width: 100%; margin-bottom: 15px;'>
+            <div class='card'>
+                <div class='card-body'>
+                    <h5 class='card-title'>Reserva Massiva</h5>
+                    <p id='selectedCount'>0 tempos selecionados</p>
+                    <div class='form-floating mb-2'>
+                        <input type='text' class='form-control' id='bulkMotivo' name='motivo' placeholder='Motivo da Reserva' required>
+                        <label for='bulkMotivo'>Motivo da Reserva</label>
+                    </div>
+                    <div class='form-floating mb-2'>
+                        <textarea class='form-control' id='bulkExtra' name='extra' placeholder='Informação Extra' rows='3' style='height: 100px;'></textarea>
+                        <label for='bulkExtra'>Informação Extra</label>
+                    </div>
+                    <button type='submit' class='btn btn-success me-2'>Reservar Selecionados</button>
+                    <button type='button' class='btn btn-secondary' onclick='clearBulkSelection()'>Limpar Seleção</button>
+                </div>
+            </div>
+        </div>
+        </form>
+        <div class='d-flex'><a href='/reservar/?before={$segundadiaantes}&sala=";
         if ($_POST['sala']) {
             echo "{$_POST['sala']}' class='btn mb-2 me-2 btn-success'>Semana Anterior</a> <a href='/reservar/?before={$segundadiadepois}&sala={$_POST['sala']}' class='btn mb-2 ms-2 btn-success'>Semana Seguinte</a></div></div>";
         } else {

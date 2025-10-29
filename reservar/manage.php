@@ -45,6 +45,60 @@ session_start();
             $extra = $_POST['extra'] ?? '';
             $id = $_SESSION['id'];
             switch (isset($_GET['subaction']) ? $_GET['subaction'] : null) {
+                case "bulk":
+                    if (!isset($_POST['motivo']) || empty($_POST['motivo'])) {
+                        echo "<div class='alert alert-danger fade show' role='alert'>Motivo é obrigatório.</div>";
+                        echo "<a href='" . htmlspecialchars($_SERVER['HTTP_REFERER'], ENT_QUOTES, 'UTF-8') . "' class='btn btn-primary'>Voltar</a>";
+                        break;
+                    }
+                    if (!isset($_POST['slots']) || !is_array($_POST['slots']) || count($_POST['slots']) == 0) {
+                        echo "<div class='alert alert-danger fade show' role='alert'>Nenhum tempo foi selecionado.</div>";
+                        echo "<a href='" . htmlspecialchars($_SERVER['HTTP_REFERER'], ENT_QUOTES, 'UTF-8') . "' class='btn btn-primary'>Voltar</a>";
+                        break;
+                    }
+                    
+                    $motivo = $_POST['motivo'];
+                    $extra = $_POST['extra'] ?? '';
+                    $successCount = 0;
+                    $failedSlots = [];
+                    
+                    foreach ($_POST['slots'] as $slot) {
+                        $parts = explode('|', $slot);
+                        if (count($parts) !== 3) continue;
+                        
+                        $slotTempo = urldecode($parts[0]);
+                        $slotSala = urldecode($parts[1]);
+                        $slotData = urldecode($parts[2]);
+                        
+                        // Check if slot is still available
+                        $checkStmt = $db->prepare("SELECT * FROM reservas WHERE sala=? AND tempo=? AND data=? AND aprovado!=-1");
+                        $checkStmt->bind_param("sss", $slotSala, $slotTempo, $slotData);
+                        $checkStmt->execute();
+                        $existing = $checkStmt->get_result()->fetch_assoc();
+                        $checkStmt->close();
+                        
+                        if (!$existing) {
+                            $stmt = $db->prepare("INSERT INTO reservas (sala, tempo, requisitor, data, aprovado, motivo, extra) VALUES (?, ?, ?, ?, 0, ?, ?);");
+                            $stmt->bind_param("ssssss", $slotSala, $slotTempo, $id, $slotData, $motivo, $extra);
+                            if ($stmt->execute()) {
+                                $successCount++;
+                            } else {
+                                $failedSlots[] = $slotData . " - " . $slotTempo;
+                            }
+                            $stmt->close();
+                        } else {
+                            $failedSlots[] = $slotData . " - " . $slotTempo . " (já reservado)";
+                        }
+                    }
+                    
+                    echo "<div class='alert alert-success fade show' role='alert'>{$successCount} reserva(s) criada(s) com sucesso!</div>";
+                    if (count($failedSlots) > 0) {
+                        echo "<div class='alert alert-warning fade show' role='alert'>Algumas reservas falharam:<br>" . implode('<br>', $failedSlots) . "</div>";
+                    }
+                    echo "<p class='text-center'>As reservas foram submetidas para aprovação.</p>";
+                    echo "<a href='/reservas' class='btn btn-primary'>Ver as minhas reservas</a>";
+                    echo " <a href='/reservar' class='btn btn-success'>Fazer nova reserva</a>";
+                    break;
                 case "reservar":
                     if (!isset($_POST['motivo'])) {
                         echo "<div class='alert alert-danger fade show' role='alert'>Motivo é obrigatório.</div>";
