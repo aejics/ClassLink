@@ -41,9 +41,3 @@ Deny from all
 
 # Disable directory browsing
 Options All -Indexes
-
-# Protect sensitive directories
-<DirectoryMatch "^/.*(vendor|\.git|func|src)">
-    Order Deny,Allow
-    Deny from all
-</DirectoryMatch>
