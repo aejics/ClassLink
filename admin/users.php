@@ -40,12 +40,12 @@ switch ($_GET['action']){
         formulario("users.php?action=update&id={$d['id']}", [
             ["type" => "text", "id" => "nome", "placeholder" => "Nome", "label" => "Nome", "value" => $d['nome']],
             ["type" => "email", "id" => "email", "placeholder" => "Email", "label" => "Email", "value" => $d['email']],
-            ["type" => "checkbox", "id" => "admin", "placeholder" => "Admin", "label" => "Administrador", "value" => $d['admin'] ? "1" : "0"]
+            ["type" => "checkbox", "id" => "administrador", "placeholder" => "Admin", "label" => "Administrador", "value" => $d['admin'] ? "1" : "0"]
         ]);
         break;
     // caso seja submetida a edição:
     case "update":
-        $adminValue = isset($_POST["admin"]) ? 1 : 0;
+        $adminValue = isset($_POST["administrador"]) ? 1 : 0;
         $db->query("UPDATE cache SET nome = '{$_POST['nome']}', email = '{$_POST['email']}', admin = {$adminValue} WHERE id = '{$_GET['id']}';");
         acaoexecutada("Atualização de Utilizador");
         break;
