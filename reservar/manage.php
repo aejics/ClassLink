@@ -86,8 +86,8 @@ session_start();
                     echo "<div class='alert alert-warning fade show' role='alert'>Algumas reservas falharam:<br>" . implode('<br>', $failedSlots) . "</div>";
                 }
                 echo "<p class='text-center'>As reservas foram submetidas para aprovação.</p>";
+                echo "<a href='/reservar' class='btn btn-success'>Voltar à página de reserva de salas</a> ";
                 echo "<a href='/reservas' class='btn btn-primary'>Ver as minhas reservas</a>";
-                echo " <a href='/reservar' class='btn btn-success'>Fazer nova reserva</a>";
             }
         } elseif (isset($_GET['tempo']) && isset($_GET['data']) && isset($_GET['sala'])) {
             $tempo = $_GET['tempo'];
@@ -108,7 +108,7 @@ session_start();
                         die("Houve um problema a reservar a sala. Contacte um administrador, ou tente novamente mais tarde.");
                     }
                     $stmt->close();
-                    header("Location: /reservar/?sala=" . urlencode($sala) . "&tempo=" . urlencode($tempo));
+                    header("Location: /reservas/postreserva.php?sala=" . urlencode($sala) . "&tempo=" . urlencode($tempo) . "&data=" . urlencode($data));
                     exit();
                     break;
                 case "apagar":

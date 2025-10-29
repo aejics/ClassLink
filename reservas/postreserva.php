@@ -42,14 +42,14 @@ session_start();
             $data = $_GET['data'];
             
             // Verify the reservation exists and belongs to the user
-            $stmt = $db->prepare("SELECT * FROM reservas WHERE sala=? AND tempo=? AND data=? AND requisitor=? AND aprovado=1");
+            $stmt = $db->prepare("SELECT * FROM reservas WHERE sala=? AND tempo=? AND data=? AND requisitor=?");
             $stmt->bind_param("ssss", $sala, $tempo, $data, $_SESSION['id']);
             $stmt->execute();
             $reserva = $stmt->get_result()->fetch_assoc();
             $stmt->close();
             
             if (!$reserva) {
-                echo "<div class='alert alert-danger'>Reserva não encontrada ou não aprovada.</div>";
+                echo "<div class='alert alert-danger'>Reserva não encontrada.</div>";
                 echo "<a href='/reservas' class='btn btn-primary'>Voltar para as minhas reservas</a>";
             } else {
                 // Get sala details including post-reservation content
@@ -66,7 +66,15 @@ session_start();
                 $tempoData = $stmt->get_result()->fetch_assoc();
                 $stmt->close();
                 
-                echo "<div class='alert alert-success'><h4>Reserva Aprovada!</h4></div>";
+                // Display appropriate message based on approval status
+                if ($reserva['aprovado'] == 1) {
+                    echo "<div class='alert alert-success'><h4>Reserva Aprovada!</h4></div>";
+                } else if ($reserva['aprovado'] == 0) {
+                    echo "<div class='alert alert-info'><h4>Reserva Submetida!</h4><p>A sua reserva foi submetida e está a aguardar aprovação.</p></div>";
+                } else {
+                    echo "<div class='alert alert-warning'><h4>Reserva Cancelada</h4></div>";
+                }
+                
                 echo "<div class='card mb-4'>";
                 echo "<div class='card-body'>";
                 echo "<h5 class='card-title'>Detalhes da Reserva</h5>";
@@ -89,8 +97,8 @@ session_start();
                     echo "</div>";
                 }
                 
-                echo "<a href='/reservas' class='btn btn-primary'>Ver todas as minhas reservas</a> ";
-                echo "<a href='/reservar' class='btn btn-success'>Fazer nova reserva</a>";
+                echo "<a href='/reservar' class='btn btn-success'>Voltar à página de reserva de salas</a> ";
+                echo "<a href='/reservas' class='btn btn-primary'>Ver todas as minhas reservas</a>";
             }
         }
         $db->close();
