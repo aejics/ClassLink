@@ -28,7 +28,7 @@ use PHPMailer\PHPMailer\Exception;
         </div>
         <div class="form-floating me-2">
             <input type="text" class="form-control form-control-sm" id="requisitor" name="requisitor" placeholder="Requisitor" value="">
-            <label for="requisitor">Requisitor</label>
+            <label for="requisitor">Requisitor (id)</label>
         </div>
     </form>
 
@@ -101,7 +101,7 @@ use PHPMailer\PHPMailer\Exception;
                 break;
             case "detalhes":
         }
-    } elseif ($_POST['sala'] | $_GET['sala'] | isset($_POST['requisitor'])) {
+    } elseif (isset($_POST['sala']) | isset($_GET['sala']) | isset($_POST['requisitor'])) {
         echo "<div style='max-height: 400px; overflow-y: auto; width: 100%;'>";
         echo "<table class='table'><tr><th scope='col'>Data</th><th scope='col'>Tempo</th><th scope='col'>Requisitor</th><th scope='col'>Motivo</th><th scope='col'>AÇÕES</th></tr>";
         if ($_POST['sala']) {
