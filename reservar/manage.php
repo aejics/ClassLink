@@ -4,6 +4,11 @@ require_once(__DIR__ . '/../src/db.php');
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 session_start();
+if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
+    http_response_code(403);
+    header("Location: /login");
+    die("A reencaminhar para iniciar sessão...");
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt">
