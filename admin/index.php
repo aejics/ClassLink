@@ -42,6 +42,7 @@
     sidebarLink('/admin/pedidos.php', 'Pedidos de Reserva');
     sidebarLink('/admin/tempos.php', 'Gestão de Tempos');
     sidebarLink('/admin/salas.php', 'Gestão de Salas');
+    sidebarLink('/admin/materiais.php', 'Gestão de Materiais');
     sidebarLink('/admin/salas_postreserva.php', 'Páginas Pós-Reserva');
     sidebarLink('/admin/users.php', 'Gestão de Utilizadores');
     echo "<li class='nav-item dropdown'>
