@@ -179,14 +179,20 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                     </div>";
         
         // Get materials for the selected room
-        $salaForMateriais = isset($_GET['sala']) ? $_GET['sala'] : $_POST['sala'];
-        $materiaisStmt = $db->prepare("SELECT id, nome, descricao FROM materiais WHERE sala_id = ? ORDER BY nome ASC");
-        $materiaisStmt->bind_param("s", $salaForMateriais);
-        $materiaisStmt->execute();
-        $materiaisResult = $materiaisStmt->get_result();
-        $materiaisStmt->close();
+        $salaForMateriais = isset($_GET['sala']) ? $_GET['sala'] : (isset($_POST['sala']) ? $_POST['sala'] : null);
         
-        if ($materiaisResult->num_rows > 0) {
+        // Only fetch materials if we have a valid room ID
+        if ($salaForMateriais) {
+            $materiaisStmt = $db->prepare("SELECT id, nome, descricao FROM materiais WHERE sala_id = ? ORDER BY nome ASC");
+            $materiaisStmt->bind_param("s", $salaForMateriais);
+            $materiaisStmt->execute();
+            $materiaisResult = $materiaisStmt->get_result();
+            $materiaisStmt->close();
+        } else {
+            $materiaisResult = null;
+        }
+        
+        if ($materiaisResult && $materiaisResult->num_rows > 0) {
             echo "<div class='mb-2'>";
             echo "<label class='form-label'><strong>Materiais Disponíveis (opcional):</strong></label>";
             echo "<div class='border rounded p-3' style='max-height: 200px; overflow-y: auto;'>";
