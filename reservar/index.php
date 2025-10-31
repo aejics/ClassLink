@@ -215,7 +215,7 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
             </div>
         </div>
         </form>";
-        <div class='d-flex'><a href='/reservar/?before={$segundadiaantes}&sala=";
+        echo "<div class='d-flex'><a href='/reservar/?before={$segundadiaantes}&sala=";
         if ($_POST['sala']) {
             echo "{$_POST['sala']}' class='btn mb-2 me-2 btn-success'>Semana Anterior</a> <a href='/reservar/?before={$segundadiadepois}&sala={$_POST['sala']}' class='btn mb-2 ms-2 btn-success'>Semana Seguinte</a></div></div>";
         } else {
