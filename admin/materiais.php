@@ -48,15 +48,23 @@ switch (isset($_GET['action']) ? $_GET['action'] : null){
         $successCount = 0;
         $errorCount = 0;
         $errors = [];
+        $lineNumber = 0;
         
         while (($data = fgetcsv($file)) !== FALSE) {
+            $lineNumber++;
+            
             // Skip empty lines
             if (empty($data[0])) continue;
+            
+            // Skip header row (detect by checking if first column contains "MaterialName" or similar)
+            if ($lineNumber == 1 && (strtolower($data[0]) == 'materialname' || strtolower($data[0]) == 'nome')) {
+                continue;
+            }
             
             // Expecting: MaterialName,MaterialDescription,RoomID
             if (count($data) < 3) {
                 $errorCount++;
-                $errors[] = "Linha inválida: " . htmlspecialchars(implode(',', $data), ENT_QUOTES, 'UTF-8');
+                $errors[] = "Linha {$lineNumber} inválida: " . htmlspecialchars(implode(',', $data), ENT_QUOTES, 'UTF-8');
                 continue;
             }
             
@@ -84,7 +92,7 @@ switch (isset($_GET['action']) ? $_GET['action'] : null){
                 $successCount++;
             } else {
                 $errorCount++;
-                $errors[] = "Erro ao inserir material '{$nome}'";
+                $errors[] = "Erro ao inserir material '{$nome}': " . htmlspecialchars($stmt->error, ENT_QUOTES, 'UTF-8');
             }
             $stmt->close();
         }
@@ -264,27 +272,26 @@ if ($materiaisQuery->num_rows == 0) {
     echo "</div>";
 }
 
+// Get reference section for Room IDs before closing connection
+echo "<!-- Reference Section for Room IDs -->";
+echo "<div class='mt-4'>";
+echo "<h5>Referência de IDs de Salas</h5>";
+echo "<p class='text-muted small'>Use estes IDs ao criar o ficheiro CSV para importação de materiais:</p>";
+
+$salasRef = $db->query("SELECT id, nome FROM salas ORDER BY nome ASC;");
+if ($salasRef->num_rows > 0) {
+    echo "<div style='max-height: 200px; overflow-y: auto; width: 90%;'>";
+    echo "<table class='table table-sm'><tr><th scope='col'>Nome da Sala</th><th scope='col'>ID (Room ID)</th></tr>";
+    while ($sala = $salasRef->fetch_assoc()) {
+        $salaNome = htmlspecialchars($sala['nome'], ENT_QUOTES, 'UTF-8');
+        $salaId = htmlspecialchars($sala['id'], ENT_QUOTES, 'UTF-8');
+        echo "<tr><td>{$salaNome}</td><td><code>{$salaId}</code></td></tr>";
+    }
+    echo "</table>";
+    echo "</div>";
+}
+
+echo "</div>";
+
 $db->close();
 ?>
-
-<!-- Reference Section for Room IDs -->
-<div class="mt-4">
-    <h5>Referência de IDs de Salas</h5>
-    <p class="text-muted small">Use estes IDs ao criar o ficheiro CSV para importação de materiais:</p>
-    <?php
-    $db = new mysqli($db['servidor'], $db['user'], $db['password'], $db['db'], $db['porta']);
-    $salasRef = $db->query("SELECT id, nome FROM salas ORDER BY nome ASC;");
-    if ($salasRef->num_rows > 0) {
-        echo "<div style='max-height: 200px; overflow-y: auto; width: 90%;'>";
-        echo "<table class='table table-sm'><tr><th scope='col'>Nome da Sala</th><th scope='col'>ID (Room ID)</th></tr>";
-        while ($sala = $salasRef->fetch_assoc()) {
-            $salaNome = htmlspecialchars($sala['nome'], ENT_QUOTES, 'UTF-8');
-            $salaId = htmlspecialchars($sala['id'], ENT_QUOTES, 'UTF-8');
-            echo "<tr><td>{$salaNome}</td><td><code>{$salaId}</code></td></tr>";
-        }
-        echo "</table>";
-        echo "</div>";
-    }
-    $db->close();
-    ?>
-</div>

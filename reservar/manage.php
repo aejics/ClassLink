@@ -9,6 +9,18 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
     header("Location: /login");
     die("A reencaminhar para iniciar sessão...");
 }
+
+// Helper function to save selected materials for a reservation
+function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
+    if (isset($materiais) && is_array($materiais)) {
+        foreach ($materiais as $materialId) {
+            $matStmt = $db->prepare("INSERT INTO reservas_materiais (reserva_sala, reserva_tempo, reserva_data, material_id) VALUES (?, ?, ?, ?)");
+            $matStmt->bind_param("ssss", $sala, $tempo, $data, $materialId);
+            $matStmt->execute();
+            $matStmt->close();
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt">
@@ -99,14 +111,7 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                             $successCount++;
                             
                             // Save selected materials if any
-                            if (isset($_POST['materiais']) && is_array($_POST['materiais'])) {
-                                foreach ($_POST['materiais'] as $materialId) {
-                                    $matStmt = $db->prepare("INSERT INTO reservas_materiais (reserva_sala, reserva_tempo, reserva_data, material_id) VALUES (?, ?, ?, ?)");
-                                    $matStmt->bind_param("ssss", $slotSala, $slotTempo, $slotData, $materialId);
-                                    $matStmt->execute();
-                                    $matStmt->close();
-                                }
-                            }
+                            saveReservationMaterials($db, $slotSala, $slotTempo, $slotData, $_POST['materiais'] ?? null);
                         } else {
                             $failedSlots[] = htmlspecialchars($slotData, ENT_QUOTES, 'UTF-8') . " - " . htmlspecialchars($slotTempo, ENT_QUOTES, 'UTF-8');
                         }
@@ -192,14 +197,7 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                     $stmt->close();
                     
                     // Save selected materials if any
-                    if (isset($_POST['materiais']) && is_array($_POST['materiais'])) {
-                        foreach ($_POST['materiais'] as $materialId) {
-                            $matStmt = $db->prepare("INSERT INTO reservas_materiais (reserva_sala, reserva_tempo, reserva_data, material_id) VALUES (?, ?, ?, ?)");
-                            $matStmt->bind_param("ssss", $sala, $tempo, $data, $materialId);
-                            $matStmt->execute();
-                            $matStmt->close();
-                        }
-                    }
+                    saveReservationMaterials($db, $sala, $tempo, $data, $_POST['materiais'] ?? null);
                     
                     header("Location: /reservar/manage.php?sala=" . urlencode($sala) . "&tempo=" . urlencode($tempo) . "&data=" . urlencode($data));
                     exit();
