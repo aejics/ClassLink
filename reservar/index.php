@@ -90,9 +90,27 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
     </div>
     <?php
     if (isset($_POST['sala']) | isset($_GET['sala'])) {
+        // Get the selected room
+        $sala = isset($_GET['sala']) ? $_GET['sala'] : $_POST['sala'];
+        
+        // Query room information to check if it's autonomous
+        $stmt = $db->prepare("SELECT nome, tipo_sala FROM salas WHERE id = ?");
+        $stmt->bind_param("s", $sala);
+        $stmt->execute();
+        $salaData = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        
+        $isAutonomous = ($salaData && $salaData['tipo_sala'] == 2);
+        
+        echo "<div class='container mt-3 d-flex align-items-center justify-content-center flex-column'>";
+        
+        // Display autonomous reservation message if applicable
+        if ($isAutonomous) {
+            echo "<div class='alert alert-info mb-3' style='width: 100%;'><strong>Reserva Autónoma:</strong> Esta sala é de reserva autónoma. A sua reserva será aprovada automaticamente.</div>";
+        }
+        
         echo (
-            "<div class='container mt-3 d-flex align-items-center justify-content-center flex-column'>
-            <form id='bulkReservationForm' method='POST' action='/reservar/manage.php?subaction=bulk'>
+            "<form id='bulkReservationForm' method='POST' action='/reservar/manage.php?subaction=bulk'>
             <table class='table table-bordered'><thead><tr><th scope='col'>Tempos</th>"
         );
         for ($i = 0; $i < 7; $i++) {
