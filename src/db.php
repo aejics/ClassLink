@@ -5,7 +5,7 @@
     if ($db->connect_error) {
         die("Ligação ao servidor falhou: " . $db->connect_error);
     }
-    $db->set_charset("utf8");
+    $db->set_charset("utf8mb4");
 
     // Criar bases de dados. Todas.
     $db->query("CREATE TABLE IF NOT EXISTS cache (id VARCHAR(99) UNIQUE, nome VARCHAR(99), email VARCHAR(99), admin BOOL, PRIMARY KEY (id));");

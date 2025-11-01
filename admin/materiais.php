@@ -305,22 +305,59 @@ if ($materiaisQuery->num_rows == 0) {
 echo "</div>";
 
 // Get reference section for Room IDs before closing connection
+$salasRef = $db->query("SELECT id, nome FROM salas ORDER BY nome ASC;");
+
 echo "<!-- Reference Section for Room IDs -->";
-echo "<div class='mt-4'>";
+echo "<div class='mt-3 mb-3'>";
 echo "<h5>Referência de IDs de Salas</h5>";
 echo "<p class='text-muted small'>Use estes IDs ao criar o ficheiro CSV para importação de materiais:</p>";
 
-$salasRef = $db->query("SELECT id, nome FROM salas ORDER BY nome ASC;");
-if ($salasRef->num_rows > 0) {
-    echo "<div style='max-height: 200px; overflow-y: auto; width: 90%;'>";
-    echo "<table class='table table-sm'><tr><th scope='col'>Nome da Sala</th><th scope='col'>ID (Room ID)</th></tr>";
+if ($salasRef && $salasRef->num_rows > 0) {
+    echo "<button type='button' class='btn btn-info' data-bs-toggle='modal' data-bs-target='#salasRefModal'>";
+    echo "Ver IDs das Salas ({$salasRef->num_rows})";
+    echo "</button>";
+    
+    // Modal for room IDs reference
+    echo "<div class='modal fade' id='salasRefModal' tabindex='-1' aria-labelledby='salasRefModalLabel' aria-hidden='true'>";
+    echo "<div class='modal-dialog modal-lg modal-dialog-scrollable'>";
+    echo "<div class='modal-content'>";
+    echo "<div class='modal-header'>";
+    echo "<h5 class='modal-title' id='salasRefModalLabel'>Referência de IDs de Salas</h5>";
+    echo "<button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>";
+    echo "</div>";
+    echo "<div class='modal-body'>";
+    echo "<p class='mb-3'>Use estes IDs na coluna <code>RoomID</code> ao criar o ficheiro CSV para importação de materiais.</p>";
+    echo "<div class='table-responsive'>";
+    echo "<table class='table table-striped table-hover'>";
+    echo "<thead class='table-light'>";
+    echo "<tr><th scope='col'>Nome da Sala</th><th scope='col'>ID (Room ID)</th></tr>";
+    echo "</thead>";
+    echo "<tbody>";
+    
+    // Reset pointer to iterate
+    $salasRef->data_seek(0);
+    
     while ($sala = $salasRef->fetch_assoc()) {
         $salaNome = htmlspecialchars($sala['nome'], ENT_QUOTES, 'UTF-8');
         $salaId = htmlspecialchars($sala['id'], ENT_QUOTES, 'UTF-8');
-        echo "<tr><td>{$salaNome}</td><td><code>{$salaId}</code></td></tr>";
+        echo "<tr>";
+        echo "<td><strong>{$salaNome}</strong></td>";
+        echo "<td><code class='user-select-all'>{$salaId}</code></td>";
+        echo "</tr>";
     }
+    
+    echo "</tbody>";
     echo "</table>";
     echo "</div>";
+    echo "</div>";
+    echo "<div class='modal-footer'>";
+    echo "<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Fechar</button>";
+    echo "</div>";
+    echo "</div>";
+    echo "</div>";
+    echo "</div>";
+} else {
+    echo "<div class='alert alert-warning'>Não existem salas. Por favor, adicione salas antes de criar materiais.</div>";
 }
 
 echo "</div>";
