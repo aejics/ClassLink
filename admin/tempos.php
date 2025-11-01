@@ -81,14 +81,57 @@ switch (isset($_GET['action']) ? $_GET['action'] : null){
 }
 
 $temposatuais = $db->query("SELECT * FROM tempos ORDER BY horashumanos ASC;");
-if ($temposatuais->num_rows == 0) {
-    echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>Não existem tempos.</div>\n";
-}
-echo "<div style='max-height: 400px; overflow-y: auto; width: 90%;'>";
-echo "<table class='table'><tr><th scope='col'>Hora Humana</th><th scope='col'>AÇÕES</th></tr>";
-while ($row = $temposatuais->fetch_assoc()) {
-    $idEnc = urlencode($row['id']);
-    echo "<tr><td>" . htmlspecialchars($row['horashumanos'], ENT_QUOTES, 'UTF-8') . "</td><td><a href='/admin/tempos.php?action=edit&id={$idEnc}'>EDITAR</a>  <a href='/admin/tempos.php?action=apagar&id={$idEnc}' onclick='return confirm(\"Tem a certeza que pretende apagar o tempo? Isto irá causar problemas se a sala tiver reservas passadas.\");'>APAGAR</a></tr>";
-}
-echo "</div></table>"
+$numTempos = $temposatuais->num_rows;
+?>
+
+<div class="mb-3">
+    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#temposModal">
+        Ver Tempos (<?php echo $numTempos; ?>)
+    </button>
+</div>
+
+<!-- Modal for Tempos -->
+<div class="modal fade" id="temposModal" tabindex="-1" aria-labelledby="temposModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="temposModalLabel">Lista de Tempos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <?php if ($numTempos == 0): ?>
+                    <div class='alert alert-warning'>Não existem tempos.</div>
+                <?php else: ?>
+                    <table class='table table-striped table-hover'>
+                        <thead class='table-dark'>
+                            <tr>
+                                <th scope='col'>Hora Humana</th>
+                                <th scope='col'>AÇÕES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($row = $temposatuais->fetch_assoc()): 
+                                $idEnc = urlencode($row['id']);
+                            ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($row['horashumanos'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td>
+                                        <a href='/admin/tempos.php?action=edit&id=<?php echo $idEnc; ?>' class='btn btn-sm btn-primary'>EDITAR</a>
+                                        <a href='/admin/tempos.php?action=apagar&id=<?php echo $idEnc; ?>' class='btn btn-sm btn-danger' onclick='return confirm("Tem a certeza que pretende apagar o tempo? Isto irá causar problemas se a sala tiver reservas passadas.");'>APAGAR</a>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php
+$db->close();
 ?>
