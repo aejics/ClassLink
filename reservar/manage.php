@@ -9,6 +9,18 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
     header("Location: /login");
     die("A reencaminhar para iniciar sessão...");
 }
+
+// Helper function to save selected materials for a reservation
+function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
+    if (isset($materiais) && is_array($materiais)) {
+        foreach ($materiais as $materialId) {
+            $matStmt = $db->prepare("INSERT INTO reservas_materiais (reserva_sala, reserva_tempo, reserva_data, material_id) VALUES (?, ?, ?, ?)");
+            $matStmt->bind_param("ssss", $sala, $tempo, $data, $materialId);
+            $matStmt->execute();
+            $matStmt->close();
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt">
@@ -97,6 +109,9 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                         $stmt->bind_param("sssssss", $slotSala, $slotTempo, $id, $slotData, $aprovado, $motivo, $extra);
                         if ($stmt->execute()) {
                             $successCount++;
+                            
+                            // Save selected materials if any
+                            saveReservationMaterials($db, $slotSala, $slotTempo, $slotData, $_POST['materiais'] ?? null);
                         } else {
                             $failedSlots[] = htmlspecialchars($slotData, ENT_QUOTES, 'UTF-8') . " - " . htmlspecialchars($slotTempo, ENT_QUOTES, 'UTF-8');
                         }
@@ -180,6 +195,10 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                         die("Houve um problema a reservar a sala. Contacte um administrador, ou tente novamente mais tarde.");
                     }
                     $stmt->close();
+                    
+                    // Save selected materials if any
+                    saveReservationMaterials($db, $sala, $tempo, $data, $_POST['materiais'] ?? null);
+                    
                     header("Location: /reservar/manage.php?sala=" . urlencode($sala) . "&tempo=" . urlencode($tempo) . "&data=" . urlencode($data));
                     exit();
                     break;
@@ -277,6 +296,13 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                         if ($isAutonomous) {
                             echo "<div class='alert alert-info mb-3'><strong>Reserva Autónoma:</strong> Esta sala é de reserva autónoma. A sua reserva será aprovada automaticamente.</div>";
                         }
+                        // Get materials for this room
+                        $materiaisStmt = $db->prepare("SELECT id, nome, descricao FROM materiais WHERE sala_id = ? ORDER BY nome ASC");
+                        $materiaisStmt->bind_param("s", $sala);
+                        $materiaisStmt->execute();
+                        $materiaisResult = $materiaisStmt->get_result();
+                        $materiaisStmt->close();
+                        
                         echo "<form action='/reservar/manage.php?subaction=reservar&tempo=" . urlencode($tempo) . "&data=" . urlencode($data) . "&sala=" . urlencode($sala) . "' method='POST'>
                     <div class='form-floating mb-3'>
                     <input type='text' class='form-control' id='sala' name='sala' placeholder='Sala' value='" . htmlspecialchars($salaextenso, ENT_QUOTES, 'UTF-8') . "' disabled>
@@ -290,6 +316,30 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                     <textarea class='form-control' id='extra' name='extra' placeholder='Informação Extra' rows='6' style='height: 150px;'></textarea>
                     <label for='extra'>Informação Extra</label>
                     </div>";
+                        
+                        // Show materials selection if available
+                        if ($materiaisResult->num_rows > 0) {
+                            echo "<div class='mb-3'>";
+                            echo "<label class='form-label'><strong>Materiais Disponíveis (opcional):</strong></label>";
+                            echo "<div class='border rounded p-3' style='max-height: 200px; overflow-y: auto;'>";
+                            while ($material = $materiaisResult->fetch_assoc()) {
+                                $materialId = htmlspecialchars($material['id'], ENT_QUOTES, 'UTF-8');
+                                $materialNome = htmlspecialchars($material['nome'], ENT_QUOTES, 'UTF-8');
+                                $materialDesc = htmlspecialchars($material['descricao'], ENT_QUOTES, 'UTF-8');
+                                echo "<div class='form-check'>";
+                                echo "<input class='form-check-input' type='checkbox' name='materiais[]' value='{$materialId}' id='material_{$materialId}'>";
+                                echo "<label class='form-check-label' for='material_{$materialId}'>";
+                                echo "<strong>{$materialNome}</strong>";
+                                if (!empty($materialDesc)) {
+                                    echo "<br><small class='text-muted'>{$materialDesc}</small>";
+                                }
+                                echo "</label>";
+                                echo "</div>";
+                            }
+                            echo "</div>";
+                            echo "</div>";
+                        }
+                        
                         if (!$isAutonomous) {
                             echo "<p class='text-muted small mb-3'>Nota: A reserva será submetida para aprovação.</p>";
                         }
@@ -344,6 +394,31 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                             echo "<p class='mb-2'><strong>Informação Extra:</strong></p>";
                             echo "<div class='border rounded p-3 bg-light'>" . nl2br(htmlspecialchars($detalhesreserva['extra'], ENT_QUOTES, 'UTF-8')) . "</div>";
                         }
+                        
+                        // Display reserved materials
+                        $matStmt = $db->prepare("SELECT m.nome, m.descricao FROM reservas_materiais rm JOIN materiais m ON rm.material_id = m.id WHERE rm.reserva_sala = ? AND rm.reserva_tempo = ? AND rm.reserva_data = ?");
+                        $matStmt->bind_param("sss", $sala, $tempo, $data);
+                        $matStmt->execute();
+                        $matResult = $matStmt->get_result();
+                        
+                        if ($matResult->num_rows > 0) {
+                            echo "<p class='mb-2'><strong>Materiais Reservados:</strong></p>";
+                            echo "<div class='border rounded p-3 bg-light'>";
+                            echo "<ul class='mb-0'>";
+                            while ($mat = $matResult->fetch_assoc()) {
+                                $matNome = htmlspecialchars($mat['nome'], ENT_QUOTES, 'UTF-8');
+                                $matDesc = htmlspecialchars($mat['descricao'], ENT_QUOTES, 'UTF-8');
+                                echo "<li><strong>{$matNome}</strong>";
+                                if (!empty($matDesc)) {
+                                    echo " - <small class='text-muted'>{$matDesc}</small>";
+                                }
+                                echo "</li>";
+                            }
+                            echo "</ul>";
+                            echo "</div>";
+                        }
+                        $matStmt->close();
+                        
                         echo "</div>";
                         echo "</div>";
                         

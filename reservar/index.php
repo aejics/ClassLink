@@ -194,14 +194,52 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                     <div class='form-floating mb-2'>
                         <textarea class='form-control' id='bulkExtra' name='extra' placeholder='Informação Extra' rows='3' style='height: 100px;'></textarea>
                         <label for='bulkExtra'>Informação Extra</label>
-                    </div>
+                    </div>";
+        
+        // Get materials for the selected room
+        $salaForMateriais = isset($_GET['sala']) ? $_GET['sala'] : (isset($_POST['sala']) ? $_POST['sala'] : null);
+        
+        // Only fetch materials if we have a valid room ID
+        if ($salaForMateriais) {
+            $materiaisStmt = $db->prepare("SELECT id, nome, descricao FROM materiais WHERE sala_id = ? ORDER BY nome ASC");
+            $materiaisStmt->bind_param("s", $salaForMateriais);
+            $materiaisStmt->execute();
+            $materiaisResult = $materiaisStmt->get_result();
+            $materiaisStmt->close();
+        } else {
+            $materiaisResult = null;
+        }
+        
+        if ($materiaisResult && $materiaisResult->num_rows > 0) {
+            echo "<div class='mb-2'>";
+            echo "<label class='form-label'><strong>Materiais Disponíveis (opcional):</strong></label>";
+            echo "<div class='border rounded p-3' style='max-height: 200px; overflow-y: auto;'>";
+            while ($material = $materiaisResult->fetch_assoc()) {
+                $materialId = htmlspecialchars($material['id'], ENT_QUOTES, 'UTF-8');
+                $materialNome = htmlspecialchars($material['nome'], ENT_QUOTES, 'UTF-8');
+                $materialDesc = htmlspecialchars($material['descricao'], ENT_QUOTES, 'UTF-8');
+                echo "<div class='form-check'>";
+                echo "<input class='form-check-input' type='checkbox' name='materiais[]' value='{$materialId}' id='bulk_material_{$materialId}'>";
+                echo "<label class='form-check-label' for='bulk_material_{$materialId}'>";
+                echo "<strong>{$materialNome}</strong>";
+                if (!empty($materialDesc)) {
+                    echo "<br><small class='text-muted'>{$materialDesc}</small>";
+                }
+                echo "</label>";
+                echo "</div>";
+            }
+            echo "</div>";
+            echo "</div>";
+        }
+        
+        echo "
                     <button type='submit' class='btn btn-success me-2'>Reservar Selecionados</button>
                     <button type='button' class='btn btn-secondary' onclick='clearBulkSelection()'>Limpar Seleção</button>
                 </div>
             </div>
         </div>
-        </form>
-        <div class='d-flex'><a href='/reservar/?before={$segundadiaantes}&sala=";
+        </form>";
+        echo "<div class='d-flex'><a href='/reservar/?before={$segundadiaantes}&sala=";
         if ($_POST['sala']) {
             echo "{$_POST['sala']}' class='btn mb-2 me-2 btn-success'>Semana Anterior</a> <a href='/reservar/?before={$segundadiadepois}&sala={$_POST['sala']}' class='btn mb-2 ms-2 btn-success'>Semana Seguinte</a></div></div>";
         } else {
