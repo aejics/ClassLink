@@ -88,17 +88,64 @@ switch (isset($_GET['action']) ? $_GET['action'] : null){
 }
 
 $utilizadores = $db->query("SELECT * FROM cache ORDER BY nome ASC;");
-if ($utilizadores->num_rows == 0) {
-    echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>Não existem utilizadores.</div>\n";
-}
-echo "<div style='max-height: 400px; overflow-y: auto; width: 90%;'>";
-echo "<table class='table'><tr><th scope='col'>ID</th><th scope='col'>Nome</th><th scope='col'>Email</th><th scope='col'>Admin</th><th scope='col'>AÇÕES</th></tr>";
-while ($row = $utilizadores->fetch_assoc()) {
-    $adminStatus = $row['admin'] ? "Sim" : "Não";
-    $idEnc = urlencode($row['id']);
-    echo "<tr><td>" . htmlspecialchars($row['id'], ENT_QUOTES, 'UTF-8') . "</td><td>" . htmlspecialchars($row['nome'], ENT_QUOTES, 'UTF-8') . "</td><td>" . htmlspecialchars($row['email'], ENT_QUOTES, 'UTF-8') . "</td><td>" . htmlspecialchars($adminStatus, ENT_QUOTES, 'UTF-8') . "</td><td><a href='/admin/users.php?action=edit&id={$idEnc}'>EDITAR</a>  <a href='/admin/users.php?action=apagar&id={$idEnc}' onclick='return confirm(\"Tem a certeza que pretende apagar o utilizador? Isto irá causar problemas se o utilizador tiver reservas passadas.\");'>APAGAR</a></tr>";
-}
-echo "</table>";
-echo "</div>";
+$numUtilizadores = $utilizadores->num_rows;
+?>
+
+<div class="mb-3">
+    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#utilizadoresModal">
+        Ver Utilizadores (<?php echo $numUtilizadores; ?>)
+    </button>
+</div>
+
+<!-- Modal for Utilizadores -->
+<div class="modal fade" id="utilizadoresModal" tabindex="-1" aria-labelledby="utilizadoresModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="utilizadoresModalLabel">Lista de Utilizadores</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <?php if ($numUtilizadores == 0): ?>
+                    <div class='alert alert-warning'>Não existem utilizadores.</div>
+                <?php else: ?>
+                    <table class='table table-striped table-hover'>
+                        <thead class='table-dark'>
+                            <tr>
+                                <th scope='col'>ID</th>
+                                <th scope='col'>Nome</th>
+                                <th scope='col'>Email</th>
+                                <th scope='col'>Admin</th>
+                                <th scope='col'>AÇÕES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($row = $utilizadores->fetch_assoc()): 
+                                $adminStatus = $row['admin'] ? "Sim" : "Não";
+                                $idEnc = urlencode($row['id']);
+                            ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($row['id'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars($row['nome'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars($row['email'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td><?php echo htmlspecialchars($adminStatus, ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td>
+                                        <a href='/admin/users.php?action=edit&id=<?php echo $idEnc; ?>' class='btn btn-sm btn-primary'>EDITAR</a>
+                                        <a href='/admin/users.php?action=apagar&id=<?php echo $idEnc; ?>' class='btn btn-sm btn-danger' onclick='return confirm("Tem a certeza que pretende apagar o utilizador? Isto irá causar problemas se o utilizador tiver reservas passadas.");'>APAGAR</a>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php
 $db->close();
 ?>
