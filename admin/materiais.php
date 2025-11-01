@@ -244,12 +244,34 @@ $materiaisQuery = $db->query("
     ORDER BY s.nome ASC, m.nome ASC
 ");
 
+echo "<div class='mt-4 mb-3'>";
+echo "<h5>Materiais Existentes</h5>";
+
 if ($materiaisQuery->num_rows == 0) {
     echo "<div class='alert alert-info alert-dismissible fade show' role='alert'>Não existem materiais.</div>\n";
 } else {
-    echo "<h5 class='mt-4'>Materiais Existentes</h5>";
-    echo "<div style='max-height: 400px; overflow-y: auto; width: 90%;'>";
-    echo "<table class='table'><tr><th scope='col'>Nome</th><th scope='col'>Descrição</th><th scope='col'>Sala</th><th scope='col'>AÇÕES</th></tr>";
+    echo "<button type='button' class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#materiaisModal'>";
+    echo "Ver Todos os Materiais ({$materiaisQuery->num_rows})";
+    echo "</button>";
+    
+    // Modal for materials list
+    echo "<div class='modal fade' id='materiaisModal' tabindex='-1' aria-labelledby='materiaisModalLabel' aria-hidden='true'>";
+    echo "<div class='modal-dialog modal-xl modal-dialog-scrollable'>";
+    echo "<div class='modal-content'>";
+    echo "<div class='modal-header'>";
+    echo "<h5 class='modal-title' id='materiaisModalLabel'>Materiais Existentes</h5>";
+    echo "<button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>";
+    echo "</div>";
+    echo "<div class='modal-body'>";
+    echo "<div class='table-responsive'>";
+    echo "<table class='table table-striped table-hover'>";
+    echo "<thead class='table-light'>";
+    echo "<tr><th scope='col'>Nome</th><th scope='col'>Descrição</th><th scope='col'>Sala</th><th scope='col'>Ações</th></tr>";
+    echo "</thead>";
+    echo "<tbody>";
+    
+    // Reset pointer to iterate again
+    $materiaisQuery->data_seek(0);
     
     while ($row = $materiaisQuery->fetch_assoc()) {
         $idEnc = urlencode($row['id']);
@@ -258,19 +280,29 @@ if ($materiaisQuery->num_rows == 0) {
         $salaNome = htmlspecialchars($row['sala_nome'], ENT_QUOTES, 'UTF-8');
         
         echo "<tr>";
-        echo "<td>{$nome}</td>";
-        echo "<td>" . (empty($descricao) ? '<em>Sem descrição</em>' : $descricao) . "</td>";
-        echo "<td>{$salaNome}</td>";
+        echo "<td><strong>{$nome}</strong></td>";
+        echo "<td>" . (empty($descricao) ? '<em class=\"text-muted\">Sem descrição</em>' : $descricao) . "</td>";
+        echo "<td><span class='badge bg-info'>{$salaNome}</span></td>";
         echo "<td>";
-        echo "<a href='/admin/materiais.php?action=edit&id={$idEnc}'>EDITAR</a>  ";
-        echo "<a href='/admin/materiais.php?action=apagar&id={$idEnc}' onclick='return confirm(\"Tem a certeza que pretende apagar este material?\");'>APAGAR</a>";
+        echo "<a href='/admin/materiais.php?action=edit&id={$idEnc}' class='btn btn-sm btn-outline-primary me-1'>Editar</a>";
+        echo "<a href='/admin/materiais.php?action=apagar&id={$idEnc}' class='btn btn-sm btn-outline-danger' onclick='return confirm(\"Tem a certeza que pretende apagar este material?\");'>Apagar</a>";
         echo "</td>";
         echo "</tr>";
     }
     
+    echo "</tbody>";
     echo "</table>";
     echo "</div>";
+    echo "</div>";
+    echo "<div class='modal-footer'>";
+    echo "<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Fechar</button>";
+    echo "</div>";
+    echo "</div>";
+    echo "</div>";
+    echo "</div>";
 }
+
+echo "</div>";
 
 // Get reference section for Room IDs before closing connection
 echo "<!-- Reference Section for Room IDs -->";
