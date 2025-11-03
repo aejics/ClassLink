@@ -19,6 +19,35 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
     <link href="/assets/index.css" rel="stylesheet">
     <link rel="stylesheet" href="/assets/reservar.css">
     <link rel='icon' href='/assets/logo.png'>
+    <style>
+        @media (max-width: 1366px) {
+            .table {
+                font-size: 0.7rem !important;
+            }
+            .table th, .table td {
+                padding: 2px !important;
+                font-size: 0.65rem !important;
+            }
+        }
+        @media (max-width: 768px) {
+            .table {
+                font-size: 0.6rem !important;
+                max-width: 100% !important;
+            }
+            .table th, .table td {
+                padding: 1px !important;
+                font-size: 0.55rem !important;
+            }
+            .bulk-checkbox {
+                width: 12px !important;
+                height: 12px !important;
+            }
+        }
+        .reservation-table-container {
+            overflow-x: auto;
+            width: 100%;
+        }
+    </style>
     <script>
         function updateBulkControls() {
             const checkboxes = document.querySelectorAll('.bulk-checkbox:checked');
@@ -111,7 +140,8 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
         
         echo (
             "<form id='bulkReservationForm' method='POST' action='/reservar/manage.php?subaction=bulk'>
-            <table class='table table-bordered' style='table-layout: fixed; width: 100%;'><thead><tr><th scope='col'>Tempos</th>"
+            <div class='reservation-table-container'>
+            <table class='table table-bordered' style='table-layout: fixed; width: 100%; max-width: 70%; margin: 0 auto; font-size: 0.85rem;'><thead><tr><th scope='col' style='font-size: 0.75rem;'>Tempos</th>"
         );
         for ($i = 0; $i < 7; $i++) {
             if ($_GET['before']) {
@@ -125,14 +155,14 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
             $segundadiadepois = date("d-m-Y", $segundadiadepois);
             $diaObj = strtotime("+{$i} day", $segunda);
             $diaFormatted = date("d/m", $diaObj) . "<br>" . date("Y", $diaObj);
-            echo "<th scope='col' style='text-align: center;'>{$diaFormatted}</th>";
+            echo "<th scope='col' style='text-align: center; font-size: 0.75rem; padding: 4px;'>{$diaFormatted}</th>";
         };
         echo "</tr></thead><tbody>";
         $tempos = $db->query("SELECT * FROM tempos ORDER BY horashumanos ASC;");
         // por cada tempo:
         for ($i = 1; $i <= $tempos->num_rows; $i++) {
             while ($row = $tempos->fetch_assoc()) {
-                echo "<tr><th scope='row'>{$row['horashumanos']}</td>";
+                echo "<tr><th scope='row' style='font-size: 0.75rem; padding: 4px;'>{$row['horashumanos']}</td>";
                 // por cada dia da semana:
                 for ($j = 0; $j < 7; $j++) {
                     $diacheckdb = $segunda + ($j * 86400);
@@ -147,10 +177,10 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                     $stmt->close();
                     
                     if (!$tempoatualdb || $tempoatualdb['aprovado'] == -1) {
-                        echo "<td class='bg-success text-white text-center' style='white-space: nowrap; padding: 8px;'>
-                        <div style='display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; min-height: 60px;'>
-                        <input type='checkbox' name='slots[]' value='" . urlencode($row['id']) . "|" . urlencode($sala) . "|" . urlencode($diacheckdb) . "' class='bulk-checkbox' style='width: 20px; height: 20px;'>
-                        <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "' style='display: block;'>
+                        echo "<td class='bg-success text-white text-center' style='padding: 4px; overflow: hidden;'>
+                        <div style='display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 50px;'>
+                        <input type='checkbox' name='slots[]' value='" . urlencode($row['id']) . "|" . urlencode($sala) . "|" . urlencode($diacheckdb) . "' class='bulk-checkbox' style='width: 16px; height: 16px;'>
+                        <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "' style='display: block; font-size: 0.75rem; word-break: break-word;'>
                         Livre
                         </a>
                         </div></td>";
@@ -163,15 +193,15 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                         
                         $nomerequisitor['nome'] = preg_replace('/^(\S+).*?(\S+)$/u', '$1 $2', $nomerequisitor['nome']);
                         if ($tempoatualdb['aprovado'] == 0) {
-                            echo "<td class='bg-warning text-white text-center' style='white-space: nowrap; padding: 8px; min-height: 60px;'>
-                            <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "'>
+                            echo "<td class='bg-warning text-white text-center' style='padding: 4px; min-height: 50px; overflow: hidden;'>
+                            <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "' style='font-size: 0.75rem; word-break: break-word;'>
                             Pendente
                             <br>
                             " . htmlspecialchars($nomerequisitor['nome'], ENT_QUOTES, 'UTF-8') . "
                             </a></td>";
                         } else if ($tempoatualdb['aprovado'] == 1) {
-                            echo "<td class='bg-danger text-white text-center' style='white-space: nowrap; padding: 8px; min-height: 60px;'>
-                            <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "'>
+                            echo "<td class='bg-danger text-white text-center' style='padding: 4px; min-height: 50px; overflow: hidden;'>
+                            <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "' style='font-size: 0.75rem; word-break: break-word;'>
                             Ocupado
                             <br>
                             " . htmlspecialchars($nomerequisitor['nome'], ENT_QUOTES, 'UTF-8') . "
@@ -183,6 +213,7 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
             }
         }
         echo "</table>
+        </div>
         <div id='bulkReservationControls' style='display: none; width: 100%; margin-bottom: 15px;'>
             <div class='card'>
                 <div class='card-body'>
