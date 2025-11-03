@@ -22,7 +22,7 @@
     session_start();
     if (!$_SESSION['admin']) {
         http_response_code(403);
-        die("Não pode entrar no Painel Administrativo. <a href='/'>Voltar para a página inicial</a>");
+        die("<div class='alert alert-danger text-center'>Não pode entrar no Painel Administrativo. <a href='/'>Voltar para a página inicial</a></div>");
     }
 ?>
 <?php
