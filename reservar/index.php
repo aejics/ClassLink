@@ -111,7 +111,7 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
         
         echo (
             "<form id='bulkReservationForm' method='POST' action='/reservar/manage.php?subaction=bulk'>
-            <table class='table table-bordered'><thead><tr><th scope='col'>Tempos</th>"
+            <table class='table table-bordered' style='table-layout: fixed; width: 100%;'><thead><tr><th scope='col'>Tempos</th>"
         );
         for ($i = 0; $i < 7; $i++) {
             if ($_GET['before']) {
@@ -123,8 +123,9 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
             $segundadiaantes = date("d-m-Y", $segundadiaantes);
             $segundadiadepois = strtotime("+1 week", $segunda);
             $segundadiadepois = date("d-m-Y", $segundadiadepois);
-            $dia = date("d-m-Y", strtotime("+{$i} day", $segunda));
-            echo "<th scope='col'>{$dia}</th>";
+            $diaObj = strtotime("+{$i} day", $segunda);
+            $diaFormatted = date("d/m", $diaObj) . "<br>" . date("Y", $diaObj);
+            echo "<th scope='col' style='text-align: center;'>{$diaFormatted}</th>";
         };
         echo "</tr></thead><tbody>";
         $tempos = $db->query("SELECT * FROM tempos ORDER BY horashumanos ASC;");
@@ -146,10 +147,10 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                     $stmt->close();
                     
                     if (!$tempoatualdb || $tempoatualdb['aprovado'] == -1) {
-                        echo "<td class='bg-success text-white text-center'>
-                        <div style='display: flex; flex-direction: column; align-items: center; gap: 5px;'>
+                        echo "<td class='bg-success text-white text-center' style='white-space: nowrap; padding: 8px;'>
+                        <div style='display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; min-height: 60px;'>
                         <input type='checkbox' name='slots[]' value='" . urlencode($row['id']) . "|" . urlencode($sala) . "|" . urlencode($diacheckdb) . "' class='bulk-checkbox' style='width: 20px; height: 20px;'>
-                        <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "'>
+                        <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "' style='display: block;'>
                         Livre
                         </a>
                         </div></td>";
@@ -162,14 +163,14 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                         
                         $nomerequisitor['nome'] = preg_replace('/^(\S+).*?(\S+)$/u', '$1 $2', $nomerequisitor['nome']);
                         if ($tempoatualdb['aprovado'] == 0) {
-                            echo "<td class='bg-warning text-white text-center'>
+                            echo "<td class='bg-warning text-white text-center' style='white-space: nowrap; padding: 8px; min-height: 60px;'>
                             <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "'>
                             Pendente
                             <br>
                             " . htmlspecialchars($nomerequisitor['nome'], ENT_QUOTES, 'UTF-8') . "
                             </a></td>";
                         } else if ($tempoatualdb['aprovado'] == 1) {
-                            echo "<td class='bg-danger text-white text-center'>
+                            echo "<td class='bg-danger text-white text-center' style='white-space: nowrap; padding: 8px; min-height: 60px;'>
                             <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "'>
                             Ocupado
                             <br>
@@ -239,12 +240,12 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
             </div>
         </div>
         </form>";
-        echo "<div class='d-flex'><a href='/reservar/?before={$segundadiaantes}&sala=";
-        if ($_POST['sala']) {
-            echo "{$_POST['sala']}' class='btn mb-2 me-2 btn-success'>Semana Anterior</a> <a href='/reservar/?before={$segundadiadepois}&sala={$_POST['sala']}' class='btn mb-2 ms-2 btn-success'>Semana Seguinte</a></div></div>";
-        } else {
-            echo "{$_GET['sala']}' class='btn mb-2 me-2 btn-success'>Semana Anterior</a> <a href='/reservar/?before={$segundadiadepois}&sala={$_GET['sala']}' class='btn mb-2 ms-2 btn-success'>Semana Seguinte</a></div></div>";
-        }
+        $currentSalaId = $_POST['sala'] ?? $_GET['sala'];
+        echo "<div class='d-flex gap-2'>";
+        echo "<a href='/reservar/?before={$segundadiaantes}&sala={$currentSalaId}' class='btn mb-2 btn-success'>Semana Anterior</a>";
+        echo "<a href='/reservar/?sala={$currentSalaId}' class='btn mb-2 btn-primary'>Semana Atual</a>";
+        echo "<a href='/reservar/?before={$segundadiadepois}&sala={$currentSalaId}' class='btn mb-2 btn-success'>Semana Seguinte</a>";
+        echo "</div></div>";
     }
     ?>
 </body>
