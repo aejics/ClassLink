@@ -212,7 +212,7 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                 echo "</tr>";
             }
         }
-        echo "</table>
+        echo "</table><br>
         </div>
         <div id='bulkReservationControls' style='display: none; width: 100%; max-width: 70%; margin: 20px auto 15px auto;'>
             <div class='card'>
@@ -272,7 +272,7 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
         </div>
         </form>";
         $currentSalaId = $_POST['sala'] ?? $_GET['sala'];
-        echo "<div class='d-flex gap-2'>";
+        echo "<div class='d-flex gap-2 mt-2'>";
         echo "<a href='/reservar/?before={$segundadiaantes}&sala={$currentSalaId}' class='btn mb-2 btn-success'>Semana Anterior</a>";
         echo "<a href='/reservar/?sala={$currentSalaId}' class='btn mb-2 btn-primary'>Semana Atual</a>";
         echo "<a href='/reservar/?before={$segundadiadepois}&sala={$currentSalaId}' class='btn mb-2 btn-success'>Semana Seguinte</a>";
