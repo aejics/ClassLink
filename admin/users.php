@@ -1,30 +1,7 @@
 <?php require 'index.php'; ?>
 <h3>Gestão de Utilizadores</h3>
-<div class="d-flex align-items-center mb-3">
-    <span class="me-3">Adicionar um utilizador</span>
-    <?php formulario("users.php?action=criar", [
-        ["type" => "text", "id" => "userid", "placeholder" => "ID do Utilizador", "label" => "ID do Utilizador", "value" => null],
-        ["type" => "text", "id" => "nome", "placeholder" => "Nome", "label" => "Nome", "value" => null],
-        ["type" => "email", "id" => "email", "placeholder" => "Email", "label" => "Email", "value" => null],
-        ["type" => "checkbox", "id" => "admin", "placeholder" => "Admin", "label" => "Administrador", "value" => "1"]
-    ]); ?>
-</div>
-
 <?php
 switch (isset($_GET['action']) ? $_GET['action'] : null){
-    // caso seja preenchido o formulário de criação:
-    case "criar":
-        if (!isset($_POST['userid']) || !isset($_POST['nome']) || !isset($_POST['email'])) {
-            echo "<div class='alert alert-danger fade show' role='alert'>Dados inválidos.</div>";
-            break;
-        }
-        $adminValue = isset($_POST["admin"]) ? 1 : 0;
-        $stmt = $db->prepare("INSERT INTO cache (id, nome, email, admin) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("sssi", $_POST["userid"], $_POST["nome"], $_POST["email"], $adminValue);
-        $stmt->execute();
-        $stmt->close();
-        acaoexecutada("Criação de Utilizador");
-        break;
     // caso execute a ação apagar:
     case "apagar":
         if (!isset($_GET['id'])) {
