@@ -214,7 +214,7 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
         }
         echo "</table>
         </div>
-        <div id='bulkReservationControls' style='display: none; width: 100%; margin-bottom: 15px;'>
+        <div id='bulkReservationControls' style='display: none; width: 100%; max-width: 70%; margin: 20px auto 15px auto;'>
             <div class='card'>
                 <div class='card-body'>
                     <h5 class='card-title'>Reservas em Massa</h5>
