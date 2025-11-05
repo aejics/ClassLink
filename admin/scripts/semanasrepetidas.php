@@ -205,7 +205,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sala']) && isset($_PO
                     
                     // Insert reservation
                     $motivo = "Horário adicionado por um administrador através do script de semanas repetidas.";
-                    $extra = "Reserva criada automaticamente pelo administrador " . htmlspecialchars($_SESSION['nome'], ENT_QUOTES, 'UTF-8') . " para múltiplas semanas.";
+                    $admin_nome = isset($_SESSION['nome']) ? htmlspecialchars($_SESSION['nome'], ENT_QUOTES, 'UTF-8') : 'Administrador';
+                    $extra = "Reserva criada automaticamente pelo administrador " . $admin_nome . " para múltiplas semanas.";
                     
                     $stmt = $db->prepare("INSERT INTO reservas (sala, tempo, data, requisitor, aprovado, motivo, extra) VALUES (?, ?, ?, ?, 1, ?, ?)");
                     $stmt->bind_param("ssssss", $sala_id, $tempo_id, $data_reserva_formatted, $requisitor_id, $motivo, $extra);
