@@ -1,7 +1,6 @@
 <?php
-require_once(__DIR__ . '../vendor/autoload.php');
-    //require_once(__DIR__ . '/../src/config.php');
-    //require_once(__DIR__ . '/../src/db.php');
+    require_once(__DIR__ . '/../src/config.php');
+    require_once(__DIR__ . '/../src/db.php');
     
     session_start();
     if (isset($_GET['action']) && $_GET['action'] == "logout"){
