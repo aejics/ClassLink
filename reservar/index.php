@@ -283,7 +283,7 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
             }
             echo "<input type='hidden' id='bulkRequisitor' name='requisitor_id' value=''>
             <div class='mb-2'>
-                <label class='form-label'><strong>Reservar para utilizador:</strong></label>
+                <label class='form-label'><strong>Reservar para utilizador (<span style='color: red'>ADMIN</span>):</strong></label>
                 <div class='input-group'>
                     <input type='text' class='form-control' id='bulkSelectedUserDisplay' placeholder='Reservar para mim mesmo' readonly>
                     <button class='btn btn-outline-secondary' type='button' data-bs-toggle='modal' data-bs-target='#bulkUserSelectModal'>

@@ -383,7 +383,7 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                             
                             // Show locked room notice for admins
                             if ($isLocked && $_SESSION['admin']) {
-                                echo "<div class='alert alert-warning mb-3'><strong>Sala Bloqueada:</strong> Esta sala está bloqueada. Como administrador, pode criar reservas para utilizadores.</div>";
+                                echo "<div class='alert alert-warning mb-3'><strong>Sala Bloqueada:</strong> Esta sala está bloqueada.</div>";
                             }
                             
                             if ($isAutonomous) {
@@ -411,7 +411,7 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                                 }
                                 echo "<input type='hidden' id='requisitor_id' name='requisitor_id' value=''>
                                 <div class='mb-3'>
-                                    <label class='form-label'><strong>Reservar para utilizador:</strong></label>
+                                    <label class='form-label'><strong>Reservar para utilizador (<span style='color: red'>ADMIN</span>):</strong></label>
                                     <div class='input-group'>
                                         <input type='text' class='form-control' id='selectedUserDisplay' placeholder='Reservar para mim mesmo' readonly>
                                         <button class='btn btn-outline-secondary' type='button' data-bs-toggle='modal' data-bs-target='#userSelectModal'>
