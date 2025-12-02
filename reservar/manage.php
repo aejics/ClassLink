@@ -34,6 +34,43 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
     <link href="/assets/index.css" rel="stylesheet">
     <link rel="stylesheet" href="/assets/reservar.css">
     <link rel='icon' href='/assets/logo.png'>
+    <script>
+        // User selection modal functions for single reservations
+        function filterUsers() {
+            const searchInput = document.getElementById('userSearchInput');
+            const filter = searchInput.value.toLowerCase();
+            const userItems = document.querySelectorAll('.user-item');
+            
+            userItems.forEach(item => {
+                const name = item.getAttribute('data-user-name').toLowerCase();
+                const email = item.getAttribute('data-user-email').toLowerCase();
+                if (name.includes(filter) || email.includes(filter)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+        
+        function selectUser(element) {
+            const userId = element.getAttribute('data-user-id');
+            const userName = element.getAttribute('data-user-name');
+            const userEmail = element.getAttribute('data-user-email');
+            
+            document.getElementById('requisitor_id').value = userId;
+            document.getElementById('selectedUserDisplay').value = userName + ' (' + userEmail + ')';
+            
+            // Close the modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('userSelectModal'));
+            modal.hide();
+        }
+        
+        function clearUserSelection() {
+            document.getElementById('requisitor_id').value = '';
+            document.getElementById('selectedUserDisplay').value = '';
+            document.getElementById('selectedUserDisplay').placeholder = 'Reservar para mim mesmo';
+        }
+    </script>
 </head>
 
 <body>
@@ -365,20 +402,60 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                         <label for='sala'>Sala</label>
                         </div>";
                             
-                            // Show user selection for admins
+                            // Show user selection for admins with modal lookup
                             if ($_SESSION['admin']) {
                                 $usersStmt = $db->query("SELECT id, nome, email FROM cache ORDER BY nome ASC");
-                                echo "<div class='form-floating mb-3'>
-                                <select class='form-select' id='requisitor_id' name='requisitor_id'>
-                                <option value=''>Reservar para mim mesmo</option>";
+                                $usersData = [];
                                 while ($user = $usersStmt->fetch_assoc()) {
+                                    $usersData[] = $user;
+                                }
+                                echo "<input type='hidden' id='requisitor_id' name='requisitor_id' value=''>
+                                <div class='mb-3'>
+                                    <label class='form-label'><strong>Reservar para utilizador:</strong></label>
+                                    <div class='input-group'>
+                                        <input type='text' class='form-control' id='selectedUserDisplay' placeholder='Reservar para mim mesmo' readonly>
+                                        <button class='btn btn-outline-secondary' type='button' data-bs-toggle='modal' data-bs-target='#userSelectModal'>
+                                            Procurar
+                                        </button>
+                                        <button class='btn btn-outline-danger' type='button' onclick='clearUserSelection()'>
+                                            Limpar
+                                        </button>
+                                    </div>
+                                </div>";
+                                
+                                // User selection modal
+                                echo "<div class='modal fade' id='userSelectModal' tabindex='-1' aria-labelledby='userSelectModalLabel' aria-hidden='true'>
+                                    <div class='modal-dialog modal-dialog-scrollable'>
+                                        <div class='modal-content'>
+                                            <div class='modal-header'>
+                                                <h5 class='modal-title' id='userSelectModalLabel'>Selecionar Utilizador</h5>
+                                                <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Fechar'></button>
+                                            </div>
+                                            <div class='modal-body'>
+                                                <div class='mb-3'>
+                                                    <input type='text' class='form-control' id='userSearchInput' placeholder='Pesquisar por nome ou email...' oninput='filterUsers()'>
+                                                </div>
+                                                <div class='list-group' id='userList'>";
+                                foreach ($usersData as $user) {
                                     $userId = htmlspecialchars($user['id'], ENT_QUOTES, 'UTF-8');
                                     $userName = htmlspecialchars($user['nome'], ENT_QUOTES, 'UTF-8');
                                     $userEmail = htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8');
-                                    echo "<option value='{$userId}'>{$userName} ({$userEmail})</option>";
+                                    echo "<button type='button' class='list-group-item list-group-item-action user-item' 
+                                        data-user-id='{$userId}' 
+                                        data-user-name='{$userName}' 
+                                        data-user-email='{$userEmail}'
+                                        onclick='selectUser(this)'>
+                                        <strong>{$userName}</strong><br>
+                                        <small class='text-muted'>{$userEmail}</small>
+                                    </button>";
                                 }
-                                echo "</select>
-                                <label for='requisitor_id'>Reservar para utilizador</label>
+                                echo "</div>
+                                            </div>
+                                            <div class='modal-footer'>
+                                                <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Cancelar</button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>";
                             }
                             
