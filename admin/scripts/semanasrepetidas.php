@@ -273,7 +273,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sala']) && isset($_PO
         </div>";
     } elseif (strtotime($data_fim) < strtotime($data_inicio)) {
         echo "<div class='mt-3 alert alert-danger fade show' role='alert'>
-            <strong>Erro:</strong> A data de fim deve ser posterior à data de início.
+            <strong>Erro:</strong> A data de fim deve ser igual ou posterior à data de início.
         </div>";
     } else {
         // Verify sala exists
@@ -306,91 +306,98 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sala']) && isset($_PO
                 $first_date = strtotime("+{$days_to_add} days", $first_date);
             }
             
-            $reservas_criadas = 0;
-            $reservas_duplicadas = 0;
-            $erros = [];
-            $num_semanas = 0;
-            
-            // Create reservations for each week until we pass the end date
-            $current_date = $first_date;
-            while ($current_date <= $end_date) {
-                $num_semanas++;
-                $data_reserva_formatted = date('Y-m-d', $current_date);
+            // Check if the first occurrence is after the end date
+            if ($first_date > $end_date) {
+                echo "<div class='mt-3 alert alert-warning fade show' role='alert'>
+                    <strong>Atenção:</strong> O dia da semana selecionado não ocorre dentro do intervalo de datas especificado. Nenhuma reserva foi criada.
+                </div>";
+            } else {
+                $reservas_criadas = 0;
+                $reservas_duplicadas = 0;
+                $erros = [];
+                $num_semanas = 0;
                 
-                // Create reservation for each selected time
-                foreach ($tempos_ids as $tempo_id) {
-                    // Verify tempo exists
-                    $stmt = $db->prepare("SELECT * FROM tempos WHERE id = ?");
-                    $stmt->bind_param("s", $tempo_id);
-                    $stmt->execute();
-                    $tempo = $stmt->get_result()->fetch_assoc();
-                    $stmt->close();
+                // Create reservations for each week until we pass the end date
+                $current_date = $first_date;
+                while ($current_date <= $end_date) {
+                    $num_semanas++;
+                    $data_reserva_formatted = date('Y-m-d', $current_date);
                     
-                    if (!$tempo) {
-                        $erros[] = "Tempo inválido: {$tempo_id}";
-                        continue;
+                    // Create reservation for each selected time
+                    foreach ($tempos_ids as $tempo_id) {
+                        // Verify tempo exists
+                        $stmt = $db->prepare("SELECT * FROM tempos WHERE id = ?");
+                        $stmt->bind_param("s", $tempo_id);
+                        $stmt->execute();
+                        $tempo = $stmt->get_result()->fetch_assoc();
+                        $stmt->close();
+                        
+                        if (!$tempo) {
+                            $erros[] = "Tempo inválido: {$tempo_id}";
+                            continue;
+                        }
+                        
+                        // Check if reservation already exists
+                        $stmt = $db->prepare("SELECT * FROM reservas WHERE sala = ? AND tempo = ? AND data = ?");
+                        $stmt->bind_param("sss", $sala_id, $tempo_id, $data_reserva_formatted);
+                        $stmt->execute();
+                        $existing = $stmt->get_result()->fetch_assoc();
+                        $stmt->close();
+                        
+                        if ($existing) {
+                            $reservas_duplicadas++;
+                            continue;
+                        }
+                        
+                        // Insert reservation with user-provided motivo and extra
+                        $stmt = $db->prepare("INSERT INTO reservas (sala, tempo, data, requisitor, aprovado, motivo, extra) VALUES (?, ?, ?, ?, 1, ?, ?)");
+                        $stmt->bind_param("ssssss", $sala_id, $tempo_id, $data_reserva_formatted, $requisitor_id, $motivo, $extra);
+                        
+                        if ($stmt->execute()) {
+                            $reservas_criadas++;
+                        } else {
+                            $erros[] = "Erro ao criar reserva para {$data_reserva_formatted} - {$tempo['horashumanos']}: " . $stmt->error;
+                        }
+                        $stmt->close();
                     }
                     
-                    // Check if reservation already exists
-                    $stmt = $db->prepare("SELECT * FROM reservas WHERE sala = ? AND tempo = ? AND data = ?");
-                    $stmt->bind_param("sss", $sala_id, $tempo_id, $data_reserva_formatted);
-                    $stmt->execute();
-                    $existing = $stmt->get_result()->fetch_assoc();
-                    $stmt->close();
-                    
-                    if ($existing) {
-                        $reservas_duplicadas++;
-                        continue;
-                    }
-                    
-                    // Insert reservation with user-provided motivo and extra
-                    $stmt = $db->prepare("INSERT INTO reservas (sala, tempo, data, requisitor, aprovado, motivo, extra) VALUES (?, ?, ?, ?, 1, ?, ?)");
-                    $stmt->bind_param("ssssss", $sala_id, $tempo_id, $data_reserva_formatted, $requisitor_id, $motivo, $extra);
-                    
-                    if ($stmt->execute()) {
-                        $reservas_criadas++;
-                    } else {
-                        $erros[] = "Erro ao criar reserva para {$data_reserva_formatted} - {$tempo['horashumanos']}: " . $stmt->error;
-                    }
-                    $stmt->close();
+                    // Move to next week
+                    $current_date = strtotime("+1 week", $current_date);
                 }
                 
-                // Move to next week
-                $current_date = strtotime("+1 week", $current_date);
-            }
-            
-            // Display results
-            echo "<div class='mt-3 alert alert-success fade show' role='alert'>
-                <strong>Sucesso!</strong> {$reservas_criadas} reserva(s) criada(s) com sucesso.
-            </div>";
-            
-            if ($reservas_duplicadas > 0) {
-                echo "<div class='mt-3 alert alert-warning fade show' role='alert'>
-                    <strong>Atenção:</strong> {$reservas_duplicadas} reserva(s) já existia(m) e não foi/foram criada(s).
+                // Display results
+                echo "<div class='mt-3 alert alert-success fade show' role='alert'>
+                    <strong>Sucesso!</strong> {$reservas_criadas} reserva(s) criada(s) com sucesso.
+                </div>";
+                
+                if ($reservas_duplicadas > 0) {
+                    echo "<div class='mt-3 alert alert-warning fade show' role='alert'>
+                        <strong>Atenção:</strong> {$reservas_duplicadas} reserva(s) já existia(m) e não foi/foram criada(s).
+                    </div>";
+                }
+                
+                if (!empty($erros)) {
+                    echo "<div class='mt-3 alert alert-danger fade show' role='alert'>
+                        <strong>Erros encontrados:</strong>
+                        <ul class='mb-0'>";
+                    foreach ($erros as $erro) {
+                        echo "<li>" . htmlspecialchars($erro, ENT_QUOTES, 'UTF-8') . "</li>";
+                    }
+                    echo "</ul></div>";
+                }
+                
+                // Summary
+                echo "<div class='mt-3 alert alert-info fade show' role='alert'>
+                    <strong>Resumo:</strong><br>
+                    - Sala: " . htmlspecialchars($sala['nome'], ENT_QUOTES, 'UTF-8') . "<br>
+                    - Utilizador: " . htmlspecialchars($requisitor['nome'], ENT_QUOTES, 'UTF-8') . "<br>
+                    - Tempos selecionados: " . count($tempos_ids) . "<br>
+                    - Semanas abrangidas: {$num_semanas}<br>
+                    - Total de reservas esperadas: " . (count($tempos_ids) * $num_semanas) . "<br>
+                    - Reservas criadas: {$reservas_criadas}<br>
+                    - Motivo: " . htmlspecialchars($motivo, ENT_QUOTES, 'UTF-8') . "
                 </div>";
             }
-            
-            if (!empty($erros)) {
-                echo "<div class='mt-3 alert alert-danger fade show' role='alert'>
-                    <strong>Erros encontrados:</strong>
-                    <ul class='mb-0'>";
-                foreach ($erros as $erro) {
-                    echo "<li>" . htmlspecialchars($erro, ENT_QUOTES, 'UTF-8') . "</li>";
-                }
-                echo "</ul></div>";
-            }
-            
-            // Summary
-            echo "<div class='mt-3 alert alert-info fade show' role='alert'>
-                <strong>Resumo:</strong><br>
-                - Sala: " . htmlspecialchars($sala['nome'], ENT_QUOTES, 'UTF-8') . "<br>
-                - Utilizador: " . htmlspecialchars($requisitor['nome'], ENT_QUOTES, 'UTF-8') . "<br>
-                - Tempos selecionados: " . count($tempos_ids) . "<br>
-                - Semanas abrangidas: {$num_semanas}<br>
-                - Total de reservas esperadas: " . (count($tempos_ids) * $num_semanas) . "<br>
-                - Reservas criadas: {$reservas_criadas}<br>
-                - Motivo: " . htmlspecialchars($motivo, ENT_QUOTES, 'UTF-8') . "
-            </div>";
         }
     }
 }
