@@ -107,7 +107,7 @@ switch (isset($_GET['action']) ? $_GET['action'] : null){
         $stmt = $db->prepare("INSERT INTO cache (id, nome, email, admin) VALUES (?, ?, ?, 0)");
         $stmt->bind_param("sss", $tempId, $_POST['nome'], $_POST['email']);
         if ($stmt->execute()) {
-            echo "<div class='alert alert-success fade show' role='alert'>Utilizador pré-adicionado com sucesso. Quando o utilizador iniciar sessão pela primeira vez, as reservas serão automaticamente associadas à conta.</div>";
+            echo "<div class='alert alert-success fade show' role='alert'>Utilizador pré-adicionado com sucesso.</div>";
             acaoexecutada("Pré-adição de Utilizador");
         } else {
             echo "<div class='alert alert-danger fade show' role='alert'>Erro ao pré-adicionar utilizador.</div>";
@@ -126,7 +126,7 @@ $numUtilizadores = $utilizadores->num_rows;
         <h5 class="mb-0">Pré-adicionar Utilizador</h5>
     </div>
     <div class="card-body">
-        <p class="text-muted small">Adicione utilizadores antes de eles iniciarem sessão. Quando o utilizador iniciar sessão pela primeira vez, as reservas associadas serão automaticamente transferidas.</p>
+        <p class="text-muted small">Não deve fazer esta ação sem consultar o manual. Consulte o manual antes de proceder.</p>
         <form action="users.php?action=preadd" method="POST" class="d-flex align-items-center flex-wrap gap-2">
             <div class="form-floating" style="flex: 1; min-width: 200px;">
                 <input type="text" class="form-control" id="nome" name="nome" placeholder="Nome" required>
