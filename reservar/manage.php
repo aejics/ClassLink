@@ -87,8 +87,8 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                     $checkStmt->close();
                     
                     if (!$existing) {
-                        // Check if room has autonomous reservation (tipo_sala = 2)
-                        $salaStmt = $db->prepare("SELECT tipo_sala FROM salas WHERE id = ?");
+                        // Check if room has autonomous reservation (tipo_sala = 2) and if it's locked
+                        $salaStmt = $db->prepare("SELECT tipo_sala, bloqueado FROM salas WHERE id = ?");
                         $salaStmt->bind_param("s", $slotSala);
                         $salaStmt->execute();
                         $salaInfo = $salaStmt->get_result()->fetch_assoc();
@@ -99,6 +99,18 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                             continue;
                         }
                         
+                        // Check if room is locked and user is not admin
+                        if ($salaInfo['bloqueado'] == 1 && !$_SESSION['admin']) {
+                            $failedSlots[] = htmlspecialchars($slotData, ENT_QUOTES, 'UTF-8') . " - " . htmlspecialchars($slotTempo, ENT_QUOTES, 'UTF-8') . " (sala bloqueada)";
+                            continue;
+                        }
+                        
+                        // Determine requisitor: for admins on locked rooms, use selected user or current user
+                        $requisitor = $id;
+                        if ($_SESSION['admin'] && isset($_POST['requisitor_id']) && !empty($_POST['requisitor_id'])) {
+                            $requisitor = $_POST['requisitor_id'];
+                        }
+                        
                         // Auto-approve if tipo_sala is 2 (autonomous), otherwise set to 0 (pending)
                         $aprovado = ($salaInfo['tipo_sala'] == 2) ? 1 : 0;
                         if ($aprovado == 1) {
@@ -106,7 +118,7 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                         }
                         
                         $stmt = $db->prepare("INSERT INTO reservas (sala, tempo, requisitor, data, aprovado, motivo, extra) VALUES (?, ?, ?, ?, ?, ?, ?);");
-                        $stmt->bind_param("sssssss", $slotSala, $slotTempo, $id, $slotData, $aprovado, $motivo, $extra);
+                        $stmt->bind_param("sssssss", $slotSala, $slotTempo, $requisitor, $slotData, $aprovado, $motivo, $extra);
                         if ($stmt->execute()) {
                             $successCount++;
                             
@@ -173,8 +185,8 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                         echo "<div class='alert alert-danger show' role='alert'>Motivo é obrigatório.</div>";
                         break;
                     }
-                    // Check if room has autonomous reservation (tipo_sala = 2)
-                    $stmt = $db->prepare("SELECT tipo_sala FROM salas WHERE id = ?");
+                    // Check if room has autonomous reservation (tipo_sala = 2) and if it's locked
+                    $stmt = $db->prepare("SELECT tipo_sala, bloqueado FROM salas WHERE id = ?");
                     $stmt->bind_param("s", $sala);
                     $stmt->execute();
                     $salaInfo = $stmt->get_result()->fetch_assoc();
@@ -185,11 +197,23 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                         die("Sala não encontrada.");
                     }
                     
+                    // Check if room is locked and user is not admin
+                    if ($salaInfo['bloqueado'] == 1 && !$_SESSION['admin']) {
+                        http_response_code(403);
+                        die("Esta sala está bloqueada. Apenas os administradores podem criar reservas.");
+                    }
+                    
+                    // Determine requisitor: for admins, use selected user if provided
+                    $requisitor = $id;
+                    if ($_SESSION['admin'] && isset($_POST['requisitor_id']) && !empty($_POST['requisitor_id'])) {
+                        $requisitor = $_POST['requisitor_id'];
+                    }
+                    
                     // Auto-approve if tipo_sala is 2 (autonomous), otherwise set to 0 (pending)
                     $aprovado = ($salaInfo['tipo_sala'] == 2) ? 1 : 0;
                     
                     $stmt = $db->prepare("INSERT INTO reservas (sala, tempo, requisitor, data, aprovado, motivo, extra) VALUES (?, ?, ?, ?, ?, ?, ?);");
-                    $stmt->bind_param("sssssss", $sala, $tempo, $id, $data, $aprovado, $motivo, $extra);
+                    $stmt->bind_param("sssssss", $sala, $tempo, $requisitor, $data, $aprovado, $motivo, $extra);
                     if (!$stmt->execute()) {
                         http_response_code(500);
                         die("Houve um problema a reservar a sala. Contacte um administrador, ou tente novamente mais tarde.");
@@ -281,7 +305,7 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                     $stmt->close();
                     
                     if (!$detalhesreserva) {
-                        $stmt = $db->prepare("SELECT nome, tipo_sala FROM salas WHERE id=?");
+                        $stmt = $db->prepare("SELECT nome, tipo_sala, bloqueado FROM salas WHERE id=?");
                         $stmt->bind_param("s", $sala);
                         $stmt->execute();
                         $salaData = $stmt->get_result()->fetch_assoc();
@@ -289,64 +313,99 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                         
                         $salaextenso = $salaData['nome'];
                         $isAutonomous = ($salaData['tipo_sala'] == 2);
+                        $isLocked = ($salaData['bloqueado'] == 1);
+                        $canCreateReservation = (!$isLocked || $_SESSION['admin']);
                         
                         echo "<div class='row justify-content-center'>";
                         echo "<div class='col-md-8 col-lg-6'>";
-                        echo "<h2 class='mb-4'>Reservar Sala</h2>";
-                        if ($isAutonomous) {
-                            echo "<div class='alert alert-info mb-3'><strong>Reserva Autónoma:</strong> Esta sala é de reserva autónoma. A sua reserva será aprovada automaticamente.</div>";
-                        }
-                        // Get materials for this room
-                        $materiaisStmt = $db->prepare("SELECT id, nome, descricao FROM materiais WHERE sala_id = ? ORDER BY nome ASC");
-                        $materiaisStmt->bind_param("s", $sala);
-                        $materiaisStmt->execute();
-                        $materiaisResult = $materiaisStmt->get_result();
-                        $materiaisStmt->close();
                         
-                        echo "<form action='/reservar/manage.php?subaction=reservar&tempo=" . urlencode($tempo) . "&data=" . urlencode($data) . "&sala=" . urlencode($sala) . "' method='POST'>
-                    <div class='form-floating mb-3'>
-                    <input type='text' class='form-control' id='sala' name='sala' placeholder='Sala' value='" . htmlspecialchars($salaextenso, ENT_QUOTES, 'UTF-8') . "' disabled>
-                    <label for='sala'>Sala</label>
-                    </div>
-                    <div class='form-floating mb-3'>
-                    <input type='text' class='form-control' id='motivo' name='motivo' placeholder='Motivo da Reserva' required>
-                    <label for='motivo'>Motivo da Reserva</label>
-                    </div>
-                    <div class='form-floating mb-3'>
-                    <textarea class='form-control' id='extra' name='extra' placeholder='Informação Extra' rows='6' style='height: 150px;'></textarea>
-                    <label for='extra'>Informação Extra</label>
-                    </div>";
-                        
-                        // Show materials selection if available
-                        if ($materiaisResult->num_rows > 0) {
-                            echo "<div class='mb-3'>";
-                            echo "<label class='form-label'><strong>Materiais Disponíveis (opcional):</strong></label>";
-                            echo "<div class='border rounded p-3' style='max-height: 200px; overflow-y: auto;'>";
-                            while ($material = $materiaisResult->fetch_assoc()) {
-                                $materialId = htmlspecialchars($material['id'], ENT_QUOTES, 'UTF-8');
-                                $materialNome = htmlspecialchars($material['nome'], ENT_QUOTES, 'UTF-8');
-                                $materialDesc = htmlspecialchars($material['descricao'], ENT_QUOTES, 'UTF-8');
-                                echo "<div class='form-check'>";
-                                echo "<input class='form-check-input' type='checkbox' name='materiais[]' value='{$materialId}' id='material_{$materialId}'>";
-                                echo "<label class='form-check-label' for='material_{$materialId}'>";
-                                echo "<strong>{$materialNome}</strong>";
-                                if (!empty($materialDesc)) {
-                                    echo "<br><small class='text-muted'>{$materialDesc}</small>";
+                        if (!$canCreateReservation) {
+                            // Non-admin trying to access a locked room
+                            echo "<h2 class='mb-4'>Sala Bloqueada</h2>";
+                            echo "<div class='alert alert-danger mb-3'><strong>Sala Bloqueada:</strong> Esta sala está bloqueada. Apenas os administradores podem criar reservas.</div>";
+                            echo "<a href='/reservar/?sala=" . urlencode($sala) . "' class='btn btn-secondary w-100'>Voltar</a>";
+                            echo "</div></div>";
+                        } else {
+                            echo "<h2 class='mb-4'>Reservar Sala</h2>";
+                            
+                            // Show locked room notice for admins
+                            if ($isLocked && $_SESSION['admin']) {
+                                echo "<div class='alert alert-warning mb-3'><strong>Sala Bloqueada:</strong> Esta sala está bloqueada. Como administrador, pode criar reservas para utilizadores.</div>";
+                            }
+                            
+                            if ($isAutonomous) {
+                                echo "<div class='alert alert-info mb-3'><strong>Reserva Autónoma:</strong> Esta sala é de reserva autónoma. A sua reserva será aprovada automaticamente.</div>";
+                            }
+                            // Get materials for this room
+                            $materiaisStmt = $db->prepare("SELECT id, nome, descricao FROM materiais WHERE sala_id = ? ORDER BY nome ASC");
+                            $materiaisStmt->bind_param("s", $sala);
+                            $materiaisStmt->execute();
+                            $materiaisResult = $materiaisStmt->get_result();
+                            $materiaisStmt->close();
+                            
+                            echo "<form action='/reservar/manage.php?subaction=reservar&tempo=" . urlencode($tempo) . "&data=" . urlencode($data) . "&sala=" . urlencode($sala) . "' method='POST'>
+                        <div class='form-floating mb-3'>
+                        <input type='text' class='form-control' id='sala' name='sala' placeholder='Sala' value='" . htmlspecialchars($salaextenso, ENT_QUOTES, 'UTF-8') . "' disabled>
+                        <label for='sala'>Sala</label>
+                        </div>";
+                            
+                            // Show user selection for admins
+                            if ($_SESSION['admin']) {
+                                $usersStmt = $db->query("SELECT id, nome, email FROM cache ORDER BY nome ASC");
+                                echo "<div class='form-floating mb-3'>
+                                <select class='form-select' id='requisitor_id' name='requisitor_id'>
+                                <option value=''>Reservar para mim mesmo</option>";
+                                while ($user = $usersStmt->fetch_assoc()) {
+                                    $userId = htmlspecialchars($user['id'], ENT_QUOTES, 'UTF-8');
+                                    $userName = htmlspecialchars($user['nome'], ENT_QUOTES, 'UTF-8');
+                                    $userEmail = htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8');
+                                    echo "<option value='{$userId}'>{$userName} ({$userEmail})</option>";
                                 }
-                                echo "</label>";
+                                echo "</select>
+                                <label for='requisitor_id'>Reservar para utilizador</label>
+                                </div>";
+                            }
+                            
+                            echo "<div class='form-floating mb-3'>
+                        <input type='text' class='form-control' id='motivo' name='motivo' placeholder='Motivo da Reserva' required>
+                        <label for='motivo'>Motivo da Reserva</label>
+                        </div>
+                        <div class='form-floating mb-3'>
+                        <textarea class='form-control' id='extra' name='extra' placeholder='Informação Extra' rows='6' style='height: 150px;'></textarea>
+                        <label for='extra'>Informação Extra</label>
+                        </div>";
+                            
+                            // Show materials selection if available
+                            if ($materiaisResult->num_rows > 0) {
+                                echo "<div class='mb-3'>";
+                                echo "<label class='form-label'><strong>Materiais Disponíveis (opcional):</strong></label>";
+                                echo "<div class='border rounded p-3' style='max-height: 200px; overflow-y: auto;'>";
+                                while ($material = $materiaisResult->fetch_assoc()) {
+                                    $materialId = htmlspecialchars($material['id'], ENT_QUOTES, 'UTF-8');
+                                    $materialNome = htmlspecialchars($material['nome'], ENT_QUOTES, 'UTF-8');
+                                    $materialDesc = htmlspecialchars($material['descricao'], ENT_QUOTES, 'UTF-8');
+                                    echo "<div class='form-check'>";
+                                    echo "<input class='form-check-input' type='checkbox' name='materiais[]' value='{$materialId}' id='material_{$materialId}'>";
+                                    echo "<label class='form-check-label' for='material_{$materialId}'>";
+                                    echo "<strong>{$materialNome}</strong>";
+                                    if (!empty($materialDesc)) {
+                                        echo "<br><small class='text-muted'>{$materialDesc}</small>";
+                                    }
+                                    echo "</label>";
+                                    echo "</div>";
+                                }
+                                echo "</div>";
                                 echo "</div>";
                             }
-                            echo "</div>";
-                            echo "</div>";
+                            
+                            if (!$isAutonomous) {
+                                echo "<p class='text-muted small mb-3'>Nota: A reserva será submetida para aprovação.</p>";
+                            }
+                            echo "<button type='submit' class='btn btn-success w-100 mb-2'>Reservar</button>
+                        </form>";
+                            echo "<a href='" . htmlspecialchars($_SERVER['HTTP_REFERER'], ENT_QUOTES, 'UTF-8') . "' class='btn btn-secondary w-100'>Voltar</a>";
+                            echo "</div></div>";
                         }
-                        
-                        if (!$isAutonomous) {
-                            echo "<p class='text-muted small mb-3'>Nota: A reserva será submetida para aprovação.</p>";
-                        }
-                        echo "<button type='submit' class='btn btn-success w-100 mb-2'>Reservar</button>
-                    </form>";
-                        echo "<a href='" . htmlspecialchars($_SERVER['HTTP_REFERER'], ENT_QUOTES, 'UTF-8') . "' class='btn btn-secondary w-100'>Voltar</a>";
-                        echo "</div></div>";
                     } else {
                         echo "<div class='row justify-content-center'>";
                         echo "<div class='col-md-10 col-lg-8'>";

@@ -122,16 +122,27 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
         // Get the selected room
         $sala = isset($_GET['sala']) ? $_GET['sala'] : $_POST['sala'];
         
-        // Query room information to check if it's autonomous
-        $stmt = $db->prepare("SELECT nome, tipo_sala FROM salas WHERE id = ?");
+        // Query room information to check if it's autonomous and if it's locked
+        $stmt = $db->prepare("SELECT nome, tipo_sala, bloqueado FROM salas WHERE id = ?");
         $stmt->bind_param("s", $sala);
         $stmt->execute();
         $salaData = $stmt->get_result()->fetch_assoc();
         $stmt->close();
         
         $isAutonomous = ($salaData && $salaData['tipo_sala'] == 2);
+        $isLocked = ($salaData && $salaData['bloqueado'] == 1);
+        $canCreateReservation = (!$isLocked || $_SESSION['admin']);
         
         echo "<div class='container mt-3 d-flex align-items-center justify-content-center flex-column'>";
+        
+        // Display locked room notice
+        if ($isLocked) {
+            if ($_SESSION['admin']) {
+                echo "<div class='alert alert-warning mb-3' style='width: 100%;'><strong>Sala Bloqueada:</strong> Esta sala está bloqueada. Como administrador, pode criar reservas para utilizadores.</div>";
+            } else {
+                echo "<div class='alert alert-danger mb-3' style='width: 100%;'><strong>Sala Bloqueada:</strong> Esta sala está bloqueada. Apenas os administradores podem criar reservas. Pode visualizar as reservas existentes.</div>";
+            }
+        }
         
         // Display autonomous reservation message if applicable
         if ($isAutonomous) {
@@ -177,13 +188,20 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                     $stmt->close();
                     
                     if (!$tempoatualdb || $tempoatualdb['aprovado'] == -1) {
-                        echo "<td class='bg-success text-white text-center' style='padding: 4px; overflow: hidden;'>
-                        <div style='display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 50px;'>
-                        <input type='checkbox' name='slots[]' value='" . urlencode($row['id']) . "|" . urlencode($sala) . "|" . urlencode($diacheckdb) . "' class='bulk-checkbox' style='width: 16px; height: 16px;'>
-                        <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "' style='display: block; font-size: 0.75rem; word-break: break-word;'>
-                        Livre
-                        </a>
-                        </div></td>";
+                        if ($canCreateReservation) {
+                            echo "<td class='bg-success text-white text-center' style='padding: 4px; overflow: hidden;'>
+                            <div style='display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 50px;'>
+                            <input type='checkbox' name='slots[]' value='" . urlencode($row['id']) . "|" . urlencode($sala) . "|" . urlencode($diacheckdb) . "' class='bulk-checkbox' style='width: 16px; height: 16px;'>
+                            <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "' style='display: block; font-size: 0.75rem; word-break: break-word;'>
+                            Livre
+                            </a>
+                            </div></td>";
+                        } else {
+                            echo "<td class='bg-success text-white text-center' style='padding: 4px; overflow: hidden;'>
+                            <div style='display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 50px;'>
+                            <span style='font-size: 0.75rem;'>Livre</span>
+                            </div></td>";
+                        }
                     } else {
                         $stmt = $db->prepare("SELECT nome FROM cache WHERE id=?");
                         $stmt->bind_param("s", $tempoatualdb['requisitor']);
@@ -218,8 +236,26 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
             <div class='card'>
                 <div class='card-body'>
                     <h5 class='card-title'>Reservas em Massa</h5>
-                    <p id='selectedCount'>0 tempos selecionados</p>
-                    <div class='form-floating mb-2'>
+                    <p id='selectedCount'>0 tempos selecionados</p>";
+        
+        // Show user selection for admins
+        if ($_SESSION['admin']) {
+            $usersStmt = $db->query("SELECT id, nome, email FROM cache ORDER BY nome ASC");
+            echo "<div class='form-floating mb-2'>
+            <select class='form-select' id='bulkRequisitor' name='requisitor_id'>
+            <option value=''>Reservar para mim mesmo</option>";
+            while ($user = $usersStmt->fetch_assoc()) {
+                $userId = htmlspecialchars($user['id'], ENT_QUOTES, 'UTF-8');
+                $userName = htmlspecialchars($user['nome'], ENT_QUOTES, 'UTF-8');
+                $userEmail = htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8');
+                echo "<option value='{$userId}'>{$userName} ({$userEmail})</option>";
+            }
+            echo "</select>
+            <label for='bulkRequisitor'>Reservar para utilizador</label>
+            </div>";
+        }
+        
+        echo "<div class='form-floating mb-2'>
                         <input type='text' class='form-control' id='bulkMotivo' name='motivo' placeholder='Motivo da Reserva' required>
                         <label for='bulkMotivo'>Motivo da Reserva</label>
                     </div>
