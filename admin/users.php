@@ -102,8 +102,8 @@ switch (isset($_GET['action']) ? $_GET['action'] : null){
             echo "<div class='alert alert-danger fade show' role='alert'>Já existe um utilizador com este email.</div>";
             break;
         }
-        // Generate a temporary ID with 'pre_' prefix for pre-registered users
-        $tempId = 'pre_' . uuid4();
+        // Generate a temporary ID with pre-registered prefix for pre-registered users
+        $tempId = PRE_REGISTERED_PREFIX . uuid4();
         $stmt = $db->prepare("INSERT INTO cache (id, nome, email, admin) VALUES (?, ?, ?, 0)");
         $stmt->bind_param("sss", $tempId, $_POST['nome'], $_POST['email']);
         if ($stmt->execute()) {
@@ -178,7 +178,7 @@ $numUtilizadores = $utilizadores->num_rows;
                                 $adminStatus = $row['admin'] ? "Sim" : "Não";
                                 $userName = htmlspecialchars($row['nome'], ENT_QUOTES, 'UTF-8');
                                 $userEmail = htmlspecialchars($row['email'], ENT_QUOTES, 'UTF-8');
-                                $isPreRegistered = str_starts_with($row['id'], 'pre_');
+                                $isPreRegistered = str_starts_with($row['id'], PRE_REGISTERED_PREFIX);
                             ?>
                                 <tr data-user-name="<?php echo $userName; ?>" data-user-email="<?php echo $userEmail; ?>">
                                     <td><?php echo $userName; ?></td>

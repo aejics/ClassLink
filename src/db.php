@@ -45,10 +45,6 @@
     // Create junction table for reservations and materials
     $db->query("CREATE TABLE IF NOT EXISTS reservas_materiais (reserva_sala VARCHAR(99) NOT NULL, reserva_tempo VARCHAR(99) NOT NULL, reserva_data DATE NOT NULL, material_id VARCHAR(99) NOT NULL, PRIMARY KEY (reserva_sala, reserva_tempo, reserva_data, material_id), FOREIGN KEY (reserva_sala, reserva_tempo, reserva_data) REFERENCES reservas(sala, tempo, data) ON DELETE CASCADE, FOREIGN KEY (material_id) REFERENCES materiais(id) ON DELETE CASCADE);");
     
-    // Add unique index on email for pre-registered user lookup (existing installations)
-    // This helps identify pre-registered users when they log in for the first time
-    $result = $db->query("SHOW INDEX FROM cache WHERE Key_name = 'email_unique'");
-    if ($result && $result->num_rows == 0) {
-        $db->query("ALTER TABLE cache ADD UNIQUE INDEX email_unique (email);");
-    }
+    // Constant for pre-registered user ID prefix
+    define('PRE_REGISTERED_PREFIX', 'pre_');
 ?>

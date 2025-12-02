@@ -23,32 +23,42 @@
             $_SESSION['email'] = $_SESSION['resourceOwner']['email'];
             $_SESSION['id'] = $_SESSION['resourceOwner']['sub'];
 
-            // Check if there's a pre-registered user with this email (id starts with 'pre_')
-            $stmt = $db->prepare("SELECT id FROM cache WHERE email = ? AND id LIKE 'pre_%'");
-            $stmt->bind_param("s", $_SESSION['email']);
+            // Check if there's a pre-registered user with this email (id starts with PRE_REGISTERED_PREFIX)
+            $prePattern = PRE_REGISTERED_PREFIX . '%';
+            $stmt = $db->prepare("SELECT id FROM cache WHERE email = ? AND id LIKE ?");
+            $stmt->bind_param("ss", $_SESSION['email'], $prePattern);
             $stmt->execute();
             $preRegisteredUser = $stmt->get_result()->fetch_assoc();
             $stmt->close();
             
             if ($preRegisteredUser) {
                 // User was pre-registered, update their ID to the real OAuth2 ID
-                // First update foreign key references in reservas table
-                $stmt = $db->prepare("UPDATE reservas SET requisitor = ? WHERE requisitor = ?");
-                $stmt->bind_param("ss", $_SESSION['id'], $preRegisteredUser['id']);
-                $stmt->execute();
-                $stmt->close();
-                
-                // Update foreign key references in logs table
-                $stmt = $db->prepare("UPDATE logs SET userid = ? WHERE userid = ?");
-                $stmt->bind_param("ss", $_SESSION['id'], $preRegisteredUser['id']);
-                $stmt->execute();
-                $stmt->close();
-                
-                // Update the user record with the real OAuth2 ID
-                $stmt = $db->prepare("UPDATE cache SET id = ?, nome = ? WHERE email = ? AND id LIKE 'pre_%'");
-                $stmt->bind_param("sss", $_SESSION['id'], $_SESSION['nome'], $_SESSION['email']);
-                $stmt->execute();
-                $stmt->close();
+                // Use a transaction to ensure atomicity
+                $db->begin_transaction();
+                try {
+                    // First update foreign key references in reservas table
+                    $stmt = $db->prepare("UPDATE reservas SET requisitor = ? WHERE requisitor = ?");
+                    $stmt->bind_param("ss", $_SESSION['id'], $preRegisteredUser['id']);
+                    $stmt->execute();
+                    $stmt->close();
+                    
+                    // Update foreign key references in logs table
+                    $stmt = $db->prepare("UPDATE logs SET userid = ? WHERE userid = ?");
+                    $stmt->bind_param("ss", $_SESSION['id'], $preRegisteredUser['id']);
+                    $stmt->execute();
+                    $stmt->close();
+                    
+                    // Update the user record with the real OAuth2 ID
+                    $stmt = $db->prepare("UPDATE cache SET id = ?, nome = ? WHERE id = ?");
+                    $stmt->bind_param("sss", $_SESSION['id'], $_SESSION['nome'], $preRegisteredUser['id']);
+                    $stmt->execute();
+                    $stmt->close();
+                    
+                    $db->commit();
+                } catch (Exception $e) {
+                    $db->rollback();
+                    throw $e;
+                }
             } else {
                 // No pre-registered user found, insert new record (existing behavior)
                 $stmt = $db->prepare("INSERT IGNORE INTO cache (id, nome, email) VALUES (?, ?, ?)");
