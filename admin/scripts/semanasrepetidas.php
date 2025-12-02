@@ -2,7 +2,7 @@
 <div style="margin-left: 20%; margin-right: 20%; text-align: center;">
 <h1>Semanas repetidas</h1>
 <p>Este script permite criar reservas repetidas de salas ao longo de várias semanas.</p>
-<p>Selecione a sala, o utilizador, os tempos desejados e o intervalo de semanas para criar as reservas.</p>
+<p>Selecione a sala, o utilizador, os tempos desejados e o intervalo de datas para criar as reservas.</p>
 
 <style>
     body {
@@ -41,7 +41,70 @@
     .time-checkbox-item:hover {
         background-color: #e9ecef;
     }
+    
+    .form-floating label {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
 </style>
+
+<script>
+    // User selection modal functions
+    function filterUsers() {
+        const searchInput = document.getElementById('userSearchInput');
+        const filter = searchInput.value.toLowerCase();
+        const userItems = document.querySelectorAll('.user-item');
+        
+        userItems.forEach(item => {
+            const name = item.getAttribute('data-user-name').toLowerCase();
+            const email = item.getAttribute('data-user-email').toLowerCase();
+            if (name.includes(filter) || email.includes(filter)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function selectUser(element) {
+        const userId = element.getAttribute('data-user-id');
+        const userName = element.getAttribute('data-user-name');
+        const userEmail = element.getAttribute('data-user-email');
+        
+        document.getElementById('requisitor').value = userId;
+        document.getElementById('selectedUserDisplay').value = userName + ' (' + userEmail + ')';
+        
+        // Close the modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('userSelectModal'));
+        modal.hide();
+    }
+    
+    function clearUserSelection() {
+        document.getElementById('requisitor').value = '';
+        document.getElementById('selectedUserDisplay').value = '';
+        document.getElementById('selectedUserDisplay').placeholder = 'Selecione um utilizador...';
+    }
+    
+    // Form validation
+    function validateForm(event) {
+        const requisitor = document.getElementById('requisitor').value;
+        if (!requisitor) {
+            event.preventDefault();
+            alert('Por favor, selecione um utilizador.');
+            return false;
+        }
+        return true;
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', validateForm);
+        }
+    });
+</script>
 
 <form action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="POST" class="mt-4">
     <div class="row mb-3">
@@ -61,18 +124,27 @@
             </div>
         </div>
         <div class="col-md-6">
-            <div class="form-floating">
-                <select class="form-select" id="requisitor" name="requisitor" required>
-                    <option value="" selected disabled>Escolha um utilizador</option>
-                    <?php
-                    $users = $db->query("SELECT * FROM cache ORDER BY nome ASC;");
-                    while ($user = $users->fetch_assoc()) {
-                        $selected = (isset($_POST['requisitor']) && $_POST['requisitor'] == $user['id']) ? 'selected' : '';
-                        echo "<option value='{$user['id']}' {$selected}>" . htmlspecialchars($user['nome'], ENT_QUOTES, 'UTF-8') . "</option>";
+            <input type="hidden" id="requisitor" name="requisitor" value="<?php echo isset($_POST['requisitor']) ? htmlspecialchars($_POST['requisitor'], ENT_QUOTES, 'UTF-8') : ''; ?>" required>
+            <label class="form-label text-start d-block"><strong>Utilizador (requisitor):</strong></label>
+            <div class="input-group">
+                <input type="text" class="form-control" id="selectedUserDisplay" placeholder="Selecione um utilizador..." readonly value="<?php
+                    if (isset($_POST['requisitor']) && !empty($_POST['requisitor'])) {
+                        $userStmt = $db->prepare("SELECT nome, email FROM cache WHERE id = ?");
+                        $userStmt->bind_param("s", $_POST['requisitor']);
+                        $userStmt->execute();
+                        $selectedUser = $userStmt->get_result()->fetch_assoc();
+                        $userStmt->close();
+                        if ($selectedUser) {
+                            echo htmlspecialchars($selectedUser['nome'] . ' (' . $selectedUser['email'] . ')', ENT_QUOTES, 'UTF-8');
+                        }
                     }
-                    ?>
-                </select>
-                <label for="requisitor">Utilizador (requisitor)</label>
+                ?>">
+                <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#userSelectModal">
+                    Procurar
+                </button>
+                <button class="btn btn-outline-danger" type="button" onclick="clearUserSelection()">
+                    Limpar
+                </button>
             </div>
         </div>
     </div>
@@ -127,13 +199,28 @@
         <div class="col-md-4">
             <div class="form-floating">
                 <input type="date" class="form-control" id="data_inicio" name="data_inicio" placeholder="Data de início" value="<?php echo isset($_POST['data_inicio']) ? htmlspecialchars($_POST['data_inicio']) : ''; ?>" required>
-                <label for="data_inicio">Data de início (primeira semana)</label>
+                <label for="data_inicio" title="Data de início">Data de início</label>
             </div>
         </div>
         <div class="col-md-4">
             <div class="form-floating">
-                <input type="number" class="form-control" id="semanas" name="semanas" placeholder="Número de semanas" min="1" max="52" value="<?php echo isset($_POST['semanas']) ? htmlspecialchars($_POST['semanas']) : ''; ?>" required>
-                <label for="semanas">Número de semanas</label>
+                <input type="date" class="form-control" id="data_fim" name="data_fim" placeholder="Data de fim" value="<?php echo isset($_POST['data_fim']) ? htmlspecialchars($_POST['data_fim']) : ''; ?>" required>
+                <label for="data_fim" title="Data de fim">Data de fim</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="form-floating">
+                <input type="text" class="form-control" id="motivo" name="motivo" placeholder="Motivo" value="<?php echo isset($_POST['motivo']) ? htmlspecialchars($_POST['motivo'], ENT_QUOTES, 'UTF-8') : 'Importada automaticamente do horário'; ?>" required>
+                <label for="motivo">Motivo</label>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-floating">
+                <textarea class="form-control" id="extra" name="extra" placeholder="Informação Adicional" style="height: 58px;"><?php echo isset($_POST['extra']) ? htmlspecialchars($_POST['extra'], ENT_QUOTES, 'UTF-8') : ''; ?></textarea>
+                <label for="extra">Informação Adicional</label>
             </div>
         </div>
     </div>
@@ -143,8 +230,46 @@
     </div>
 </form>
 
+<!-- User Selection Modal -->
+<div class="modal fade" id="userSelectModal" tabindex="-1" aria-labelledby="userSelectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userSelectModalLabel">Selecionar Utilizador</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="userSearchInput" placeholder="Pesquisar por nome ou email..." oninput="filterUsers()">
+                </div>
+                <div class="list-group" id="userList">
+                    <?php
+                    $users = $db->query("SELECT id, nome, email FROM cache ORDER BY nome ASC");
+                    while ($user = $users->fetch_assoc()) {
+                        $userId = htmlspecialchars($user['id'], ENT_QUOTES, 'UTF-8');
+                        $userName = htmlspecialchars($user['nome'], ENT_QUOTES, 'UTF-8');
+                        $userEmail = htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8');
+                        echo "<button type='button' class='list-group-item list-group-item-action user-item' 
+                            data-user-id='{$userId}' 
+                            data-user-name='{$userName}' 
+                            data-user-email='{$userEmail}'
+                            onclick='selectUser(this)'>
+                            <strong>{$userName}</strong><br>
+                            <small class='text-muted'>{$userEmail}</small>
+                        </button>";
+                    }
+                    ?>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sala']) && isset($_POST['requisitor']) && isset($_POST['tempos']) && isset($_POST['dia_semana']) && isset($_POST['data_inicio']) && isset($_POST['semanas'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sala']) && isset($_POST['requisitor']) && isset($_POST['tempos']) && isset($_POST['dia_semana']) && isset($_POST['data_inicio']) && isset($_POST['data_fim']) && isset($_POST['motivo'])) {
     
     // Validate inputs
     $sala_id = $_POST['sala'];
@@ -152,11 +277,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sala']) && isset($_PO
     $tempos_ids = $_POST['tempos'];
     $dia_semana = intval($_POST['dia_semana']);
     $data_inicio = $_POST['data_inicio'];
-    $num_semanas = intval($_POST['semanas']);
+    $data_fim = $_POST['data_fim'];
+    $motivo = $_POST['motivo'];
+    $extra = isset($_POST['extra']) ? $_POST['extra'] : '';
     
     if (empty($tempos_ids)) {
         echo "<div class='mt-3 alert alert-danger fade show' role='alert'>
             <strong>Erro:</strong> Deve selecionar pelo menos um tempo.
+        </div>";
+    } elseif (empty($motivo)) {
+        echo "<div class='mt-3 alert alert-danger fade show' role='alert'>
+            <strong>Erro:</strong> O campo Motivo é obrigatório.
+        </div>";
+    } elseif (strtotime($data_fim) < strtotime($data_inicio)) {
+        echo "<div class='mt-3 alert alert-danger fade show' role='alert'>
+            <strong>Erro:</strong> A data de fim deve ser igual ou posterior à data de início.
         </div>";
     } else {
         // Verify sala exists
@@ -180,6 +315,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sala']) && isset($_PO
         } else {
             // Calculate first occurrence of the selected day of week from data_inicio
             $first_date = strtotime($data_inicio);
+            $end_date = strtotime($data_fim);
             $first_day_of_week = date('w', $first_date);
             
             // Adjust to the next occurrence of the selected day if needed
@@ -188,89 +324,98 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sala']) && isset($_PO
                 $first_date = strtotime("+{$days_to_add} days", $first_date);
             }
             
-            $reservas_criadas = 0;
-            $reservas_duplicadas = 0;
-            $erros = [];
-            
-            // Create reservations for each week
-            for ($semana = 0; $semana < $num_semanas; $semana++) {
-                $data_reserva = strtotime("+{$semana} weeks", $first_date);
-                $data_reserva_formatted = date('Y-m-d', $data_reserva);
-                
-                // Create reservation for each selected time
-                foreach ($tempos_ids as $tempo_id) {
-                    // Verify tempo exists
-                    $stmt = $db->prepare("SELECT * FROM tempos WHERE id = ?");
-                    $stmt->bind_param("s", $tempo_id);
-                    $stmt->execute();
-                    $tempo = $stmt->get_result()->fetch_assoc();
-                    $stmt->close();
-                    
-                    if (!$tempo) {
-                        $erros[] = "Tempo inválido: {$tempo_id}";
-                        continue;
-                    }
-                    
-                    // Check if reservation already exists
-                    $stmt = $db->prepare("SELECT * FROM reservas WHERE sala = ? AND tempo = ? AND data = ?");
-                    $stmt->bind_param("sss", $sala_id, $tempo_id, $data_reserva_formatted);
-                    $stmt->execute();
-                    $existing = $stmt->get_result()->fetch_assoc();
-                    $stmt->close();
-                    
-                    if ($existing) {
-                        $reservas_duplicadas++;
-                        continue;
-                    }
-                    
-                    // Insert reservation
-                    $motivo = "Horário adicionado por um administrador através do script de semanas repetidas.";
-                    $admin_nome = isset($_SESSION['nome']) ? htmlspecialchars($_SESSION['nome'], ENT_QUOTES, 'UTF-8') : 'Administrador';
-                    $extra = "Reserva criada automaticamente pelo administrador " . $admin_nome . " para múltiplas semanas.";
-                    
-                    $stmt = $db->prepare("INSERT INTO reservas (sala, tempo, data, requisitor, aprovado, motivo, extra) VALUES (?, ?, ?, ?, 1, ?, ?)");
-                    $stmt->bind_param("ssssss", $sala_id, $tempo_id, $data_reserva_formatted, $requisitor_id, $motivo, $extra);
-                    
-                    if ($stmt->execute()) {
-                        $reservas_criadas++;
-                    } else {
-                        $erros[] = "Erro ao criar reserva para {$data_reserva_formatted} - {$tempo['horashumanos']}: " . $stmt->error;
-                    }
-                    $stmt->close();
-                }
-            }
-            
-            // Display results
-            echo "<div class='mt-3 alert alert-success fade show' role='alert'>
-                <strong>Sucesso!</strong> {$reservas_criadas} reserva(s) criada(s) com sucesso.
-            </div>";
-            
-            if ($reservas_duplicadas > 0) {
+            // Check if the first occurrence is after the end date
+            if ($first_date > $end_date) {
                 echo "<div class='mt-3 alert alert-warning fade show' role='alert'>
-                    <strong>Atenção:</strong> {$reservas_duplicadas} reserva(s) já existia(m) e não foi/foram criada(s).
+                    <strong>Atenção:</strong> O dia da semana selecionado não ocorre dentro do intervalo de datas especificado. Nenhuma reserva foi criada.
+                </div>";
+            } else {
+                $reservas_criadas = 0;
+                $reservas_duplicadas = 0;
+                $erros = [];
+                $num_semanas = 0;
+                
+                // Create reservations for each week until we pass the end date
+                $current_date = $first_date;
+                while ($current_date <= $end_date) {
+                    $num_semanas++;
+                    $data_reserva_formatted = date('Y-m-d', $current_date);
+                    
+                    // Create reservation for each selected time
+                    foreach ($tempos_ids as $tempo_id) {
+                        // Verify tempo exists
+                        $stmt = $db->prepare("SELECT * FROM tempos WHERE id = ?");
+                        $stmt->bind_param("s", $tempo_id);
+                        $stmt->execute();
+                        $tempo = $stmt->get_result()->fetch_assoc();
+                        $stmt->close();
+                        
+                        if (!$tempo) {
+                            $erros[] = "Tempo inválido: {$tempo_id}";
+                            continue;
+                        }
+                        
+                        // Check if reservation already exists
+                        $stmt = $db->prepare("SELECT * FROM reservas WHERE sala = ? AND tempo = ? AND data = ?");
+                        $stmt->bind_param("sss", $sala_id, $tempo_id, $data_reserva_formatted);
+                        $stmt->execute();
+                        $existing = $stmt->get_result()->fetch_assoc();
+                        $stmt->close();
+                        
+                        if ($existing) {
+                            $reservas_duplicadas++;
+                            continue;
+                        }
+                        
+                        // Insert reservation with user-provided motivo and extra
+                        $stmt = $db->prepare("INSERT INTO reservas (sala, tempo, data, requisitor, aprovado, motivo, extra) VALUES (?, ?, ?, ?, 1, ?, ?)");
+                        $stmt->bind_param("ssssss", $sala_id, $tempo_id, $data_reserva_formatted, $requisitor_id, $motivo, $extra);
+                        
+                        if ($stmt->execute()) {
+                            $reservas_criadas++;
+                        } else {
+                            $erros[] = "Erro ao criar reserva para {$data_reserva_formatted} - {$tempo['horashumanos']}: " . $stmt->error;
+                        }
+                        $stmt->close();
+                    }
+                    
+                    // Move to next week
+                    $current_date = strtotime("+1 week", $current_date);
+                }
+                
+                // Display results
+                echo "<div class='mt-3 alert alert-success fade show' role='alert'>
+                    <strong>Sucesso!</strong> {$reservas_criadas} reserva(s) criada(s) com sucesso.
+                </div>";
+                
+                if ($reservas_duplicadas > 0) {
+                    echo "<div class='mt-3 alert alert-warning fade show' role='alert'>
+                        <strong>Atenção:</strong> {$reservas_duplicadas} reserva(s) já existia(m) e não foi/foram criada(s).
+                    </div>";
+                }
+                
+                if (!empty($erros)) {
+                    echo "<div class='mt-3 alert alert-danger fade show' role='alert'>
+                        <strong>Erros encontrados:</strong>
+                        <ul class='mb-0'>";
+                    foreach ($erros as $erro) {
+                        echo "<li>" . htmlspecialchars($erro, ENT_QUOTES, 'UTF-8') . "</li>";
+                    }
+                    echo "</ul></div>";
+                }
+                
+                // Summary
+                echo "<div class='mt-3 alert alert-info fade show' role='alert'>
+                    <strong>Resumo:</strong><br>
+                    - Sala: " . htmlspecialchars($sala['nome'], ENT_QUOTES, 'UTF-8') . "<br>
+                    - Utilizador: " . htmlspecialchars($requisitor['nome'], ENT_QUOTES, 'UTF-8') . "<br>
+                    - Tempos selecionados: " . count($tempos_ids) . "<br>
+                    - Semanas abrangidas: {$num_semanas}<br>
+                    - Total de reservas esperadas: " . (count($tempos_ids) * $num_semanas) . "<br>
+                    - Reservas criadas: {$reservas_criadas}<br>
+                    - Motivo: " . htmlspecialchars($motivo, ENT_QUOTES, 'UTF-8') . "
                 </div>";
             }
-            
-            if (!empty($erros)) {
-                echo "<div class='mt-3 alert alert-danger fade show' role='alert'>
-                    <strong>Erros encontrados:</strong>
-                    <ul class='mb-0'>";
-                foreach ($erros as $erro) {
-                    echo "<li>" . htmlspecialchars($erro, ENT_QUOTES, 'UTF-8') . "</li>";
-                }
-                echo "</ul></div>";
-            }
-            
-            // Summary
-            echo "<div class='mt-3 alert alert-info fade show' role='alert'>
-                <strong>Resumo:</strong><br>
-                - Sala: " . htmlspecialchars($sala['nome'], ENT_QUOTES, 'UTF-8') . "<br>
-                - Utilizador: " . htmlspecialchars($requisitor['nome'], ENT_QUOTES, 'UTF-8') . "<br>
-                - Tempos selecionados: " . count($tempos_ids) . "<br>
-                - Semanas: {$num_semanas}<br>
-                - Total de reservas esperadas: " . (count($tempos_ids) * $num_semanas) . "<br>
-                - Reservas criadas: {$reservas_criadas}
-            </div>";
         }
     }
 }
