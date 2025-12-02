@@ -48,13 +48,15 @@
     sidebarLink('/admin/materiais.php', 'Materiais');
     sidebarLink('/admin/salas_postreserva.php', 'Pós-Reserva');
     sidebarLink('/admin/users.php', 'Utilizadores');
+    sidebarLink('/admin/registos.php', 'Registos');
     echo "<li class='nav-item dropdown'>
             <a class='nav-link dropdown-toggle' href='#' id='extensibilidadeDropdown' role='button' data-bs-toggle='dropdown' aria-expanded='false'>
                 Extensibilidade
             </a>
             <ul class='dropdown-menu dropdown-menu-end' aria-labelledby='extensibilidadeDropdown'>";
     foreach (glob(__DIR__ . "/scripts/*.php") as $scriptFile) {
-        if (basename($scriptFile) !== "example.php") {
+        // Skip example.php and logsadmin.php (moved to registos.php tab)
+        if (basename($scriptFile) !== "example.php" && basename($scriptFile) !== "logsadmin.php") {
             $scriptName = basename($scriptFile, ".php");
             echo "<li>";
             echo "<a class='dropdown-item' href='/admin/scripts/$scriptName.php'>" . ucfirst($scriptName) . "</a>";
