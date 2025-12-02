@@ -138,9 +138,9 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
         // Display locked room notice
         if ($isLocked) {
             if ($_SESSION['admin']) {
-                echo "<div class='alert alert-warning mb-3' style='width: 100%;'><strong>Sala Bloqueada:</strong> Esta sala está bloqueada. Como administrador, pode criar reservas para utilizadores.</div>";
+                echo "<div class='alert alert-warning mb-3' style='width: 100%;'><strong>Sala Bloqueada:</strong> Esta sala encontra-se bloqueada. Como administrador, pode criar reservas.</div>";
             } else {
-                echo "<div class='alert alert-danger mb-3' style='width: 100%;'><strong>Sala Bloqueada:</strong> Esta sala está bloqueada. Apenas os administradores podem criar reservas. Pode visualizar as reservas existentes.</div>";
+                echo "<div class='alert alert-danger mb-3' style='width: 100%;'><strong>Sala Bloqueada:</strong> Esta sala está bloqueada.</div>";
             }
         }
         
