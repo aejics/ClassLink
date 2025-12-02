@@ -107,19 +107,23 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
 
 <div class="container-fluid px-4 fade-in">
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="mb-1">
-                <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                    Gestão de Pedidos
-                </span>
-            </h2>
-            <p class="text-muted mb-0">Gerir e aprovar pedidos de reserva de salas</p>
-        </div>
-        <div>
-            <span class="badge bg-primary fs-6 px-3 py-2">
-                <?php echo date('d/m/Y'); ?>
-            </span>
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                            Gestão de Pedidos
+                        </span>
+                    </h2>
+                    <p class="text-muted mb-0">Gerir e aprovar pedidos de reserva de salas</p>
+                </div>
+                <div>
+                    <span class="badge bg-primary fs-6 px-3 py-2">
+                        <?php echo date('d/m/Y'); ?>
+                    </span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -180,6 +184,7 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <form action="/admin/pedidos.php" method="POST" id="filterForm">
+                <input type="hidden" id="requisitor" name="requisitor" value="<?php echo isset($_POST['requisitor']) ? htmlspecialchars($_POST['requisitor'], ENT_QUOTES, 'UTF-8') : ''; ?>">
                 <div class="row g-3 align-items-end">
                     <div class="col-md-4">
                         <label for="sala" class="form-label fw-bold">Filtrar por Sala</label>
@@ -200,21 +205,76 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label for="requisitor" class="form-label fw-bold">Pesquisar por Requisitor</label>
-                        <input type="text" class="form-control search-box" id="requisitor" name="requisitor" 
-                               placeholder="Digite o ID do requisitor..." 
-                               value="<?php echo isset($_POST['requisitor']) ? htmlspecialchars($_POST['requisitor'], ENT_QUOTES, 'UTF-8') : ''; ?>">
+                        <label class="form-label fw-bold">Filtrar por Requisitor</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="selectedUserDisplay" 
+                                   placeholder="Todos os utilizadores" readonly
+                                   value="<?php 
+                                   if (isset($_POST['requisitor']) && !empty($_POST['requisitor'])) {
+                                       $userStmt = $db->prepare("SELECT nome FROM cache WHERE id = ?");
+                                       $userStmt->bind_param("s", $_POST['requisitor']);
+                                       $userStmt->execute();
+                                       $userResult = $userStmt->get_result()->fetch_assoc();
+                                       $userStmt->close();
+                                       echo $userResult ? htmlspecialchars($userResult['nome'], ENT_QUOTES, 'UTF-8') : '';
+                                   }
+                                   ?>">
+                            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#userSelectModal">
+                                Procurar
+                            </button>
+                            <button class="btn btn-outline-danger" type="button" onclick="clearUserSelection()">
+                                Limpar
+                            </button>
+                        </div>
                     </div>
                     <div class="col-md-4 d-flex gap-2">
                         <button type="submit" class="btn btn-primary flex-grow-1">
                             Pesquisar
                         </button>
                         <a href="/admin/pedidos.php" class="btn btn-outline-secondary">
-                            Limpar
+                            Limpar Tudo
                         </a>
                     </div>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- User Selection Modal -->
+    <div class="modal fade" id="userSelectModal" tabindex="-1" aria-labelledby="userSelectModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userSelectModalLabel">Selecionar Utilizador</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="userSearchInput" placeholder="Pesquisar por nome ou email..." oninput="filterUsersModal()">
+                    </div>
+                    <div class="list-group" id="userList">
+                        <?php
+                        $usersQuery = $db->query("SELECT id, nome, email FROM cache ORDER BY nome ASC");
+                        while ($user = $usersQuery->fetch_assoc()) {
+                            $userId = htmlspecialchars($user['id'], ENT_QUOTES, 'UTF-8');
+                            $userName = htmlspecialchars($user['nome'], ENT_QUOTES, 'UTF-8');
+                            $userEmail = htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8');
+                            echo "<button type='button' class='list-group-item list-group-item-action user-item' 
+                                data-user-id='{$userId}' 
+                                data-user-name='{$userName}' 
+                                data-user-email='{$userEmail}'
+                                onclick='selectUser(this)'>
+                                <strong>{$userName}</strong><br>
+                                <small class='text-muted'>{$userEmail}</small>
+                            </button>";
+                        }
+                        ?>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -394,8 +454,8 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
         $pedidosArray = [];
         
         if (isset($_POST['requisitor']) && !empty($_POST['requisitor'])) {
-            // Search by requisitor
-            $stmt = $db->prepare("SELECT * FROM reservas WHERE requisitor=? ORDER BY data DESC");
+            // Search by requisitor - only show pending requests
+            $stmt = $db->prepare("SELECT * FROM reservas WHERE requisitor=? AND aprovado=0 ORDER BY data ASC");
             $stmt->bind_param("s", $_POST['requisitor']);
             $stmt->execute();
             $pedidos = $stmt->get_result();
@@ -430,7 +490,12 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
         echo "<div class='d-flex justify-content-between align-items-center mb-3'>";
         echo "<h5 class='mb-0'>";
         if ($searchMode == "requisitor") {
-            echo "Reservas do Requisitor";
+            $stmt = $db->prepare("SELECT nome FROM cache WHERE id=?");
+            $stmt->bind_param("s", $_POST['requisitor']);
+            $stmt->execute();
+            $reqName = $stmt->get_result()->fetch_assoc()['nome'];
+            $stmt->close();
+            echo "Pedidos Pendentes - " . htmlspecialchars($reqName, ENT_QUOTES, 'UTF-8');
         } elseif ($searchMode == "room") {
             $stmt = $db->prepare("SELECT nome FROM salas WHERE id=?");
             $stmt->bind_param("s", $sala);
@@ -464,13 +529,12 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                     <table class='table table-hover align-middle' id='pedidosTable'>
                         <thead class='table-dark'>
                             <tr>
-                                <th scope='col' style='width: 15%;'>Data</th>
-                                <th scope='col' style='width: 15%;'>Horário</th>
-                                <th scope='col' style='width: 15%;'>Sala</th>
-                                <th scope='col' style='width: 15%;'>Requisitor</th>
-                                <th scope='col' style='width: 20%;'>Motivo</th>
-                                <th scope='col' style='width: 10%;'>Estado</th>
-                                <th scope='col' style='width: 10%;' class='text-center'>Ações</th>
+                                <th scope='col'>Data</th>
+                                <th scope='col'>Horário</th>
+                                <th scope='col'>Sala</th>
+                                <th scope='col'>Requisitor</th>
+                                <th scope='col'>Motivo</th>
+                                <th scope='col' class='text-center'>Ações</th>
                             </tr>
                         </thead>
                         <tbody>";
@@ -547,29 +611,20 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                 $motivoTruncated = strlen($pedido['motivo']) > 50 ? substr($pedido['motivo'], 0, 50) . '...' : $pedido['motivo'];
                 echo "<td title='" . htmlspecialchars($pedido['motivo'], ENT_QUOTES, 'UTF-8') . "'>" . htmlspecialchars($motivoTruncated, ENT_QUOTES, 'UTF-8') . "</td>";
                 
-                // Status column
-                if ($pedido['aprovado'] == 0) {
-                    echo "<td><span class='badge badge-pending'>Pendente</span></td>";
-                } else {
-                    echo "<td><span class='badge badge-approved'>Aprovado</span></td>";
-                }
-                
                 // Actions column
                 echo "<td class='text-center'>";
                 echo "<div class='btn-group' role='group'>";
                 
-                if ($pedido['aprovado'] == 0) {
-                    echo "<button type='button' class='btn btn-success btn-sm action-btn' 
-                          onclick='confirmAction(\"aprovar\", \"{$tempoEnc}\", \"{$dataEnc}\", \"{$salaEnc}\", \"" . htmlspecialchars($salaextenso, ENT_QUOTES, 'UTF-8') . "\", \"" . htmlspecialchars($dataFormatted, ENT_QUOTES, 'UTF-8') . "\", \"" . htmlspecialchars($horastempo, ENT_QUOTES, 'UTF-8') . "\")' 
-                          title='Aprovar'>
-                        &#x2705;
-                    </button>";
-                    echo "<button type='button' class='btn btn-danger btn-sm action-btn' 
-                          onclick='confirmAction(\"rejeitar\", \"{$tempoEnc}\", \"{$dataEnc}\", \"{$salaEnc}\", \"" . htmlspecialchars($salaextenso, ENT_QUOTES, 'UTF-8') . "\", \"" . htmlspecialchars($dataFormatted, ENT_QUOTES, 'UTF-8') . "\", \"" . htmlspecialchars($horastempo, ENT_QUOTES, 'UTF-8') . "\")' 
-                          title='Rejeitar'>
-                        &#x274C;
-                    </button>";
-                }
+                echo "<button type='button' class='btn btn-success btn-sm action-btn' 
+                      onclick='confirmAction(\"aprovar\", \"{$tempoEnc}\", \"{$dataEnc}\", \"{$salaEnc}\", \"" . htmlspecialchars($salaextenso, ENT_QUOTES, 'UTF-8') . "\", \"" . htmlspecialchars($dataFormatted, ENT_QUOTES, 'UTF-8') . "\", \"" . htmlspecialchars($horastempo, ENT_QUOTES, 'UTF-8') . "\")' 
+                      title='Aprovar'>
+                    &#x2705;
+                </button>";
+                echo "<button type='button' class='btn btn-danger btn-sm action-btn' 
+                      onclick='confirmAction(\"rejeitar\", \"{$tempoEnc}\", \"{$dataEnc}\", \"{$salaEnc}\", \"" . htmlspecialchars($salaextenso, ENT_QUOTES, 'UTF-8') . "\", \"" . htmlspecialchars($dataFormatted, ENT_QUOTES, 'UTF-8') . "\", \"" . htmlspecialchars($horastempo, ENT_QUOTES, 'UTF-8') . "\")' 
+                      title='Rejeitar'>
+                    &#x274C;
+                </button>";
                 echo "<a href='/reservar/manage.php?tempo={$tempoEnc}&data={$dataEnc}&sala={$salaEnc}' 
                       class='btn btn-outline-secondary btn-sm action-btn' title='Ver Detalhes' target='_blank'>
                     &#x1F441;
@@ -797,5 +852,42 @@ function confirmAction(action, tempo, data, sala, salaNome, dataFormatted, horas
     }
     
     modal.show();
+}
+
+function filterUsersModal() {
+    const searchInput = document.getElementById('userSearchInput');
+    const filter = searchInput.value.toLowerCase();
+    const userItems = document.querySelectorAll('.user-item');
+    
+    userItems.forEach(function(item) {
+        const name = item.getAttribute('data-user-name').toLowerCase();
+        const email = item.getAttribute('data-user-email').toLowerCase();
+        if (name.includes(filter) || email.includes(filter)) {
+            item.style.display = '';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+function selectUser(element) {
+    const userId = element.getAttribute('data-user-id');
+    const userName = element.getAttribute('data-user-name');
+    
+    document.getElementById('requisitor').value = userId;
+    document.getElementById('selectedUserDisplay').value = userName;
+    
+    // Close the modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('userSelectModal'));
+    modal.hide();
+    
+    // Submit the form
+    document.getElementById('filterForm').submit();
+}
+
+function clearUserSelection() {
+    document.getElementById('requisitor').value = '';
+    document.getElementById('selectedUserDisplay').value = '';
+    document.getElementById('filterForm').submit();
 }
 </script>
