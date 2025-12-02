@@ -2,7 +2,6 @@
 <div style="margin-left: 10%; margin-right: 10%; text-align: center;">
 <h3>Gestão de Materiais</h3>
 
-<!-- CSV Import Section -->
 <div class="mb-4">
     <h5>Importar Materiais via CSV</h5>
     <a href="/assets/csvsample.csv" download>Download do modelo CSV</a>
@@ -16,7 +15,6 @@
     </form>
 </div>
 
-<!-- Add Material Form -->
 <div class="d-flex align-items-center mb-3">
     <span class="me-3">Adicionar um material via flow</span>
     <?php formulario("materiais.php?action=criar", [

@@ -85,7 +85,6 @@ $numTempos = $db->query("SELECT COUNT(*) as total FROM tempos")->fetch_assoc()['
 $db->close();
 ?>
 
-<!-- Search and List Section -->
 <div class="mt-4">
     <h5>Lista de Tempos (<?php echo $numTempos; ?>)</h5>
     <div class="mb-3">

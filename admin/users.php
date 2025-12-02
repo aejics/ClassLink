@@ -107,7 +107,6 @@ $numUtilizadores = $totalResult->fetch_assoc()['total'];
 $utilizadores = $db->query("SELECT * FROM cache ORDER BY nome ASC LIMIT 20;");
 ?>
 
-<!-- Pre-add User Form -->
 <div class="card mb-3">
     <div class="card-header">
         <h5 class="mb-0">Pré-adicionar Utilizador</h5>
