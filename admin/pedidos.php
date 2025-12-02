@@ -493,14 +493,16 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
             $stmt = $db->prepare("SELECT nome FROM cache WHERE id=?");
             $stmt->bind_param("s", $_POST['requisitor']);
             $stmt->execute();
-            $reqName = $stmt->get_result()->fetch_assoc()['nome'];
+            $reqResult = $stmt->get_result()->fetch_assoc();
+            $reqName = $reqResult ? $reqResult['nome'] : 'Utilizador';
             $stmt->close();
             echo "Pedidos Pendentes - " . htmlspecialchars($reqName, ENT_QUOTES, 'UTF-8');
         } elseif ($searchMode == "room") {
             $stmt = $db->prepare("SELECT nome FROM salas WHERE id=?");
             $stmt->bind_param("s", $sala);
             $stmt->execute();
-            $salaName = $stmt->get_result()->fetch_assoc()['nome'];
+            $salaResult = $stmt->get_result()->fetch_assoc();
+            $salaName = $salaResult ? $salaResult['nome'] : 'Sala';
             $stmt->close();
             echo "Pedidos Pendentes - " . htmlspecialchars($salaName, ENT_QUOTES, 'UTF-8');
         } else {
