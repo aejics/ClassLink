@@ -312,7 +312,7 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                 $userId = htmlspecialchars($user['id'], ENT_QUOTES, 'UTF-8');
                 $userName = htmlspecialchars($user['nome'], ENT_QUOTES, 'UTF-8');
                 $userEmail = htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8');
-                $isPreRegistered = str_starts_with($user['id'], 'pre_');
+                $isPreRegistered = str_starts_with($user['id'], PRE_REGISTERED_PREFIX);
                 $preRegBadge = $isPreRegistered ? " <span class='badge bg-warning text-dark'>Pré-registado</span>" : "";
                 echo "<button type='button' class='list-group-item list-group-item-action bulk-user-item' 
                     data-user-id='{$userId}' 
