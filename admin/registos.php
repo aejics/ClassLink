@@ -96,7 +96,7 @@
         isLoading = true;
         document.getElementById('loadingPlaceholder').style.display = 'block';
         
-        fetch('api_registos.php?offset=' + currentOffset + '&limit=' + limit)
+        fetch('api/api_registos.php?offset=' + currentOffset + '&limit=' + limit)
             .then(response => response.json())
             .then(data => {
                 const tbody = document.getElementById('logsTableBody');
