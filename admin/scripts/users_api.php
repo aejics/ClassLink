@@ -19,8 +19,10 @@ $limit = 20;
 
 if ($action === 'search') {
     if ($search !== '') {
-        $searchParam = '%' . $search . '%';
-        $stmt = $db->prepare("SELECT id, nome, email, admin FROM cache WHERE nome LIKE ? OR email LIKE ? ORDER BY nome ASC LIMIT ? OFFSET ?");
+        // Escape SQL LIKE wildcards to prevent unintended pattern matching
+        $escapedSearch = str_replace(['%', '_'], ['\\%', '\\_'], $search);
+        $searchParam = '%' . $escapedSearch . '%';
+        $stmt = $db->prepare("SELECT id, nome, email, admin FROM cache WHERE nome LIKE ? ESCAPE '\\\\' OR email LIKE ? ESCAPE '\\\\' ORDER BY nome ASC LIMIT ? OFFSET ?");
         $stmt->bind_param("ssii", $searchParam, $searchParam, $limit, $offset);
     } else {
         $stmt = $db->prepare("SELECT id, nome, email, admin FROM cache ORDER BY nome ASC LIMIT ? OFFSET ?");
@@ -43,8 +45,10 @@ if ($action === 'search') {
     
     // Get total count for the search
     if ($search !== '') {
-        $searchParam = '%' . $search . '%';
-        $countStmt = $db->prepare("SELECT COUNT(*) as total FROM cache WHERE nome LIKE ? OR email LIKE ?");
+        // Escape SQL LIKE wildcards to prevent unintended pattern matching
+        $escapedSearch = str_replace(['%', '_'], ['\\%', '\\_'], $search);
+        $searchParam = '%' . $escapedSearch . '%';
+        $countStmt = $db->prepare("SELECT COUNT(*) as total FROM cache WHERE nome LIKE ? ESCAPE '\\\\' OR email LIKE ? ESCAPE '\\\\' ");
         $countStmt->bind_param("ss", $searchParam, $searchParam);
     } else {
         $countStmt = $db->prepare("SELECT COUNT(*) as total FROM cache");

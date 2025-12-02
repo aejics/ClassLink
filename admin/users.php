@@ -122,7 +122,6 @@ $utilizadores = $db->query("SELECT * FROM cache ORDER BY nome ASC LIMIT 20;");
     const userList = document.getElementById('userList');
     const loadMoreBtn = document.getElementById('loadMoreBtn');
     const loadMoreContainer = document.getElementById('loadMoreContainer');
-    const userShownCount = document.getElementById('userShownCount');
     const userCountInfo = document.getElementById('userCountInfo');
     
     function escapeHtml(text) {
@@ -181,8 +180,7 @@ $utilizadores = $db->query("SELECT * FROM cache ORDER BY nome ASC LIMIT 20;");
                 }
                 
                 const shownCount = offset + data.users.length;
-                userShownCount.textContent = shownCount;
-                userCountInfo.innerHTML = `A mostrar <span id="userShownCount">${shownCount}</span> de ${data.total} utilizadores`;
+                userCountInfo.textContent = `A mostrar ${shownCount} de ${data.total} utilizadores`;
                 
                 currentOffset = offset + data.users.length;
             })
