@@ -1,4 +1,5 @@
 <?php require 'index.php'; ?>
+<?php require_once(__DIR__ . '/../func/genuuid.php'); ?>
 <div style="margin-left: 10%; margin-right: 10%; text-align: center;">
 <h3>Gestão de Utilizadores</h3>
 <?php
@@ -63,6 +64,39 @@ switch (isset($_GET['action']) ? $_GET['action'] : null){
         $stmt->close();
         acaoexecutada("Atualização de Utilizador");
         break;
+    // caso execute a ação pré-adicionar:
+    case "preadd":
+        if (!isset($_POST['nome']) || !isset($_POST['email']) || empty($_POST['nome']) || empty($_POST['email'])) {
+            echo "<div class='alert alert-danger fade show' role='alert'>Nome e Email são obrigatórios.</div>";
+            break;
+        }
+        // Validate email format
+        if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
+            echo "<div class='alert alert-danger fade show' role='alert'>Formato de email inválido.</div>";
+            break;
+        }
+        // Check if email already exists
+        $stmt = $db->prepare("SELECT id FROM cache WHERE email = ?");
+        $stmt->bind_param("s", $_POST['email']);
+        $stmt->execute();
+        $existingUser = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        if ($existingUser) {
+            echo "<div class='alert alert-danger fade show' role='alert'>Já existe um utilizador com este email.</div>";
+            break;
+        }
+        // Generate a temporary ID with pre-registered prefix for pre-registered users
+        $tempId = PRE_REGISTERED_PREFIX . uuid4();
+        $stmt = $db->prepare("INSERT INTO cache (id, nome, email, admin) VALUES (?, ?, ?, 0)");
+        $stmt->bind_param("sss", $tempId, $_POST['nome'], $_POST['email']);
+        if ($stmt->execute()) {
+            echo "<div class='alert alert-success fade show' role='alert'>Utilizador pré-adicionado com sucesso.</div>";
+            acaoexecutada("Pré-adição de Utilizador");
+        } else {
+            echo "<div class='alert alert-danger fade show' role='alert'>Erro ao pré-adicionar utilizador.</div>";
+        }
+        $stmt->close();
+        break;
 }
 
 // Get total count for display
@@ -73,145 +107,82 @@ $numUtilizadores = $totalResult->fetch_assoc()['total'];
 $utilizadores = $db->query("SELECT * FROM cache ORDER BY nome ASC LIMIT 20;");
 ?>
 
+<!-- Pre-add User Form -->
+<div class="card mb-3">
+    <div class="card-header">
+        <h5 class="mb-0">Pré-adicionar Utilizador</h5>
+    </div>
+    <div class="card-body">
+        <p class="text-muted small">Não deve fazer esta ação sem consultar o manual. Consulte o manual antes de proceder.</p>
+        <form action="users.php?action=preadd" method="POST" class="d-flex align-items-center flex-wrap gap-2">
+            <div class="form-floating" style="flex: 1; min-width: 200px;">
+                <input type="text" class="form-control" id="nome" name="nome" placeholder="Nome" required>
+                <label for="nome">Nome</label>
+            </div>
+            <div class="form-floating" style="flex: 1; min-width: 200px;">
+                <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
+                <label for="email">Email</label>
+            </div>
+            <button type="submit" class="btn btn-success" style="height: 58px;">Pré-adicionar</button>
+        </form>
+    </div>
+</div>
+
 <div class="mb-3">
     <input type="text" class="form-control" id="userSearchInput" placeholder="Pesquisar por nome ou email..." style="max-width: 400px; margin: 0 auto;">
 </div>
 
-<p class="text-muted" id="userCountInfo">A mostrar <span id="userShownCount"><?php echo min(20, $numUtilizadores); ?></span> de <?php echo $numUtilizadores; ?> utilizadores</p>
-
-<div id="userListContainer">
-    <?php if ($numUtilizadores == 0): ?>
-        <div class='alert alert-warning'>Não existem utilizadores.</div>
-    <?php else: ?>
-        <div class="row" id="userList">
-            <?php while ($row = $utilizadores->fetch_assoc()): 
-                $idEnc = urlencode($row['id']);
-                $adminStatus = $row['admin'] ? "<span class='badge bg-success'>Admin</span>" : "<span class='badge bg-secondary'>Utilizador</span>";
-                $userName = htmlspecialchars($row['nome'], ENT_QUOTES, 'UTF-8');
-                $userEmail = htmlspecialchars($row['email'], ENT_QUOTES, 'UTF-8');
-            ?>
-                <div class="col-md-6 col-lg-4 mb-3">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title"><?php echo $userName; ?></h5>
-                            <p class="card-text text-muted"><?php echo $userEmail; ?></p>
-                            <p class="card-text"><?php echo $adminStatus; ?></p>
-                        </div>
-                        <div class="card-footer bg-transparent">
-                            <a href='/admin/users.php?action=edit&id=<?php echo $idEnc; ?>' class='btn btn-sm btn-primary'>EDITAR</a>
-                            <a href='/admin/users.php?action=apagar&id=<?php echo $idEnc; ?>' class='btn btn-sm btn-danger' onclick='return confirm("Tem a certeza que pretende apagar o utilizador? Isto irá causar problemas se o utilizador tiver reservas passadas.");'>APAGAR</a>
-                        </div>
-                    </div>
-                </div>
-            <?php endwhile; ?>
-        </div>
-        <div id="loadMoreContainer" class="text-center mb-3" style="<?php echo $numUtilizadores > 20 ? '' : 'display: none;'; ?>">
-            <button type="button" class="btn btn-outline-primary" id="loadMoreBtn">Carregar mais</button>
-        </div>
-    <?php endif; ?>
-</div>
-
-<script>
-(function() {
-    let currentOffset = 20;
-    let currentSearch = '';
-    let searchTimeout = null;
-    const limit = 20;
-    
-    const searchInput = document.getElementById('userSearchInput');
-    const userList = document.getElementById('userList');
-    const loadMoreBtn = document.getElementById('loadMoreBtn');
-    const loadMoreContainer = document.getElementById('loadMoreContainer');
-    const userCountInfo = document.getElementById('userCountInfo');
-    
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-    
-    function createUserCard(user) {
-        const adminBadge = user.admin 
-            ? "<span class='badge bg-success'>Admin</span>" 
-            : "<span class='badge bg-secondary'>Utilizador</span>";
-        const idEnc = encodeURIComponent(user.id);
-        
-        return `
-            <div class="col-md-6 col-lg-4 mb-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">${escapeHtml(user.nome)}</h5>
-                        <p class="card-text text-muted">${escapeHtml(user.email)}</p>
-                        <p class="card-text">${adminBadge}</p>
-                    </div>
-                    <div class="card-footer bg-transparent">
-                        <a href='/admin/users.php?action=edit&id=${idEnc}' class='btn btn-sm btn-primary'>EDITAR</a>
-                        <a href='/admin/users.php?action=apagar&id=${idEnc}' class='btn btn-sm btn-danger' onclick='return confirm("Tem a certeza que pretende apagar o utilizador? Isto irá causar problemas se o utilizador tiver reservas passadas.");'>APAGAR</a>
-                    </div>
-                </div>
+<!-- Modal for Utilizadores -->
+<div class="modal fade" id="utilizadoresModal" tabindex="-1" aria-labelledby="utilizadoresModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="utilizadoresModalLabel">Lista de Utilizadores</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
-        `;
-    }
-    
-    function fetchUsers(search, offset, append) {
-        const url = `/admin/users_api.php?action=search&search=${encodeURIComponent(search)}&offset=${offset}`;
-        
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    console.error(data.error);
-                    return;
-                }
-                
-                if (!append) {
-                    userList.innerHTML = '';
-                }
-                
-                if (data.users.length === 0 && !append) {
-                    userList.innerHTML = "<div class='col-12'><div class='alert alert-warning'>Nenhum utilizador encontrado.</div></div>";
-                    loadMoreContainer.style.display = 'none';
-                } else {
-                    data.users.forEach(user => {
-                        userList.insertAdjacentHTML('beforeend', createUserCard(user));
-                    });
-                    
-                    loadMoreContainer.style.display = data.hasMore ? '' : 'none';
-                }
-                
-                const shownCount = offset + data.users.length;
-                userCountInfo.textContent = `A mostrar ${shownCount} de ${data.total} utilizadores`;
-                
-                currentOffset = offset + data.users.length;
-            })
-            .catch(error => {
-                console.error('Erro ao pesquisar utilizadores:', error);
-            });
-    }
-    
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            const search = this.value.trim();
-            
-            if (searchTimeout) {
-                clearTimeout(searchTimeout);
-            }
-            
-            searchTimeout = setTimeout(function() {
-                currentSearch = search;
-                currentOffset = 0;
-                fetchUsers(search, 0, false);
-            }, 300);
-        });
-    }
-    
-    if (loadMoreBtn) {
-        loadMoreBtn.addEventListener('click', function() {
-            fetchUsers(currentSearch, currentOffset, true);
-        });
-    }
-})();
-</script>
+            <div class="modal-body">
+                <?php if ($numUtilizadores == 0): ?>
+                    <div class='alert alert-warning'>Não existem utilizadores.</div>
+                <?php else: ?>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="userSearchInput" placeholder="Pesquisar por nome ou email..." oninput="filterUsers()">
+                    </div>
+                    <table class='table table-striped table-hover'>
+                        <thead class='table-dark'>
+                            <tr>
+                                <th scope='col'>Nome</th>
+                                <th scope='col'>Email</th>
+                                <th scope='col'>Admin</th>
+                                <th scope='col'>AÇÕES</th>
+                            </tr>
+                        </thead>
+                        <tbody id='userTableBody'>
+                            <?php while ($row = $utilizadores->fetch_assoc()): 
+                                $idEnc = urlencode($row['id']);
+                                $adminStatus = $row['admin'] ? "Sim" : "Não";
+                                $userName = htmlspecialchars($row['nome'], ENT_QUOTES, 'UTF-8');
+                                $userEmail = htmlspecialchars($row['email'], ENT_QUOTES, 'UTF-8');
+                            ?>
+                                <tr data-user-name="<?php echo $userName; ?>" data-user-email="<?php echo $userEmail; ?>">
+                                    <td><?php echo $userName; ?></td>
+                                    <td><?php echo $userEmail; ?></td>
+                                    <td><?php echo htmlspecialchars($adminStatus, ENT_QUOTES, 'UTF-8'); ?></td>
+                                    <td>
+                                        <a href='/admin/users.php?action=edit&id=<?php echo $idEnc; ?>' class='btn btn-sm btn-primary'>EDITAR</a>
+                                        <a href='/admin/users.php?action=apagar&id=<?php echo $idEnc; ?>' class='btn btn-sm btn-danger' onclick='return confirm("Tem a certeza que pretende apagar o utilizador? Isto irá causar problemas se o utilizador tiver reservas passadas.");'>APAGAR</a>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <?php
 $db->close();

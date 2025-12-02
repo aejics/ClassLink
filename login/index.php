@@ -23,11 +23,64 @@
             $_SESSION['email'] = $_SESSION['resourceOwner']['email'];
             $_SESSION['id'] = $_SESSION['resourceOwner']['sub'];
 
-            // Atribuir valores à Cache na DB
-            $stmt = $db->prepare("INSERT IGNORE INTO cache (id, nome, email) VALUES (?, ?, ?)");
-            $stmt->bind_param("sss", $_SESSION['id'], $_SESSION['nome'], $_SESSION['email']);
+            // Check if there's a pre-registered user with this email (id starts with PRE_REGISTERED_PREFIX)
+            $prePattern = PRE_REGISTERED_PREFIX . '%';
+            $stmt = $db->prepare("SELECT id FROM cache WHERE email = ? AND id LIKE ?");
+            $stmt->bind_param("ss", $_SESSION['email'], $prePattern);
             $stmt->execute();
+            $preRegisteredUser = $stmt->get_result()->fetch_assoc();
             $stmt->close();
+            
+            if ($preRegisteredUser) {
+                // User was pre-registered, migrate to the real OAuth2 ID
+                // Use a transaction to ensure atomicity
+                $db->begin_transaction();
+                try {
+                    // Get the admin status from the pre-registered user
+                    $stmt = $db->prepare("SELECT admin FROM cache WHERE id = ?");
+                    $stmt->bind_param("s", $preRegisteredUser['id']);
+                    $stmt->execute();
+                    $preRegData = $stmt->get_result()->fetch_assoc();
+                    $stmt->close();
+                    $adminStatus = $preRegData['admin'] ?? 0;
+                    
+                    // First, insert a new record with the real OAuth2 ID
+                    // This ensures the foreign key target exists before we update references
+                    $stmt = $db->prepare("INSERT INTO cache (id, nome, email, admin) VALUES (?, ?, ?, ?)");
+                    $stmt->bind_param("sssi", $_SESSION['id'], $_SESSION['nome'], $_SESSION['email'], $adminStatus);
+                    $stmt->execute();
+                    $stmt->close();
+                    
+                    // Now update foreign key references in reservas table
+                    $stmt = $db->prepare("UPDATE reservas SET requisitor = ? WHERE requisitor = ?");
+                    $stmt->bind_param("ss", $_SESSION['id'], $preRegisteredUser['id']);
+                    $stmt->execute();
+                    $stmt->close();
+                    
+                    // Update foreign key references in logs table
+                    $stmt = $db->prepare("UPDATE logs SET userid = ? WHERE userid = ?");
+                    $stmt->bind_param("ss", $_SESSION['id'], $preRegisteredUser['id']);
+                    $stmt->execute();
+                    $stmt->close();
+                    
+                    // Finally, delete the old pre-registered user record
+                    $stmt = $db->prepare("DELETE FROM cache WHERE id = ?");
+                    $stmt->bind_param("s", $preRegisteredUser['id']);
+                    $stmt->execute();
+                    $stmt->close();
+                    
+                    $db->commit();
+                } catch (Exception $e) {
+                    $db->rollback();
+                    throw $e;
+                }
+            } else {
+                // No pre-registered user found, insert new record (existing behavior)
+                $stmt = $db->prepare("INSERT IGNORE INTO cache (id, nome, email) VALUES (?, ?, ?)");
+                $stmt->bind_param("sss", $_SESSION['id'], $_SESSION['nome'], $_SESSION['email']);
+                $stmt->execute();
+                $stmt->close();
+            }
 
             // Determinar se é Administrador
             $stmt = $db->prepare("SELECT admin FROM cache WHERE id = ?");
