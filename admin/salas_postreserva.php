@@ -1,7 +1,8 @@
 <?php require 'index.php'; ?>
 <script src="https://cdn.ckeditor.com/ckeditor5/40.1.0/classic/ckeditor.js"></script>
+<div style="margin-left: 10%; margin-right: 10%; text-align: center;">
 <h3>Gestão de Páginas Pós-Reserva</h3>
-<div class="d-flex align-items-center mb-3">
+<div class="d-flex align-items-center justify-content-center mb-3">
     <span class="me-3">Selecione uma sala para editar a página pós-reserva</span>
 </div>
 
@@ -79,3 +80,4 @@ switch (isset($_GET['action']) ? $_GET['action'] : null){
 }
 $db->close();
 ?>
+</div>

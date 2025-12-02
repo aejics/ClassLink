@@ -31,37 +31,40 @@
         }
     }
 
-    // Criação da Sidebar no HTML
-    echo "</div><div class='d-flex' style='height:100vh;'>
-    <div class='flex-shrink-0 p-3 text-bg-dark' style='width: 280px;'>
-    <h1>Administração</h1>        
-    <ul class='nav nav-pills flex-column mb-auto text-center justify-content-center align-items-center' style='height: 100%;'>
-    <li class='nav-item'>";
-    // Links da Sidebar
+    // Criação da Navbar no HTML
+    echo "<nav class='navbar navbar-expand-lg navbar-light bg-light border-bottom'>
+    <div class='container-fluid'>
+        <span class='navbar-brand mb-0 h1'>Dashboard de Administração</span>
+        <button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarNav' aria-controls='navbarNav' aria-expanded='false' aria-label='Toggle navigation'>
+            <span class='navbar-toggler-icon'></span>
+        </button>
+        <div class='collapse navbar-collapse' id='navbarNav'>
+            <ul class='navbar-nav ms-auto'>";
+    // Links da Navbar
     sidebarLink('/admin/', 'Dashboard');
-    sidebarLink('/admin/pedidos.php', 'Pedidos de Reserva');
-    sidebarLink('/admin/tempos.php', 'Gestão de Tempos');
-    sidebarLink('/admin/salas.php', 'Gestão de Salas');
-    sidebarLink('/admin/materiais.php', 'Gestão de Materiais');
-    sidebarLink('/admin/salas_postreserva.php', 'Páginas Pós-Reserva');
-    sidebarLink('/admin/users.php', 'Gestão de Utilizadores');
+    sidebarLink('/admin/pedidos.php', 'Pedidos');
+    sidebarLink('/admin/tempos.php', 'Tempos');
+    sidebarLink('/admin/salas.php', 'Salas');
+    sidebarLink('/admin/materiais.php', 'Materiais');
+    sidebarLink('/admin/salas_postreserva.php', 'Pós-Reserva');
+    sidebarLink('/admin/users.php', 'Utilizadores');
     echo "<li class='nav-item dropdown'>
             <a class='nav-link dropdown-toggle' href='#' id='extensibilidadeDropdown' role='button' data-bs-toggle='dropdown' aria-expanded='false'>
                 Extensibilidade
             </a>
-            <ul class='dropdown-menu' aria-labelledby='extensibilidadeDropdown'>";
+            <ul class='dropdown-menu dropdown-menu-end' aria-labelledby='extensibilidadeDropdown'>";
     foreach (glob(__DIR__ . "/scripts/*.php") as $scriptFile) {
         if (basename($scriptFile) !== "example.php") {
             $scriptName = basename($scriptFile, ".php");
             echo "<li>";
-            sidebarLink("/admin/scripts/$scriptName.php", ucfirst($scriptName));
+            echo "<a class='dropdown-item' href='/admin/scripts/$scriptName.php'>" . ucfirst($scriptName) . "</a>";
             echo "</li>";
         }
     }
     echo "</ul></li>";
-    sidebarLink('/', 'Voltar para a página principal');
-    // Fechar Sidebar no HTML, e passar o conteúdo para a direita
-    echo "</ul></div><div class='flex-grow-1 d-flex align-items-center justify-content-center flex-column'>";
+    echo "<li class='nav-item'><a href='/' class='nav-link'>Voltar</a></li>";
+    // Fechar Navbar no HTML, e passar o conteúdo para baixo
+    echo "</ul></div></div></nav><div class='container-fluid mt-4 justify-content-center text-center'>";
 
 ?>
 
@@ -76,13 +79,13 @@
         $pedidospendentes = $db->query("SELECT * FROM reservas WHERE aprovado = 0;")->num_rows;
         $nome_safe = htmlspecialchars($_SESSION['nome'], ENT_QUOTES, 'UTF-8');
         $pedidos_safe = htmlspecialchars($pedidospendentes, ENT_QUOTES, 'UTF-8');
-        echo "<div class='flex-grow-1 d-flex align-items-center justify-content-center flex-column'>
+        echo "<div class='d-flex align-items-center justify-content-center flex-column' style='min-height: 60vh;'>
         <h1>Olá, {$nome_safe}</h1>
         <p class='h4 fw-lighter'>O que vamos fazer hoje?</p>
         <p class='h6 fw-lighter'>Existem <b>{$pedidos_safe}</b> pedidos de reserva pendentes.</p>
         <div class='botoes_dashboardadmin d-flex justify-content-center'>
         <a href='/admin/pedidos.php' class='btn btn-success w-20 me-2'>Responder a pedidos</a>
-        </div>";
+        </div></div>";
     }
 
         // criação rápida de formulários

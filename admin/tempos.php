@@ -1,6 +1,7 @@
 <?php require 'index.php'; ?>
+<div style="margin-left: 10%; margin-right: 10%; text-align: center;">
 <h3>Gestão de Tempos</h3>
-<div class="d-flex align-items-center mb-3">
+<div class="d-flex align-items-center justify-content-center mb-3">
     <span class="me-3">Adicionar um tempo</span>
     <?php formulario("tempos.php?action=criar", [
         ["type" => "text", "id" => "horahumana", "placeholder" => "Horas (08:05-08:55)", "label" => "Horas (08:05-08:55)", "value" => null]
@@ -135,3 +136,4 @@ $numTempos = $temposatuais->num_rows;
 <?php
 $db->close();
 ?>
+</div>

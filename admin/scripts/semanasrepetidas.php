@@ -1,22 +1,42 @@
 <?php require '../index.php'; ?>
+<div style="margin-left: 20%; margin-right: 20%; text-align: center;">
 <h1>Semanas repetidas</h1>
 <p>Este script permite criar reservas repetidas de salas ao longo de várias semanas.</p>
 <p>Selecione a sala, o utilizador, os tempos desejados e o intervalo de semanas para criar as reservas.</p>
 
 <style>
+    body {
+        overflow-y: auto !important;
+    }
+    
     .time-checkbox-container {
-        max-height: 400px;
+        max-height: 250px;
         overflow-y: auto;
+        overflow-x: hidden;
         border: 1px solid #dee2e6;
         border-radius: 0.375rem;
         padding: 1rem;
     }
+    
+    @media (min-height: 768px) {
+        .time-checkbox-container {
+            max-height: 350px;
+        }
+    }
+    
+    @media (min-height: 1024px) {
+        .time-checkbox-container {
+            max-height: 450px;
+        }
+    }
+    
     .time-checkbox-item {
         padding: 0.5rem;
         margin-bottom: 0.5rem;
         border: 1px solid #e0e0e0;
         border-radius: 0.25rem;
         background-color: #f8f9fa;
+        word-wrap: break-word;
     }
     .time-checkbox-item:hover {
         background-color: #e9ecef;
@@ -255,3 +275,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sala']) && isset($_PO
     }
 }
 ?>
+</div>

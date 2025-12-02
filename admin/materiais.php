@@ -1,4 +1,5 @@
 <?php require 'index.php'; ?>
+<div style="margin-left: 10%; margin-right: 10%; text-align: center;">
 <h3>Gestão de Materiais</h3>
 
 <!-- CSV Import Section -->
@@ -347,3 +348,4 @@ if ($salasRef && $salasRef->num_rows > 0) {
 
 $db->close();
 ?>
+</div>

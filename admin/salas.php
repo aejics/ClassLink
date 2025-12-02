@@ -1,6 +1,7 @@
 <?php require 'index.php'; ?>
+<div style="margin-left: 10%; margin-right: 10%; text-align: center;">
 <h3>Gestão das Salas</h3>
-<div class="d-flex align-items-center mb-3">
+<div class="d-flex align-items-center justify-content-center mb-3">
     <span class="me-3">Adicionar uma sala</span>
     <?php formulario("salas.php?action=criar", [
         ["type" => "text", "id" => "nomesala", "placeholder" => "Sala", "label" => "Sala", "value" => null]
@@ -157,3 +158,4 @@ $numSalas = $salasAtual->num_rows;
 <?php
 $db->close();
 ?>
+</div>
