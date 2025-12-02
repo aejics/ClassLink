@@ -4,12 +4,7 @@
 <!-- CSV Import Section -->
 <div class="mb-4">
     <h5>Importar Materiais via CSV</h5>
-    <p class="text-muted small">Formato do CSV: <code>MaterialName,MaterialDescription,RoomID</code></p>
-    <p class="text-muted small">Exemplo:<br>
-    <code>Projetor,Projetor HD 1080p,sala-uuid-123<br>
-    Computador Portátil,Dell Latitude 15",sala-uuid-123<br>
-    Quadro Interativo,Smart Board 75",sala-uuid-456</code>
-    </p>
+    <a href="/assets/csvsample.csv" download>Download do modelo CSV</a>
     <p class="text-muted small"><strong>Nota:</strong> Para obter o RoomID de uma sala, consulte a gestão de salas ou use a listagem abaixo.</p>
     
     <form action="materiais.php?action=import" method="POST" enctype="multipart/form-data" class="d-flex align-items-center">
@@ -20,11 +15,9 @@
     </form>
 </div>
 
-<hr>
-
 <!-- Add Material Form -->
 <div class="d-flex align-items-center mb-3">
-    <span class="me-3">Adicionar um material</span>
+    <span class="me-3">Adicionar um material via flow</span>
     <?php formulario("materiais.php?action=criar", [
         ["type" => "text", "id" => "nomematerial", "placeholder" => "Nome do Material", "label" => "Nome do Material", "value" => null]
     ]); ?>
@@ -306,9 +299,7 @@ echo "</div>";
 
 // Get reference section for Room IDs before closing connection
 $salasRef = $db->query("SELECT id, nome FROM salas ORDER BY nome ASC;");
-
-echo "<!-- Reference Section for Room IDs -->";
-echo "<div class='mt-3 mb-3'>";
+echo "<div class='mt-4 mb-3'>";
 echo "<h5>Referência de IDs de Salas</h5>";
 echo "<p class='text-muted small'>Use estes IDs ao criar o ficheiro CSV para importação de materiais:</p>";
 
