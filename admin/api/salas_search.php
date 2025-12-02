@@ -20,10 +20,10 @@ if ($offset < 0) $offset = 0;
 
 if ($search !== '') {
     $searchPattern = '%' . $search . '%';
-    $stmt = $db->prepare("SELECT id, nome, tipo_sala, bloqueado FROM salas WHERE nome LIKE ? ORDER BY nome ASC LIMIT ? OFFSET ?");
+    $stmt = $db->prepare("SELECT id, nome, tipo_sala, bloqueado, post_reservation_content FROM salas WHERE nome LIKE ? ORDER BY nome ASC LIMIT ? OFFSET ?");
     $stmt->bind_param("sii", $searchPattern, $limit, $offset);
 } else {
-    $stmt = $db->prepare("SELECT id, nome, tipo_sala, bloqueado FROM salas ORDER BY nome ASC LIMIT ? OFFSET ?");
+    $stmt = $db->prepare("SELECT id, nome, tipo_sala, bloqueado, post_reservation_content FROM salas ORDER BY nome ASC LIMIT ? OFFSET ?");
     $stmt->bind_param("ii", $limit, $offset);
 }
 
@@ -32,12 +32,17 @@ $result = $stmt->get_result();
 
 $salas = [];
 while ($row = $result->fetch_assoc()) {
-    $salas[] = [
+    $sala = [
         'id' => $row['id'],
         'nome' => $row['nome'],
         'tipo_sala' => $row['tipo_sala'],
         'bloqueado' => $row['bloqueado']
     ];
+    // Include post_reservation_content status if requested
+    if (isset($_GET['include_postreserva'])) {
+        $sala['has_post_reservation_content'] = !empty($row['post_reservation_content']);
+    }
+    $salas[] = $sala;
 }
 $stmt->close();
 
