@@ -12,6 +12,8 @@ if (!isset($_SESSION['admin']) || !$_SESSION['admin']) {
 }
 
 // Get pagination parameters
+// Note: OFFSET-based pagination is used for simplicity. For very large datasets,
+// consider cursor-based pagination using timestamp or id for better performance.
 $offset = isset($_GET['offset']) ? max(0, intval($_GET['offset'])) : 0;
 $limit = isset($_GET['limit']) ? min(100, max(1, intval($_GET['limit']))) : 50;
 

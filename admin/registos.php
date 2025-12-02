@@ -53,6 +53,7 @@
 <script>
     let currentOffset = 0;
     const limit = 50;
+    const scrollThreshold = 200;
     let isLoading = false;
     let hasMoreLogs = true;
 
@@ -95,7 +96,7 @@
         isLoading = true;
         document.getElementById('loadingPlaceholder').style.display = 'block';
         
-        fetch('/admin/api_registos.php?offset=' + currentOffset + '&limit=' + limit)
+        fetch('api_registos.php?offset=' + currentOffset + '&limit=' + limit)
             .then(response => response.json())
             .then(data => {
                 const tbody = document.getElementById('logsTableBody');
@@ -147,7 +148,7 @@
 
     // Infinite scroll handler
     function handleScroll() {
-        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - scrollThreshold) {
             loadLogs();
         }
     }
