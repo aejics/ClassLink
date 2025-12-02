@@ -44,4 +44,7 @@
     
     // Create junction table for reservations and materials
     $db->query("CREATE TABLE IF NOT EXISTS reservas_materiais (reserva_sala VARCHAR(99) NOT NULL, reserva_tempo VARCHAR(99) NOT NULL, reserva_data DATE NOT NULL, material_id VARCHAR(99) NOT NULL, PRIMARY KEY (reserva_sala, reserva_tempo, reserva_data, material_id), FOREIGN KEY (reserva_sala, reserva_tempo, reserva_data) REFERENCES reservas(sala, tempo, data) ON DELETE CASCADE, FOREIGN KEY (material_id) REFERENCES materiais(id) ON DELETE CASCADE);");
+    
+    // Constant for pre-registered user ID prefix
+    define('PRE_REGISTERED_PREFIX', 'pre_');
 ?>
