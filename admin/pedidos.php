@@ -111,7 +111,7 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
         <div>
             <h2 class="mb-1">
                 <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                    Gestao de Pedidos
+                    Gestão de Pedidos
                 </span>
             </h2>
             <p class="text-muted mb-0">Gerir e aprovar pedidos de reserva de salas</p>
@@ -137,7 +137,7 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                     </div>
                     <?php if ($totalPendentes > 0): ?>
                     <div class="ms-auto">
-                        <span class="badge bg-warning text-dark pulse">Requer Atencao</span>
+                        <span class="badge bg-warning text-dark pulse">Requer Atenção</span>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -222,7 +222,7 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
     if (isset($_GET['subaction'])) {
         if (!isset($_GET['sala']) || !isset($_GET['tempo']) || !isset($_GET['data'])) {
             echo "<div class='alert alert-danger alert-dismissible fade show shadow-sm' role='alert'>
-                    <strong>Erro!</strong> Parametros invalidos.
+                    <strong>Erro!</strong> Parâmetros inválidos.
                     <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
                   </div>";
             echo "<a href='/admin/pedidos.php' class='btn btn-primary'>Voltar aos Pedidos</a>";
@@ -248,7 +248,7 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                             <div class='card-body text-center py-4'>
                                 <div class='mb-3' style='font-size: 4rem;'>&#x1F389;</div>
                                 <h4 class='text-success mb-3'>Reserva Aprovada com Sucesso!</h4>
-                                <p class='text-muted mb-4'>O utilizador sera notificado por email sobre a aprovacao.</p>
+                                <p class='text-muted mb-4'>O utilizador será notificado por email sobre a aprovação.</p>
                                 <div class='d-flex justify-content-center gap-2'>";
                     $reservaUrl = "/reservar/manage.php?sala=" . urlencode($_GET['sala']) . "&tempo=" . urlencode($_GET['tempo']) . "&data=" . urlencode($_GET['data']);
                     echo "<a href='{$reservaUrl}' class='btn btn-outline-info' target='_blank'>
@@ -300,7 +300,7 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                         $enviarmail->send();
                     } catch (Exception $e) {
                         echo "<div class='alert alert-warning alert-dismissible fade show' role='alert'>
-                                <strong>Aviso:</strong> A reserva foi aprovada, mas o email de notificacao nao foi enviado. Contacte o Postmaster.
+                                <strong>Aviso:</strong> A reserva foi aprovada, mas o email de notificação não foi enviado. Contacte o Postmaster.
                                 <br><small>Erro: " . htmlspecialchars($enviarmail->ErrorInfo, ENT_QUOTES, 'UTF-8') . "</small>
                                 <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
                               </div>";
@@ -323,7 +323,7 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                             <div class='card-body text-center py-4'>
                                 <div class='mb-3' style='font-size: 4rem;'>&#x1F6AB;</div>
                                 <h4 class='text-danger mb-3'>Reserva Rejeitada</h4>
-                                <p class='text-muted mb-4'>O utilizador foi notificado por email sobre a rejeicao.</p>
+                                <p class='text-muted mb-4'>O utilizador foi notificado por email sobre a rejeição.</p>
                                 <a href='/admin/pedidos.php' class='btn btn-primary'>
                                     Voltar aos Pedidos
                                 </a>
@@ -368,7 +368,7 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                         $enviarmail->send();
                     } catch (Exception $e) {
                         echo "<div class='alert alert-warning alert-dismissible fade show' role='alert'>
-                                <strong>Aviso:</strong> A reserva foi rejeitada, mas o email de notificacao nao foi enviado. Contacte o Postmaster.
+                                <strong>Aviso:</strong> A reserva foi rejeitada, mas o email de notificação não foi enviado. Contacte o Postmaster.
                                 <br><small>Erro: " . htmlspecialchars($enviarmail->ErrorInfo, ENT_QUOTES, 'UTF-8') . "</small>
                                 <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
                               </div>";
@@ -450,7 +450,7 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                     <div class='card-body empty-state'>
                         <div class='empty-state-icon'>&#x1F4ED;</div>
                         <h5>Nenhum pedido encontrado</h5>
-                        <p class='mb-0'>Nao existem pedidos pendentes para os filtros selecionados.</p>
+                        <p class='mb-0'>Não existem pedidos pendentes para os filtros selecionados.</p>
                     </div>
                   </div>";
         } else {
@@ -465,12 +465,12 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                         <thead class='table-dark'>
                             <tr>
                                 <th scope='col' style='width: 15%;'>Data</th>
-                                <th scope='col' style='width: 15%;'>Horario</th>
+                                <th scope='col' style='width: 15%;'>Horário</th>
                                 <th scope='col' style='width: 15%;'>Sala</th>
                                 <th scope='col' style='width: 15%;'>Requisitor</th>
                                 <th scope='col' style='width: 20%;'>Motivo</th>
                                 <th scope='col' style='width: 10%;'>Estado</th>
-                                <th scope='col' style='width: 10%;' class='text-center'>Acoes</th>
+                                <th scope='col' style='width: 10%;' class='text-center'>Ações</th>
                             </tr>
                         </thead>
                         <tbody>";
@@ -615,11 +615,11 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                         <thead class='table-dark'>
                             <tr>
                                 <th scope='col'>Data</th>
-                                <th scope='col'>Horario</th>
+                                <th scope='col'>Horário</th>
                                 <th scope='col'>Sala</th>
                                 <th scope='col'>Requisitor</th>
                                 <th scope='col'>Motivo</th>
-                                <th scope='col' class='text-center'>Acoes</th>
+                                <th scope='col' class='text-center'>Ações</th>
                             </tr>
                         </thead>
                         <tbody>";
@@ -717,7 +717,7 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header" id="modalHeader">
-                <h5 class="modal-title" id="confirmModalLabel">Confirmar Acao</h5>
+                <h5 class="modal-title" id="confirmModalLabel">Confirmar Ação</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body" id="modalBody">
@@ -768,9 +768,9 @@ function confirmAction(action, tempo, data, sala, salaNome, dataFormatted, horas
             <div class="alert alert-light border mt-3">
                 <p class="mb-1"><strong>Sala:</strong> ${salaNome}</p>
                 <p class="mb-1"><strong>Data:</strong> ${dataFormatted}</p>
-                <p class="mb-0"><strong>Horario:</strong> ${horasNome}</p>
+                <p class="mb-0"><strong>Horário:</strong> ${horasNome}</p>
             </div>
-            <p class="text-muted small text-center mb-0">O utilizador sera notificado por email.</p>
+            <p class="text-muted small text-center mb-0">O utilizador será notificado por email.</p>
         `;
         confirmBtn.className = 'btn btn-success';
         confirmBtn.textContent = 'Aprovar Reserva';
@@ -785,10 +785,10 @@ function confirmAction(action, tempo, data, sala, salaNome, dataFormatted, horas
             <div class="alert alert-light border mt-3">
                 <p class="mb-1"><strong>Sala:</strong> ${salaNome}</p>
                 <p class="mb-1"><strong>Data:</strong> ${dataFormatted}</p>
-                <p class="mb-0"><strong>Horario:</strong> ${horasNome}</p>
+                <p class="mb-0"><strong>Horário:</strong> ${horasNome}</p>
             </div>
             <div class="alert alert-warning">
-                <strong>Atencao:</strong> Esta acao ira eliminar a reserva permanentemente e notificar o utilizador.
+                <strong>Atenção:</strong> Esta ação irá eliminar a reserva permanentemente e notificar o utilizador.
             </div>
         `;
         confirmBtn.className = 'btn btn-danger';
