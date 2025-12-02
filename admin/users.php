@@ -89,7 +89,6 @@ $numUtilizadores = $utilizadores->num_rows;
                     <table class='table table-striped table-hover'>
                         <thead class='table-dark'>
                             <tr>
-                                <th scope='col'>ID</th>
                                 <th scope='col'>Nome</th>
                                 <th scope='col'>Email</th>
                                 <th scope='col'>Admin</th>
@@ -99,10 +98,8 @@ $numUtilizadores = $utilizadores->num_rows;
                         <tbody>
                             <?php while ($row = $utilizadores->fetch_assoc()): 
                                 $adminStatus = $row['admin'] ? "Sim" : "Não";
-                                $idEnc = urlencode($row['id']);
                             ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($row['id'], ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td><?php echo htmlspecialchars($row['nome'], ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td><?php echo htmlspecialchars($row['email'], ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td><?php echo htmlspecialchars($adminStatus, ENT_QUOTES, 'UTF-8'); ?></td>
