@@ -112,65 +112,139 @@ switch (isset($_GET['action']) ? $_GET['action'] : null){
         break;
 }
 
-$salasAtual = $db->query("SELECT * FROM salas ORDER BY nome ASC;");
-$numSalas = $salasAtual->num_rows;
+$numSalas = $db->query("SELECT COUNT(*) as total FROM salas")->fetch_assoc()['total'];
+$db->close();
 ?>
 
-<div class="mb-3">
-    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#salasModal">
-        Ver Salas (<?php echo $numSalas; ?>)
-    </button>
-</div>
-
-<!-- Modal for Salas -->
-<div class="modal fade" id="salasModal" tabindex="-1" aria-labelledby="salasModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="salasModalLabel">Lista de Salas</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
-            <div class="modal-body">
-                <?php if ($numSalas == 0): ?>
-                    <div class='alert alert-warning'>Não existem salas.</div>
-                <?php else: ?>
-                    <table class='table table-striped table-hover'>
-                        <thead class='table-dark'>
-                            <tr>
-                                <th scope='col'>Sala</th>
-                                <th scope='col'>Tipo de Sala</th>
-                                <th scope='col'>Estado</th>
-                                <th scope='col'>AÇÕES</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php while ($row = $salasAtual->fetch_assoc()): 
-                                $idEnc = urlencode($row['id']);
-                                $tipoSala = ($row['tipo_sala'] == 2) ? "<span class='badge bg-success'>Reserva Autónoma</span>" : "<span class='badge bg-primary'>Normal</span>";
-                                $estadoSala = ($row['bloqueado'] == 1) ? "<span class='badge bg-danger'>Bloqueada</span>" : "<span class='badge bg-success'>Desbloqueada</span>";
-                            ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($row['nome'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                    <td><?php echo $tipoSala; ?></td>
-                                    <td><?php echo $estadoSala; ?></td>
-                                    <td>
-                                        <a href='/admin/salas.php?action=edit&id=<?php echo $idEnc; ?>' class='btn btn-sm btn-primary'>EDITAR</a>
-                                        <a href='/admin/salas.php?action=apagar&id=<?php echo $idEnc; ?>' class='btn btn-sm btn-danger' onclick='return confirm("Tem a certeza que pretende apagar a sala? Isto irá causar problemas se a sala tiver reservas passadas.");'>APAGAR</a>
-                                    </td>
-                                </tr>
-                            <?php endwhile; ?>
-                        </tbody>
-                    </table>
-                <?php endif; ?>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+<!-- Search and List Section -->
+<div class="mt-4">
+    <h5>Lista de Salas (<?php echo $numSalas; ?>)</h5>
+    <div class="mb-3">
+        <input type="text" class="form-control" id="salasSearchInput" placeholder="Pesquisar salas..." oninput="searchSalas()">
+    </div>
+    <div id="salasListContainer">
+        <div class="text-center py-3">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">A carregar...</span>
             </div>
         </div>
     </div>
+    <div id="salasLoadMore" class="text-center mt-3" style="display: none;">
+        <button class="btn btn-outline-primary" onclick="loadMoreSalas()">Carregar mais</button>
+    </div>
 </div>
 
-<?php
-$db->close();
-?>
+<script>
+let salasOffset = 0;
+let salasSearchQuery = '';
+let salasLoading = false;
+let salasHasMore = true;
+const salasLimit = 20;
+
+function searchSalas() {
+    salasSearchQuery = document.getElementById('salasSearchInput').value;
+    salasOffset = 0;
+    salasHasMore = true;
+    loadSalas(true);
+}
+
+function loadSalas(reset = false) {
+    if (salasLoading) return;
+    salasLoading = true;
+    
+    const container = document.getElementById('salasListContainer');
+    const loadMoreBtn = document.getElementById('salasLoadMore');
+    
+    if (reset) {
+        container.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">A carregar...</span></div></div>';
+    }
+    
+    const url = '/admin/api/salas_search.php?limit=' + salasLimit + '&offset=' + salasOffset + '&q=' + encodeURIComponent(salasSearchQuery);
+    
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            salasLoading = false;
+            
+            if (reset) {
+                container.innerHTML = '';
+            }
+            
+            if (data.salas.length === 0 && salasOffset === 0) {
+                container.innerHTML = '<div class="alert alert-warning">Não existem salas.</div>';
+                loadMoreBtn.style.display = 'none';
+                return;
+            }
+            
+            let tableHtml = '';
+            if (salasOffset === 0) {
+                tableHtml = `<table class='table table-striped table-hover'>
+                    <thead class='table-dark'>
+                        <tr>
+                            <th scope='col'>Sala</th>
+                            <th scope='col'>Tipo de Sala</th>
+                            <th scope='col'>Estado</th>
+                            <th scope='col'>AÇÕES</th>
+                        </tr>
+                    </thead>
+                    <tbody id='salasTableBody'>`;
+            }
+            
+            data.salas.forEach(sala => {
+                const idEnc = encodeURIComponent(sala.id);
+                const tipoSala = (sala.tipo_sala == 2) ? "<span class='badge bg-success'>Reserva Autónoma</span>" : "<span class='badge bg-primary'>Normal</span>";
+                const estadoSala = (sala.bloqueado == 1) ? "<span class='badge bg-danger'>Bloqueada</span>" : "<span class='badge bg-success'>Desbloqueada</span>";
+                
+                const rowHtml = `<tr>
+                    <td>${escapeHtml(sala.nome)}</td>
+                    <td>${tipoSala}</td>
+                    <td>${estadoSala}</td>
+                    <td>
+                        <a href='/admin/salas.php?action=edit&id=${idEnc}' class='btn btn-sm btn-primary'>EDITAR</a>
+                        <a href='/admin/salas.php?action=apagar&id=${idEnc}' class='btn btn-sm btn-danger' onclick='return confirm("Tem a certeza que pretende apagar a sala? Isto irá causar problemas se a sala tiver reservas passadas.");'>APAGAR</a>
+                    </td>
+                </tr>`;
+                
+                if (salasOffset === 0) {
+                    tableHtml += rowHtml;
+                } else {
+                    document.getElementById('salasTableBody').insertAdjacentHTML('beforeend', rowHtml);
+                }
+            });
+            
+            if (salasOffset === 0) {
+                tableHtml += '</tbody></table>';
+                container.innerHTML = tableHtml;
+            }
+            
+            salasOffset += data.salas.length;
+            salasHasMore = salasOffset < data.total;
+            loadMoreBtn.style.display = salasHasMore ? 'block' : 'none';
+        })
+        .catch(error => {
+            salasLoading = false;
+            container.innerHTML = '<div class="alert alert-danger">Erro ao carregar salas.</div>';
+            console.error('Error:', error);
+        });
+}
+
+function loadMoreSalas() {
+    if (salasHasMore && !salasLoading) {
+        loadSalas(false);
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Load initial data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadSalas(true);
+});
+</script>
+
+<?php ?>
 </div>
