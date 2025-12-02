@@ -116,7 +116,6 @@ $numSalas = $db->query("SELECT COUNT(*) as total FROM salas")->fetch_assoc()['to
 $db->close();
 ?>
 
-<!-- Search and List Section -->
 <div class="mt-4">
     <h5>Lista de Salas (<?php echo $numSalas; ?>)</h5>
     <div class="mb-3">

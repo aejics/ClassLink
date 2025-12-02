@@ -181,7 +181,6 @@ $numLogs = $result ? $result->fetch_assoc()['total'] : 0;
                 </tr>
             </thead>
             <tbody id="logsTableBody">
-                <!-- Logs will be loaded via JavaScript -->
             </tbody>
         </table>
     </div>

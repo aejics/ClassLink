@@ -230,7 +230,6 @@
     </div>
 </form>
 
-<!-- User Selection Modal -->
 <div class="modal fade" id="userSelectModal" tabindex="-1" aria-labelledby="userSelectModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
