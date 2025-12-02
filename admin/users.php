@@ -154,7 +154,7 @@ $utilizadores = $db->query("SELECT * FROM cache ORDER BY nome ASC LIMIT 20;");
     }
     
     function fetchUsers(search, offset, append) {
-        const url = `/admin/scripts/users_api.php?action=search&search=${encodeURIComponent(search)}&offset=${offset}`;
+        const url = `/admin/users_api.php?action=search&search=${encodeURIComponent(search)}&offset=${offset}`;
         
         fetch(url)
             .then(response => response.json())
