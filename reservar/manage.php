@@ -507,7 +507,7 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                         if ($detalhesreserva['aprovado'] == 1) {
                             echo "<div class='alert alert-success'><h4 class='alert-heading mb-0'>Reserva Aprovada!</h4></div>";
                         } else if ($detalhesreserva['aprovado'] == 0) {
-                            echo "<div class='alert alert-info'><h4 class='alert-heading'>Reserva Submetida!</h4><p class='mb-0'>A sua reserva foi submetida e está a aguardar aprovação.</p></div>";
+                            echo "<div class='alert alert-info'><h4 class='alert-heading'>Reserva Submetida!</h4><p class='mb-0'>A reserva foi submetida e está a aguardar aprovação.</p></div>";
                         } else {
                             echo "<div class='alert alert-warning'><h4 class='alert-heading mb-0'>Reserva Cancelada</h4></div>";
                         }
