@@ -105,10 +105,18 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                             continue;
                         }
                         
-                        // Determine requisitor: for admins on locked rooms, use selected user or current user
+                        // Determine requisitor: for admins, use selected user or current user
                         $requisitor = $id;
                         if ($_SESSION['admin'] && isset($_POST['requisitor_id']) && !empty($_POST['requisitor_id'])) {
-                            $requisitor = $_POST['requisitor_id'];
+                            // Validate that the requisitor_id exists in the database
+                            $userCheckStmt = $db->prepare("SELECT id FROM cache WHERE id = ?");
+                            $userCheckStmt->bind_param("s", $_POST['requisitor_id']);
+                            $userCheckStmt->execute();
+                            $userExists = $userCheckStmt->get_result()->fetch_assoc();
+                            $userCheckStmt->close();
+                            if ($userExists) {
+                                $requisitor = $_POST['requisitor_id'];
+                            }
                         }
                         
                         // Auto-approve if tipo_sala is 2 (autonomous), otherwise set to 0 (pending)
@@ -206,7 +214,15 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                     // Determine requisitor: for admins, use selected user if provided
                     $requisitor = $id;
                     if ($_SESSION['admin'] && isset($_POST['requisitor_id']) && !empty($_POST['requisitor_id'])) {
-                        $requisitor = $_POST['requisitor_id'];
+                        // Validate that the requisitor_id exists in the database
+                        $userCheckStmt = $db->prepare("SELECT id FROM cache WHERE id = ?");
+                        $userCheckStmt->bind_param("s", $_POST['requisitor_id']);
+                        $userCheckStmt->execute();
+                        $userExists = $userCheckStmt->get_result()->fetch_assoc();
+                        $userCheckStmt->close();
+                        if ($userExists) {
+                            $requisitor = $_POST['requisitor_id'];
+                        }
                     }
                     
                     // Auto-approve if tipo_sala is 2 (autonomous), otherwise set to 0 (pending)
