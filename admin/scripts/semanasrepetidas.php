@@ -86,6 +86,24 @@
         document.getElementById('selectedUserDisplay').value = '';
         document.getElementById('selectedUserDisplay').placeholder = 'Selecione um utilizador...';
     }
+    
+    // Form validation
+    function validateForm(event) {
+        const requisitor = document.getElementById('requisitor').value;
+        if (!requisitor) {
+            event.preventDefault();
+            alert('Por favor, selecione um utilizador.');
+            return false;
+        }
+        return true;
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', validateForm);
+        }
+    });
 </script>
 
 <form action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="POST" class="mt-4">
