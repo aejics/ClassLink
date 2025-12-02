@@ -1,5 +1,23 @@
 <?php require 'index.php'; ?>
+<div style="margin-left: 10%; margin-right: 10%; text-align: center;">
 <h3>Gestão de Utilizadores</h3>
+<script>
+    function filterUsers() {
+        const searchInput = document.getElementById('userSearchInput');
+        const filter = searchInput.value.toLowerCase();
+        const tableRows = document.querySelectorAll('#userTableBody tr');
+        
+        tableRows.forEach(row => {
+            const name = row.getAttribute('data-user-name').toLowerCase();
+            const email = row.getAttribute('data-user-email').toLowerCase();
+            if (name.includes(filter) || email.includes(filter)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+</script>
 <?php
 switch (isset($_GET['action']) ? $_GET['action'] : null){
     // caso execute a ação apagar:
@@ -86,6 +104,9 @@ $numUtilizadores = $utilizadores->num_rows;
                 <?php if ($numUtilizadores == 0): ?>
                     <div class='alert alert-warning'>Não existem utilizadores.</div>
                 <?php else: ?>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="userSearchInput" placeholder="Pesquisar por nome ou email..." oninput="filterUsers()">
+                    </div>
                     <table class='table table-striped table-hover'>
                         <thead class='table-dark'>
                             <tr>
@@ -95,13 +116,16 @@ $numUtilizadores = $utilizadores->num_rows;
                                 <th scope='col'>AÇÕES</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id='userTableBody'>
                             <?php while ($row = $utilizadores->fetch_assoc()): 
+                                $idEnc = urlencode($row['id']);
                                 $adminStatus = $row['admin'] ? "Sim" : "Não";
+                                $userName = htmlspecialchars($row['nome'], ENT_QUOTES, 'UTF-8');
+                                $userEmail = htmlspecialchars($row['email'], ENT_QUOTES, 'UTF-8');
                             ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($row['nome'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                    <td><?php echo htmlspecialchars($row['email'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                <tr data-user-name="<?php echo $userName; ?>" data-user-email="<?php echo $userEmail; ?>">
+                                    <td><?php echo $userName; ?></td>
+                                    <td><?php echo $userEmail; ?></td>
                                     <td><?php echo htmlspecialchars($adminStatus, ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td>
                                         <a href='/admin/users.php?action=edit&id=<?php echo $idEnc; ?>' class='btn btn-sm btn-primary'>EDITAR</a>
@@ -123,3 +147,4 @@ $numUtilizadores = $utilizadores->num_rows;
 <?php
 $db->close();
 ?>
+</div>
