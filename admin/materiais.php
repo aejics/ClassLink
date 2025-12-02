@@ -299,14 +299,13 @@ echo "</div>";
 
 // Get reference section for Room IDs before closing connection
 $salasRef = $db->query("SELECT id, nome FROM salas ORDER BY nome ASC;");
-echo "<div class='mt-4 mb-3'>";
-echo "<h5>Referência de IDs de Salas</h5>";
-echo "<p class='text-muted small'>Use estes IDs ao criar o ficheiro CSV para importação de materiais:</p>";
 
 if ($salasRef && $salasRef->num_rows > 0) {
+    echo "<div class='mt-4 mb-3'>";
     echo "<button type='button' class='btn btn-info' data-bs-toggle='modal' data-bs-target='#salasRefModal'>";
-    echo "Ver IDs das Salas ({$salasRef->num_rows})";
+    echo "<i class='bi bi-list-ul me-2'></i>Ver Referência de IDs de Salas ({$salasRef->num_rows})";
     echo "</button>";
+    echo "</div>";
     
     // Modal for room IDs reference
     echo "<div class='modal fade' id='salasRefModal' tabindex='-1' aria-labelledby='salasRefModalLabel' aria-hidden='true'>";
@@ -324,9 +323,6 @@ if ($salasRef && $salasRef->num_rows > 0) {
     echo "<tr><th scope='col'>Nome da Sala</th><th scope='col'>ID (Room ID)</th></tr>";
     echo "</thead>";
     echo "<tbody>";
-    
-    // Reset pointer to iterate
-    $salasRef->data_seek(0);
     
     while ($sala = $salasRef->fetch_assoc()) {
         $salaNome = htmlspecialchars($sala['nome'], ENT_QUOTES, 'UTF-8');
@@ -347,11 +343,7 @@ if ($salasRef && $salasRef->num_rows > 0) {
     echo "</div>";
     echo "</div>";
     echo "</div>";
-} else {
-    echo "<div class='alert alert-warning'>Não existem salas. Por favor, adicione salas antes de criar materiais.</div>";
 }
-
-echo "</div>";
 
 $db->close();
 ?>
