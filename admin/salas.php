@@ -77,13 +77,20 @@ switch (isset($_GET['action']) ? $_GET['action'] : null){
                 </select>
                 <label for="tipo_sala">Tipo de Sala</label>
             </div>
+            <div class="form-floating me-2" style="flex: 1;">
+                <select class="form-select form-select-sm" id="bloqueado" name="bloqueado" required>
+                    <option value="0" <?php echo (!isset($d['bloqueado']) || $d['bloqueado'] == 0) ? 'selected' : ''; ?>>Desbloqueada</option>
+                    <option value="1" <?php echo ($d['bloqueado'] == 1) ? 'selected' : ''; ?>>Bloqueada (Apenas Admins)</option>
+                </select>
+                <label for="bloqueado">Estado</label>
+            </div>
             <button type="submit" class="btn btn-primary btn-sm" style="height: 38px;">Submeter</button>
         </form>
         <?php
         break;
     // caso seja submetida a edição:
     case "update":
-        if (!isset($_GET['id']) || !isset($_POST['nomesala']) || !isset($_POST['tipo_sala'])) {
+        if (!isset($_GET['id']) || !isset($_POST['nomesala']) || !isset($_POST['tipo_sala']) || !isset($_POST['bloqueado'])) {
             echo "<div class='alert alert-danger fade show' role='alert'>Dados inválidos.</div>";
             break;
         }
@@ -92,8 +99,13 @@ switch (isset($_GET['action']) ? $_GET['action'] : null){
             echo "<div class='alert alert-danger fade show' role='alert'>Tipo de sala inválido.</div>";
             break;
         }
-        $stmt = $db->prepare("UPDATE salas SET nome = ?, tipo_sala = ? WHERE id = ?");
-        $stmt->bind_param("sis", $_POST['nomesala'], $tipo_sala, $_GET['id']);
+        $bloqueado = intval($_POST['bloqueado']);
+        if ($bloqueado != 0 && $bloqueado != 1) {
+            echo "<div class='alert alert-danger fade show' role='alert'>Estado de sala inválido.</div>";
+            break;
+        }
+        $stmt = $db->prepare("UPDATE salas SET nome = ?, tipo_sala = ?, bloqueado = ? WHERE id = ?");
+        $stmt->bind_param("siis", $_POST['nomesala'], $tipo_sala, $bloqueado, $_GET['id']);
         $stmt->execute();
         $stmt->close();
         acaoexecutada("Atualização de Sala");
@@ -127,6 +139,7 @@ $numSalas = $salasAtual->num_rows;
                             <tr>
                                 <th scope='col'>Sala</th>
                                 <th scope='col'>Tipo de Sala</th>
+                                <th scope='col'>Estado</th>
                                 <th scope='col'>AÇÕES</th>
                             </tr>
                         </thead>
@@ -134,10 +147,12 @@ $numSalas = $salasAtual->num_rows;
                             <?php while ($row = $salasAtual->fetch_assoc()): 
                                 $idEnc = urlencode($row['id']);
                                 $tipoSala = ($row['tipo_sala'] == 2) ? "<span class='badge bg-success'>Reserva Autónoma</span>" : "<span class='badge bg-primary'>Normal</span>";
+                                $estadoSala = ($row['bloqueado'] == 1) ? "<span class='badge bg-danger'>Bloqueada</span>" : "<span class='badge bg-success'>Desbloqueada</span>";
                             ?>
                                 <tr>
                                     <td><?php echo htmlspecialchars($row['nome'], ENT_QUOTES, 'UTF-8'); ?></td>
                                     <td><?php echo $tipoSala; ?></td>
+                                    <td><?php echo $estadoSala; ?></td>
                                     <td>
                                         <a href='/admin/salas.php?action=edit&id=<?php echo $idEnc; ?>' class='btn btn-sm btn-primary'>EDITAR</a>
                                         <a href='/admin/salas.php?action=apagar&id=<?php echo $idEnc; ?>' class='btn btn-sm btn-danger' onclick='return confirm("Tem a certeza que pretende apagar a sala? Isto irá causar problemas se a sala tiver reservas passadas.");'>APAGAR</a>
