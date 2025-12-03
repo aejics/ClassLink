@@ -531,3 +531,140 @@ function sendBulkReservationsEmail($db, $requisitorId, $successCount, $failedCou
         "Ver Minhas Reservas"
     );
 }
+
+/**
+ * Send recurring weekly reservations confirmation email
+ * Used by admin/scripts/semanasrepetidas.php for batch weekly reservations
+ * 
+ * @param mysqli $db Database connection
+ * @param string $requisitorId ID of the user who will have the reservations
+ * @param int $successCount Number of successful reservations
+ * @param int $duplicateCount Number of duplicate/skipped reservations
+ * @param string $salaId Room ID
+ * @param string $diaSemana Day of week (0-6, 0=Sunday)
+ * @param string $dataInicio Start date (Y-m-d)
+ * @param string $dataFim End date (Y-m-d)
+ * @param int $numSemanas Number of weeks covered
+ * @param int $numTempos Number of time slots selected
+ * @param string $motivo Reservation reason
+ * @return array ['success' => bool, 'error' => string|null]
+ */
+function sendRecurringWeeklyReservationsEmail($db, $requisitorId, $successCount, $duplicateCount, $salaId, $diaSemana, $dataInicio, $dataFim, $numSemanas, $numTempos, $motivo) {
+    // Get requisitor email
+    $stmt = $db->prepare("SELECT email, nome FROM cache WHERE id = ?");
+    $stmt->bind_param("s", $requisitorId);
+    $stmt->execute();
+    $requisitor = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
+    if (!$requisitor) {
+        return ['success' => false, 'error' => 'Requisitor not found'];
+    }
+    
+    // Get room name
+    $stmt = $db->prepare("SELECT nome FROM salas WHERE id = ?");
+    $stmt->bind_param("s", $salaId);
+    $stmt->execute();
+    $salaResult = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $salaName = $salaResult ? $salaResult['nome'] : 'Desconhecida';
+    
+    // Map day of week number to name
+    $diasSemana = [
+        '0' => 'Domingo',
+        '1' => 'Segunda-feira',
+        '2' => 'Terça-feira',
+        '3' => 'Quarta-feira',
+        '4' => 'Quinta-feira',
+        '5' => 'Sexta-feira',
+        '6' => 'Sábado'
+    ];
+    $diaSemanaName = $diasSemana[$diaSemana] ?? 'Desconhecido';
+    
+    // Ensure numeric values are integers to prevent XSS
+    $successCount = (int)$successCount;
+    $duplicateCount = (int)$duplicateCount;
+    $numSemanas = (int)$numSemanas;
+    $numTempos = (int)$numTempos;
+    
+    $baseUrl = getBaseUrl();
+    $reservasUrl = $baseUrl . "/reservas";
+    
+    // These reservations are always auto-approved (aprovado = 1) by semanasrepetidas.php
+    $heading = "Reservas Semanais Criadas";
+    $type = 'success';
+    
+    $bodyContent = "
+        <p>Olá <strong>" . htmlspecialchars($requisitor['nome'], ENT_QUOTES, 'UTF-8') . "</strong>,</p>
+        <p>As suas reservas semanais foram criadas com sucesso por um administrador.</p>
+        
+        <table cellpadding='0' cellspacing='0' border='0' width='100%' style='background-color: #f8f9fa; border-radius: 8px; margin: 20px 0;'>
+            <tr>
+                <td style='padding: 20px;'>
+                    <table cellpadding='0' cellspacing='0' border='0' width='100%'>
+                        <tr>
+                            <td style='padding: 8px 0; border-bottom: 1px solid #e9ecef;'>
+                                <strong style='color: #495057;'>Sala:</strong>
+                                <span style='color: #212529; float: right;'>" . htmlspecialchars($salaName, ENT_QUOTES, 'UTF-8') . "</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px 0; border-bottom: 1px solid #e9ecef;'>
+                                <strong style='color: #495057;'>Dia da semana:</strong>
+                                <span style='color: #212529; float: right;'>" . htmlspecialchars($diaSemanaName, ENT_QUOTES, 'UTF-8') . "</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px 0; border-bottom: 1px solid #e9ecef;'>
+                                <strong style='color: #495057;'>Período:</strong>
+                                <span style='color: #212529; float: right;'>" . htmlspecialchars($dataInicio, ENT_QUOTES, 'UTF-8') . " a " . htmlspecialchars($dataFim, ENT_QUOTES, 'UTF-8') . "</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px 0; border-bottom: 1px solid #e9ecef;'>
+                                <strong style='color: #495057;'>Semanas abrangidas:</strong>
+                                <span style='color: #212529; float: right;'>{$numSemanas}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px 0; border-bottom: 1px solid #e9ecef;'>
+                                <strong style='color: #495057;'>Tempos por dia:</strong>
+                                <span style='color: #212529; float: right;'>{$numTempos}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px 0; border-bottom: 1px solid #e9ecef;'>
+                                <strong style='color: #495057;'>Reservas criadas:</strong>
+                                <span style='color: #28a745; font-weight: bold; float: right;'>{$successCount}</span>
+                            </td>
+                        </tr>" .
+        ($duplicateCount > 0 ? "
+                        <tr>
+                            <td style='padding: 8px 0; border-bottom: 1px solid #e9ecef;'>
+                                <strong style='color: #495057;'>Reservas já existentes:</strong>
+                                <span style='color: #ffc107; font-weight: bold; float: right;'>{$duplicateCount}</span>
+                            </td>
+                        </tr>" : "") . "
+                        <tr>
+                            <td style='padding: 8px 0;'>
+                                <strong style='color: #495057;'>Motivo:</strong>
+                                <span style='color: #212529; float: right;'>" . htmlspecialchars($motivo, ENT_QUOTES, 'UTF-8') . "</span>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        
+        <p>Clique no botão abaixo para ver todas as suas reservas.</p>";
+    
+    return sendStyledEmail(
+        $requisitor['email'],
+        "ClassLink - {$heading}: {$salaName}",
+        $heading,
+        $bodyContent,
+        $type,
+        $reservasUrl,
+        "Ver Minhas Reservas"
+    );
+}
