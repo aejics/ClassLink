@@ -13,6 +13,25 @@ require_once(__DIR__ . '/../vendor/phpmailer/phpmailer/src/SMTP.php');
 require_once(__DIR__ . '/../src/config.php');
 
 /**
+ * Get the safe base URL for the application
+ * Uses HTTP_HOST but validates it's a reasonable hostname to prevent Host Header Injection
+ * 
+ * @return string The base URL (e.g., https://example.com)
+ */
+function getBaseUrl() {
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    
+    // Validate host format - must be a valid hostname (alphanumeric, dots, hyphens, and optional port)
+    if (!preg_match('/^[a-zA-Z0-9]([a-zA-Z0-9\-\.]*[a-zA-Z0-9])?(:[0-9]+)?$/', $host)) {
+        // Fall back to a safe default if host looks suspicious
+        $host = 'localhost';
+    }
+    
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    return $protocol . '://' . $host;
+}
+
+/**
  * Send a styled HTML email using the ClassLink template
  * 
  * @param string $to Recipient email address
@@ -46,15 +65,21 @@ function sendStyledEmail($to, $subject, $heading, $bodyContent, $type = 'info', 
     // Build button HTML if provided
     $buttonHtml = '';
     if ($buttonUrl && $buttonText) {
+        $escapedButtonUrl = htmlspecialchars($buttonUrl, ENT_QUOTES, 'UTF-8');
+        $escapedButtonText = htmlspecialchars($buttonText, ENT_QUOTES, 'UTF-8');
         $buttonHtml = "
         <table cellpadding='0' cellspacing='0' border='0' style='margin: 25px auto;'>
             <tr>
                 <td align='center' bgcolor='{$color['accent']}' style='border-radius: 6px;'>
-                    <a href='{$buttonUrl}' target='_blank' style='display: inline-block; padding: 14px 30px; font-family: Arial, sans-serif; font-size: 16px; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold;'>{$buttonText}</a>
+                    <a href='{$escapedButtonUrl}' target='_blank' style='display: inline-block; padding: 14px 30px; font-family: Arial, sans-serif; font-size: 16px; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold;'>{$escapedButtonText}</a>
                 </td>
             </tr>
         </table>";
     }
+    
+    // Escape subject and heading for use in HTML
+    $escapedSubject = htmlspecialchars($subject, ENT_QUOTES, 'UTF-8');
+    $escapedHeading = htmlspecialchars($heading, ENT_QUOTES, 'UTF-8');
     
     // Build the HTML email template
     $htmlBody = "
@@ -63,7 +88,7 @@ function sendStyledEmail($to, $subject, $heading, $bodyContent, $type = 'info', 
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>{$subject}</title>
+    <title>{$escapedSubject}</title>
 </head>
 <body style='margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, Helvetica, sans-serif;'>
     <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='100%' style='background-color: #f4f4f4;'>
@@ -74,7 +99,7 @@ function sendStyledEmail($to, $subject, $heading, $bodyContent, $type = 'info', 
                     <!-- Header -->
                     <tr>
                         <td style='background-color: {$color['header']}; padding: 30px 40px; text-align: center;'>
-                            <h1 style='margin: 0; color: {$color['headerText']}; font-size: 24px; font-weight: bold;'>{$heading}</h1>
+                            <h1 style='margin: 0; color: {$color['headerText']}; font-size: 24px; font-weight: bold;'>{$escapedHeading}</h1>
                         </td>
                     </tr>
                     
@@ -232,7 +257,8 @@ function sendReservationCreatedEmail($db, $requisitorId, $salaId, $tempoId, $dat
     $tempo = $stmt->get_result()->fetch_assoc()['horashumanos'];
     $stmt->close();
     
-    $reservaUrl = "https://" . $_SERVER['HTTP_HOST'] . "/reservar/manage.php?sala=" . urlencode($salaId) . "&tempo=" . urlencode($tempoId) . "&data=" . urlencode($data);
+    $baseUrl = getBaseUrl();
+    $reservaUrl = $baseUrl . "/reservar/manage.php?sala=" . urlencode($salaId) . "&tempo=" . urlencode($tempoId) . "&data=" . urlencode($data);
     
     if ($isAutonomous) {
         $heading = "Reserva Aprovada Automaticamente";
@@ -292,7 +318,8 @@ function sendReservationApprovedEmail($db, $requisitorId, $salaId, $tempoId, $da
     $tempo = $stmt->get_result()->fetch_assoc()['horashumanos'];
     $stmt->close();
     
-    $reservaUrl = "https://" . $_SERVER['HTTP_HOST'] . "/reservar/manage.php?sala=" . urlencode($salaId) . "&tempo=" . urlencode($tempoId) . "&data=" . urlencode($data);
+    $baseUrl = getBaseUrl();
+    $reservaUrl = $baseUrl . "/reservar/manage.php?sala=" . urlencode($salaId) . "&tempo=" . urlencode($tempoId) . "&data=" . urlencode($data);
     
     $bodyContent = "
         <p>Olá <strong>" . htmlspecialchars($requisitor['nome'], ENT_QUOTES, 'UTF-8') . "</strong>,</p>
@@ -340,7 +367,8 @@ function sendReservationRejectedEmail($db, $requisitorId, $salaId, $tempoId, $da
     $tempo = $stmt->get_result()->fetch_assoc()['horashumanos'];
     $stmt->close();
     
-    $reservarUrl = "https://" . $_SERVER['HTTP_HOST'] . "/reservar";
+    $baseUrl = getBaseUrl();
+    $reservarUrl = $baseUrl . "/reservar";
     
     $bodyContent = "
         <p>Olá <strong>" . htmlspecialchars($requisitor['nome'], ENT_QUOTES, 'UTF-8') . "</strong>,</p>
@@ -389,7 +417,8 @@ function sendReservationDeletedEmail($db, $requisitorId, $salaId, $tempoId, $dat
     $tempo = $stmt->get_result()->fetch_assoc()['horashumanos'];
     $stmt->close();
     
-    $reservarUrl = "https://" . $_SERVER['HTTP_HOST'] . "/reservar";
+    $baseUrl = getBaseUrl();
+    $reservarUrl = $baseUrl . "/reservar";
     
     if ($deletedByAdmin) {
         $bodyContent = "
@@ -444,7 +473,8 @@ function sendBulkReservationsEmail($db, $requisitorId, $successCount, $failedCou
         }
     }
     
-    $reservasUrl = "https://" . $_SERVER['HTTP_HOST'] . "/reservas";
+    $baseUrl = getBaseUrl();
+    $reservasUrl = $baseUrl . "/reservas";
     
     if ($isAutonomous) {
         $heading = "Reservas Aprovadas Automaticamente";
