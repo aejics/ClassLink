@@ -81,13 +81,108 @@
         $pedidospendentes = $db->query("SELECT * FROM reservas WHERE aprovado = 0;")->num_rows;
         $nome_safe = htmlspecialchars($_SESSION['nome'], ENT_QUOTES, 'UTF-8');
         $pedidos_safe = htmlspecialchars($pedidospendentes, ENT_QUOTES, 'UTF-8');
-        echo "<div class='d-flex align-items-center justify-content-center flex-column' style='min-height: 60vh;'>
+        $currentYear = date('Y');
+        echo "<div class='d-flex align-items-center justify-content-center flex-column'>
         <h1>Olá, {$nome_safe}</h1>
         <p class='h4 fw-lighter'>O que vamos fazer hoje?</p>
         <p class='h6 fw-lighter'>Existem <b>{$pedidos_safe}</b> pedidos de reserva pendentes.</p>
-        <div class='botoes_dashboardadmin d-flex justify-content-center'>
+        <div class='botoes_dashboardadmin d-flex justify-content-center mb-4'>
         <a href='/admin/pedidos.php' class='btn btn-success w-20 me-2'>Responder a pedidos</a>
         </div></div>";
+        
+        // Dashboard Charts Section
+        echo "<div class='row mt-4' style='margin-left: 5%; margin-right: 5%;'>
+            <div class='col-md-6 mb-4'>
+                <div class='card shadow-sm'>
+                    <div class='card-header bg-primary text-white'>
+                        <h5 class='mb-0'>Top Reservadores - {$currentYear}</h5>
+                    </div>
+                    <div class='card-body'>
+                        <div id='topReserversChart' style='height: 300px; width: 100%;'></div>
+                        <p class='text-muted text-center mt-2' id='topReserversNoData' style='display: none;'>Sem dados disponíveis.</p>
+                    </div>
+                </div>
+            </div>
+            <div class='col-md-6 mb-4'>
+                <div class='card shadow-sm'>
+                    <div class='card-header bg-success text-white'>
+                        <h5 class='mb-0'>Reservas por Sala - Esta Semana</h5>
+                    </div>
+                    <div class='card-body'>
+                        <div id='reservationsPerRoomChart' style='height: 300px; width: 100%;'></div>
+                        <p class='text-muted text-center mt-2' id='reservationsPerRoomNoData' style='display: none;'>Sem dados disponíveis.</p>
+                    </div>
+                </div>
+            </div>
+        </div>";
+        
+        // CanvasJS CDN and chart rendering script
+        echo "<script src='https://cdn.canvasjs.com/canvasjs.min.js'></script>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/admin/api/dashboard_stats.php')
+                .then(response => response.json())
+                .then(data => {
+                    // Top Reservers Chart
+                    if (data.topReservers && data.topReservers.length > 0) {
+                        var topReserversChart = new CanvasJS.Chart('topReserversChart', {
+                            animationEnabled: true,
+                            theme: 'light2',
+                            axisY: {
+                                title: 'Número de Reservas',
+                                includeZero: true
+                            },
+                            axisX: {
+                                title: 'Utilizadores',
+                                interval: 1,
+                                labelAngle: -45
+                            },
+                            data: [{
+                                type: 'column',
+                                color: '#0d6efd',
+                                dataPoints: data.topReservers
+                            }]
+                        });
+                        topReserversChart.render();
+                    } else {
+                        document.getElementById('topReserversChart').style.display = 'none';
+                        document.getElementById('topReserversNoData').style.display = 'block';
+                    }
+                    
+                    // Reservations per Room Chart
+                    if (data.reservationsPerRoom && data.reservationsPerRoom.length > 0) {
+                        var reservationsPerRoomChart = new CanvasJS.Chart('reservationsPerRoomChart', {
+                            animationEnabled: true,
+                            theme: 'light2',
+                            axisY: {
+                                title: 'Número de Reservas',
+                                includeZero: true
+                            },
+                            axisX: {
+                                title: 'Salas',
+                                interval: 1,
+                                labelAngle: -45
+                            },
+                            data: [{
+                                type: 'column',
+                                color: '#198754',
+                                dataPoints: data.reservationsPerRoom
+                            }]
+                        });
+                        reservationsPerRoomChart.render();
+                    } else {
+                        document.getElementById('reservationsPerRoomChart').style.display = 'none';
+                        document.getElementById('reservationsPerRoomNoData').style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading dashboard stats:', error);
+                    var errorMsg = '<p class=\"text-danger text-center\">Erro ao carregar estatísticas.</p>';
+                    document.getElementById('topReserversChart').innerHTML = errorMsg;
+                    document.getElementById('reservationsPerRoomChart').innerHTML = errorMsg;
+                });
+        });
+        </script>";
     }
 
         // criação rápida de formulários
