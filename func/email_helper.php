@@ -115,7 +115,7 @@ function sendStyledEmail($to, $subject, $heading, $bodyContent, $type = 'info', 
                     <tr>
                         <td style='background-color: #f8f9fa; padding: 25px 40px; text-align: center; border-top: 1px solid #e9ecef;'>
                             <p style='margin: 0 0 10px 0; color: #6c757d; font-size: 14px;'>
-                                Este email foi enviado automaticamente pelo sistema ClassLink.
+                                Este email foi enviado automaticamente pelo sistema ClassLink. Não responda a este email.
                             </p>
                             <p style='margin: 0; color: #6c757d; font-size: 12px;'>
                                 Agrupamento de Escolas Joaquim Inácio da Cruz Sobral
@@ -135,7 +135,7 @@ function sendStyledEmail($to, $subject, $heading, $bodyContent, $type = 'info', 
     if ($buttonUrl) {
         $plainBody .= "\n\nAceder: {$buttonUrl}";
     }
-    $plainBody .= "\n\n---\nEste email foi enviado automaticamente pelo sistema ClassLink.\nAgrupamento de Escolas Joaquim Inácio da Cruz Sobral";
+    $plainBody .= "\n\n---\nEste email foi enviado automaticamente pelo sistema ClassLink. Não responda a este email.\nAgrupamento de Escolas Joaquim Inácio da Cruz Sobral";
 
     try {
         $mailer = new PHPMailer(true);
@@ -261,19 +261,19 @@ function sendReservationCreatedEmail($db, $requisitorId, $salaId, $tempoId, $dat
     $reservaUrl = $baseUrl . "/reservar/manage.php?sala=" . urlencode($salaId) . "&tempo=" . urlencode($tempoId) . "&data=" . urlencode($data);
     
     if ($isAutonomous) {
-        $heading = "Reserva Aprovada Automaticamente";
+        $heading = "Confirmação de Reserva da Sala";
         $type = 'success';
         $bodyContent = "
             <p>Olá <strong>" . htmlspecialchars($requisitor['nome'], ENT_QUOTES, 'UTF-8') . "</strong>,</p>
-            <p>A sua reserva foi criada e <strong>aprovada automaticamente</strong> pois esta sala é de reserva autónoma.</p>
+            <p>Informamos que a sua reserva foi criada com sucesso.</p>
             " . buildReservationDetailsHtml($sala, $data, $tempo, $motivo) . "
-            <p>Pode ver todos os detalhes e informações importantes sobre a sua reserva clicando no botão abaixo.</p>";
+            <p>Pode ver todos os detalhes e informações importantes sobre a sua reserva através do botão em baixo.</p>";
     } else {
         $heading = "Reserva Submetida";
         $type = 'info';
         $bodyContent = "
             <p>Olá <strong>" . htmlspecialchars($requisitor['nome'], ENT_QUOTES, 'UTF-8') . "</strong>,</p>
-            <p>A sua reserva foi submetida com sucesso e está <strong>aguardando aprovação</strong>.</p>
+            <p>A sua reserva foi submetida com sucesso e está <strong>a aguardar aprovação</strong>.</p>
             " . buildReservationDetailsHtml($sala, $data, $tempo, $motivo) . "
             <p>Irá receber um email assim que a sua reserva for aprovada ou rejeitada.</p>";
     }
@@ -325,7 +325,7 @@ function sendReservationApprovedEmail($db, $requisitorId, $salaId, $tempoId, $da
         <p>Olá <strong>" . htmlspecialchars($requisitor['nome'], ENT_QUOTES, 'UTF-8') . "</strong>,</p>
         <p>Temos boas notícias! A sua reserva foi <strong style='color: #28a745;'>aprovada</strong>.</p>
         " . buildReservationDetailsHtml($sala, $data, $tempo) . "
-        <p>Clique no botão abaixo para ver todos os detalhes e informações importantes sobre a sua reserva.</p>";
+        <p>Carregue no botão em baixo para ver todos os detalhes e informações importantes sobre a sua reserva.</p>";
     
     return sendStyledEmail(
         $requisitor['email'],
@@ -374,8 +374,7 @@ function sendReservationRejectedEmail($db, $requisitorId, $salaId, $tempoId, $da
         <p>Olá <strong>" . htmlspecialchars($requisitor['nome'], ENT_QUOTES, 'UTF-8') . "</strong>,</p>
         <p>Lamentamos informar que a sua reserva foi <strong style='color: #dc3545;'>rejeitada</strong>.</p>
         " . buildReservationDetailsHtml($sala, $data, $tempo) . "
-        <p>Se tiver dúvidas sobre esta decisão, por favor contacte a administração.</p>
-        <p>Pode efetuar uma nova reserva clicando no botão abaixo.</p>";
+        <p>Pode efetuar um novo pedido através no botão em baixo.</p>";
     
     return sendStyledEmail(
         $requisitor['email'],
@@ -423,15 +422,14 @@ function sendReservationDeletedEmail($db, $requisitorId, $salaId, $tempoId, $dat
     if ($deletedByAdmin) {
         $bodyContent = "
             <p>Olá <strong>" . htmlspecialchars($requisitor['nome'], ENT_QUOTES, 'UTF-8') . "</strong>,</p>
-            <p>A sua reserva foi <strong>removida</strong> por um administrador.</p>
-            " . buildReservationDetailsHtml($sala, $data, $tempo) . "
-            <p>Se tiver dúvidas sobre esta ação, por favor contacte a administração.</p>";
+            <p>Informamos que a sua reserva foi <strong>removida</strong> por um administrador.</p>
+            " . buildReservationDetailsHtml($sala, $data, $tempo);
     } else {
         $bodyContent = "
             <p>Olá <strong>" . htmlspecialchars($requisitor['nome'], ENT_QUOTES, 'UTF-8') . "</strong>,</p>
-            <p>A sua reserva foi <strong>removida</strong> com sucesso.</p>
+            <p>Informamos que a sua reserva foi <strong>removida</strong> com sucesso.</p>
             " . buildReservationDetailsHtml($sala, $data, $tempo) . "
-            <p>Pode efetuar uma nova reserva a qualquer momento.</p>";
+            <p>Pode sempre efetuar uma nova reserva a qualquer momento.</p>";
     }
     
     return sendStyledEmail(
@@ -477,7 +475,7 @@ function sendBulkReservationsEmail($db, $requisitorId, $successCount, $failedCou
     $reservasUrl = $baseUrl . "/reservas";
     
     if ($isAutonomous) {
-        $heading = "Reservas Aprovadas Automaticamente";
+        $heading = "Reservas Aprovadas";
         $type = 'success';
         $statusText = "aprovadas automaticamente";
     } else {
@@ -488,7 +486,7 @@ function sendBulkReservationsEmail($db, $requisitorId, $successCount, $failedCou
     
     $bodyContent = "
         <p>Olá <strong>" . htmlspecialchars($requisitor['nome'], ENT_QUOTES, 'UTF-8') . "</strong>,</p>
-        <p>As suas reservas em massa foram processadas.</p>
+        <p>Informamos que as suas reservas em massa foram processadas.</p>
         
         <table cellpadding='0' cellspacing='0' border='0' width='100%' style='background-color: #f8f9fa; border-radius: 8px; margin: 20px 0;'>
             <tr>
@@ -519,7 +517,7 @@ function sendBulkReservationsEmail($db, $requisitorId, $successCount, $failedCou
             </tr>
         </table>
         
-        <p>Clique no botão abaixo para ver todas as suas reservas.</p>";
+        <p>Carregue no botão em baixo para ver todas as suas reservas.</p>";
     
     return sendStyledEmail(
         $requisitor['email'],
@@ -528,7 +526,7 @@ function sendBulkReservationsEmail($db, $requisitorId, $successCount, $failedCou
         $bodyContent,
         $type,
         $reservasUrl,
-        "Ver Minhas Reservas"
+        "Ver as minhas reservas"
     );
 }
 
@@ -596,7 +594,7 @@ function sendRecurringWeeklyReservationsEmail($db, $requisitorId, $successCount,
     
     $bodyContent = "
         <p>Olá <strong>" . htmlspecialchars($requisitor['nome'], ENT_QUOTES, 'UTF-8') . "</strong>,</p>
-        <p>As suas reservas semanais foram criadas com sucesso por um administrador.</p>
+        <p>Informamos que foram adicionadas reservas semanais por um administrador.</p>
         
         <table cellpadding='0' cellspacing='0' border='0' width='100%' style='background-color: #f8f9fa; border-radius: 8px; margin: 20px 0;'>
             <tr>
@@ -656,7 +654,7 @@ function sendRecurringWeeklyReservationsEmail($db, $requisitorId, $successCount,
             </tr>
         </table>
         
-        <p>Clique no botão abaixo para ver todas as suas reservas.</p>";
+        <p>Carregue no botão em baixo para ver todas as suas reservas.</p>";
     
     return sendStyledEmail(
         $requisitor['email'],
@@ -665,6 +663,6 @@ function sendRecurringWeeklyReservationsEmail($db, $requisitorId, $successCount,
         $bodyContent,
         $type,
         $reservasUrl,
-        "Ver Minhas Reservas"
+        "Ver as minhas reservas"
     );
 }
