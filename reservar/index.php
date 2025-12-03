@@ -155,8 +155,8 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
     </div>
     <?php
     if (isset($_POST['sala']) | isset($_GET['sala'])) {
-        // Get the selected room
-        $sala = isset($_GET['sala']) ? $_GET['sala'] : $_POST['sala'];
+        // Get the selected room (POST takes precedence over GET for form submissions)
+        $sala = isset($_POST['sala']) ? $_POST['sala'] : $_GET['sala'];
         
         // Query room information to check if it's autonomous and if it's locked
         $stmt = $db->prepare("SELECT nome, tipo_sala, bloqueado FROM salas WHERE id = ?");
@@ -215,7 +215,7 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                     $diacheckdb = $segunda + ($j * 86400);
                     $diacheckdb = date("Y-m-d", $diacheckdb);
                     
-                    $sala = isset($_GET['sala']) ? $_GET['sala'] : $_POST['sala'];
+                    $sala = isset($_POST['sala']) ? $_POST['sala'] : $_GET['sala'];
                     
                     $stmt = $db->prepare("SELECT * FROM reservas WHERE sala=? AND data=? AND tempo=?");
                     $stmt->bind_param("sss", $sala, $diacheckdb, $row['id']);
@@ -343,7 +343,7 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                     </div>";
         
         // Get materials for the selected room
-        $salaForMateriais = isset($_GET['sala']) ? $_GET['sala'] : (isset($_POST['sala']) ? $_POST['sala'] : null);
+        $salaForMateriais = isset($_POST['sala']) ? $_POST['sala'] : (isset($_GET['sala']) ? $_GET['sala'] : null);
         
         // Only fetch materials if we have a valid room ID
         if ($salaForMateriais) {
