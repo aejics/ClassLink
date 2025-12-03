@@ -154,7 +154,7 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
         </form>
     </div>
     <?php
-    if (isset($_POST['sala']) | isset($_GET['sala'])) {
+    if (isset($_POST['sala']) || isset($_GET['sala'])) {
         // Get the selected room (POST takes precedence over GET for form submissions)
         $sala = isset($_POST['sala']) ? $_POST['sala'] : $_GET['sala'];
         
