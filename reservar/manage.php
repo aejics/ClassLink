@@ -1,8 +1,7 @@
 <?php
 require_once(__DIR__ . '/../func/logaction.php');
+require_once(__DIR__ . '/../func/email_helper.php');
 require_once(__DIR__ . '/../src/db.php');
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
 session_start();
 if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
     http_response_code(403);
@@ -107,6 +106,8 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                 $successCount = 0;
                 $failedSlots = [];
                 $isAutonomous = false;
+                $bulkRequisitor = $id; // Track the requisitor for email
+                $lastSlotSala = null; // Track the last sala for email
                 
                 foreach ($_POST['slots'] as $slot) {
                     $parts = explode('|', $slot);
@@ -155,6 +156,8 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                                 $requisitor = $_POST['requisitor_id'];
                             }
                         }
+                        $bulkRequisitor = $requisitor; // Track for email
+                        $lastSlotSala = $slotSala; // Track for email
                         
                         // Auto-approve if tipo_sala is 2 (autonomous), otherwise set to 0 (pending)
                         $aprovado = ($salaInfo['tipo_sala'] == 2) ? 1 : 0;
@@ -176,6 +179,11 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                     } else {
                         $failedSlots[] = htmlspecialchars($slotData, ENT_QUOTES, 'UTF-8') . " - " . htmlspecialchars($slotTempo, ENT_QUOTES, 'UTF-8') . " (já reservado)";
                     }
+                }
+                
+                // Send bulk reservation email if any successful
+                if ($successCount > 0) {
+                    sendBulkReservationsEmail($db, $bulkRequisitor, $successCount, count($failedSlots), $lastSlotSala, $isAutonomous);
                 }
                 
                 echo "<div class='row justify-content-center'>";
@@ -276,6 +284,10 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                     // Save selected materials if any
                     saveReservationMaterials($db, $sala, $tempo, $data, $_POST['materiais'] ?? null);
                     
+                    // Send confirmation email to the requisitor
+                    $isAutonomousReservation = ($salaInfo['tipo_sala'] == 2);
+                    sendReservationCreatedEmail($db, $requisitor, $sala, $tempo, $data, $motivo, $isAutonomousReservation);
+                    
                     header("Location: /reservar/manage.php?sala=" . urlencode($sala) . "&tempo=" . urlencode($tempo) . "&data=" . urlencode($data));
                     exit();
                     break;
@@ -290,56 +302,21 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                         http_response_code(403);
                         die("Não tem permissão para apagar esta reserva.");
                     } else {
-                        try {
-                            $stmt = $db->prepare("SELECT nome FROM salas WHERE id=?");
-                            $stmt->bind_param("s", $sala);
-                            $stmt->execute();
-                            $salaextenso = $stmt->get_result()->fetch_assoc()['nome'];
-                            $stmt->close();
-                            
-                            $stmt = $db->prepare("SELECT email FROM cache WHERE id=?");
-                            $stmt->bind_param("s", $id);
-                            $stmt->execute();
-                            $requisitor = $stmt->get_result()->fetch_assoc()['email'];
-                            $stmt->close();
-                            
-                            $stmt = $db->prepare("SELECT horashumanos FROM tempos WHERE id=?");
-                            $stmt->bind_param("s", $tempo);
-                            $stmt->execute();
-                            $tempohumano = $stmt->get_result()->fetch_assoc()['horashumanos'];
-                            $stmt->close();
-                            
-                            logAction("Apagou a reserva da sala {$salaextenso} no dia {$data} no tempo com ID {$tempo}.", $_SESSION['id']);
-                            
-                            if ($mail['ativado'] != true) {
-                                $stmt = $db->prepare("DELETE FROM reservas WHERE sala=? AND tempo=? AND data=?");
-                                $stmt->bind_param("sss", $sala, $tempo, $data);
-                                if (!$stmt->execute()) {
-                                    http_response_code(500);
-                                    die("Houve um problema a apagar a reserva. Contacte um administrador, ou tente novamente mais tarde.");
-                                }
-                                $stmt->close();
-                                header("Location: /reservar/?sala=" . urlencode($sala));
-                                break;
-                            }
-                            $enviarmail = new PHPMailer(true);
-                            $enviarmail->isSMTP();
-                            $enviarmail->Host       = $mail['servidor'];
-                            $enviarmail->SMTPAuth   = $mail['autenticacao'];
-                            $enviarmail->Username   = $mail['username'];
-                            $enviarmail->Password   = $mail['password'];
-                            $enviarmail->SMTPSecure = $mail['tipodeseguranca'];
-                            $enviarmail->Port       = $mail['porta'];
-                            $enviarmail->setFrom($mail['mailfrom'], $mail['fromname']);
-                            $enviarmail->addAddress($requisitor);
-                            $enviarmail->isHTML(false);
-                            $enviarmail->Subject = utf8_decode("Reserva da Sala {$salaextenso} Removida");
-                            $enviarmail->Body = utf8_decode("A sua reserva da sala {$salaextenso} para a data de {$data} às {$tempohumano} foi removida.\nEsta ação pode ser realizada por administradores, ou por si mesmo.\n\nObrigado.");
-                            $enviarmail->send();
-                        } catch (Exception $e) {
-                            echo("<div class='mt-2 alert alert-warning show' role='alert'>A reserva foi rejeitada, mas o email de notificação não foi enviado. Contacte o Postmaster.\nErro do PHPMailer: {$enviarmail->ErrorInfo}</div>");
-                        }
-
+                        // Get room name for log
+                        $stmt = $db->prepare("SELECT nome FROM salas WHERE id=?");
+                        $stmt->bind_param("s", $sala);
+                        $stmt->execute();
+                        $salaextenso = $stmt->get_result()->fetch_assoc()['nome'];
+                        $stmt->close();
+                        
+                        logAction("Apagou a reserva da sala {$salaextenso} no dia {$data} no tempo com ID {$tempo}.", $_SESSION['id']);
+                        
+                        // Determine if deleted by admin (someone other than the requisitor)
+                        $deletedByAdmin = ($_SESSION['id'] != $reserva['requisitor']);
+                        
+                        // Send email to the person who made the reservation (not the current user)
+                        $emailResult = sendReservationDeletedEmail($db, $reserva['requisitor'], $sala, $tempo, $data, $deletedByAdmin);
+                        
                         $stmt = $db->prepare("DELETE FROM reservas WHERE sala=? AND tempo=? AND data=?");
                         $stmt->bind_param("sss", $sala, $tempo, $data);
                         if (!$stmt->execute()) {
@@ -347,6 +324,7 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                             die("Houve um problema a apagar a reserva. Contacte um administrador, ou tente novamente mais tarde.");
                         }
                         $stmt->close();
+                        
                         header("Location: /reservar/?sala=" . urlencode($sala));
                         break;
                     }
