@@ -141,6 +141,8 @@ $utilizadores = $db->query("SELECT * FROM cache ORDER BY nome ASC LIMIT 20;");
             <?php while ($row = $utilizadores->fetch_assoc()): 
                 $idEnc = urlencode($row['id']);
                 $adminStatus = $row['admin'] ? "<span class='badge bg-success'>Admin</span>" : "<span class='badge bg-secondary'>Utilizador</span>";
+                $isPreRegistered = str_starts_with($row['id'], PRE_REGISTERED_PREFIX);
+                $preRegBadge = $isPreRegistered ? " <span class='badge bg-warning text-dark'>Pré-registado</span>" : "";
                 $userName = htmlspecialchars($row['nome'], ENT_QUOTES, 'UTF-8');
                 $userEmail = htmlspecialchars($row['email'], ENT_QUOTES, 'UTF-8');
             ?>
@@ -149,7 +151,7 @@ $utilizadores = $db->query("SELECT * FROM cache ORDER BY nome ASC LIMIT 20;");
                         <div class="card-body">
                             <h5 class="card-title"><?php echo $userName; ?></h5>
                             <p class="card-text text-muted"><?php echo $userEmail; ?></p>
-                            <p class="card-text"><?php echo $adminStatus; ?></p>
+                            <p class="card-text"><?php echo $adminStatus . $preRegBadge; ?></p>
                         </div>
                         <div class="card-footer bg-transparent">
                             <a href='/admin/users.php?action=edit&id=<?php echo $idEnc; ?>' class='btn btn-sm btn-primary'>EDITAR</a>
@@ -188,6 +190,9 @@ $utilizadores = $db->query("SELECT * FROM cache ORDER BY nome ASC LIMIT 20;");
         const adminBadge = user.admin 
             ? "<span class='badge bg-success'>Admin</span>" 
             : "<span class='badge bg-secondary'>Utilizador</span>";
+        const preRegBadge = user.isPreRegistered 
+            ? " <span class='badge bg-warning text-dark'>Pré-registado</span>" 
+            : "";
         const idEnc = encodeURIComponent(user.id);
         
         return `
@@ -196,7 +201,7 @@ $utilizadores = $db->query("SELECT * FROM cache ORDER BY nome ASC LIMIT 20;");
                     <div class="card-body">
                         <h5 class="card-title">${escapeHtml(user.nome)}</h5>
                         <p class="card-text text-muted">${escapeHtml(user.email)}</p>
-                        <p class="card-text">${adminBadge}</p>
+                        <p class="card-text">${adminBadge}${preRegBadge}</p>
                     </div>
                     <div class="card-footer bg-transparent">
                         <a href='/admin/users.php?action=edit&id=${idEnc}' class='btn btn-sm btn-primary'>EDITAR</a>
