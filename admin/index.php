@@ -78,17 +78,12 @@
     if ($_SERVER['REQUEST_URI'] == "/admin/") {
         // Conteúdos para a Dashboard Administrativa. Apenas colocar o conteúdo neste bloco, pois
         // este módulo é reutilizado para as subpáginas.
-        $pedidospendentes = $db->query("SELECT * FROM reservas WHERE aprovado = 0;")->num_rows;
         $nome_safe = htmlspecialchars($_SESSION['nome'], ENT_QUOTES, 'UTF-8');
-        $pedidos_safe = htmlspecialchars($pedidospendentes, ENT_QUOTES, 'UTF-8');
         $currentYear = date('Y');
         echo "<div class='d-flex align-items-center justify-content-center flex-column'>
         <h1>Olá, {$nome_safe}</h1>
         <p class='h4 fw-lighter'>O que vamos fazer hoje?</p>
-        <p class='h6 fw-lighter'>Existem <b>{$pedidos_safe}</b> pedidos de reserva pendentes.</p>
-        <div class='botoes_dashboardadmin d-flex justify-content-center mb-4'>
-        <a href='/admin/pedidos.php' class='btn btn-success w-20 me-2'>Responder a pedidos</a>
-        </div></div>";
+        </div>";
         
         // Dashboard Charts Section
         echo "<div class='row mt-4' style='margin-left: 5%; margin-right: 5%;'>
