@@ -38,7 +38,8 @@ if ($action === 'search') {
             'id' => $row['id'],
             'nome' => $row['nome'],
             'email' => $row['email'],
-            'admin' => (bool)$row['admin']
+            'admin' => (bool)$row['admin'],
+            'isPreRegistered' => str_starts_with($row['id'], PRE_REGISTERED_PREFIX)
         ];
     }
     $stmt->close();
