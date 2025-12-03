@@ -1,8 +1,6 @@
 <?php
 require 'index.php';
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+require_once(__DIR__ . '/../func/email_helper.php');
 
 // Get statistics for the dashboard
 $totalPendentes = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprovado = 0")->fetch_assoc()['total'];
@@ -283,10 +281,6 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                   </div>";
             echo "<a href='/admin/pedidos.php' class='btn btn-primary'>Voltar aos Pedidos</a>";
         } else {
-            require '../vendor/phpmailer/phpmailer/src/Exception.php';
-            require '../vendor/phpmailer/phpmailer/src/PHPMailer.php';
-            require '../vendor/phpmailer/phpmailer/src/SMTP.php';
-
             switch ($_GET['subaction']) {
                 case "aprovar":
                     $stmt = $db->prepare("SELECT requisitor FROM reservas WHERE sala=? AND tempo=? AND data=?");
@@ -317,47 +311,12 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                       </div>
                     </div>";
                     
-                    try {
-                        $stmt = $db->prepare("SELECT nome FROM salas WHERE id=?");
-                        $stmt->bind_param("s", $_GET['sala']);
-                        $stmt->execute();
-                        $sala = $stmt->get_result()->fetch_assoc()['nome'];
-                        $stmt->close();
-                        
-                        $stmt = $db->prepare("SELECT email FROM cache WHERE id=?");
-                        $stmt->bind_param("s", $requisitor);
-                        $stmt->execute();
-                        $maildapessoa = $stmt->get_result()->fetch_assoc()['email'];
-                        $stmt->close();
-                        
-                        $stmt = $db->prepare("SELECT horashumanos FROM tempos WHERE id=?");
-                        $stmt->bind_param("s", $_GET['tempo']);
-                        $stmt->execute();
-                        $tempohumano = $stmt->get_result()->fetch_assoc()['horashumanos'];
-                        $stmt->close();
-                        
-                        if ($mail['ativado'] != true) {
-                            break;
-                        }
-                        $enviarmail = new PHPMailer(true);
-                        $enviarmail->isSMTP();
-                        $enviarmail->Host       = $mail['servidor'];
-                        $enviarmail->SMTPAuth   = $mail['autenticacao'];
-                        $enviarmail->Username   = $mail['username'];
-                        $enviarmail->Password   = $mail['password'];
-                        $enviarmail->SMTPSecure = $mail['tipodeseguranca'];
-                        $enviarmail->Port       = $mail['porta'];
-                        $enviarmail->setFrom($mail['mailfrom'], $mail['fromname']);
-                        $enviarmail->addAddress($maildapessoa);
-                        $enviarmail->isHTML(false);
-                        $enviarmail->Subject = utf8_decode("Reserva da Sala {$sala} Aprovada");
-                        $reservaUrl = "https://" . $_SERVER['HTTP_HOST'] . "/reservar/manage.php?sala=" . urlencode($_GET['sala']) . "&tempo=" . urlencode($_GET['tempo']) . "&data=" . urlencode($_GET['data']);
-                        $enviarmail->Body = utf8_decode("A sua reserva da sala {$sala} para a data de {$_GET['data']} às {$tempohumano} foi aprovada.\n\nPode ver os detalhes e informações importantes da sua reserva em:\n{$reservaUrl}\n\nObrigado.");
-                        $enviarmail->send();
-                    } catch (Exception $e) {
+                    // Send approval email using the email helper
+                    $emailResult = sendReservationApprovedEmail($db, $requisitor, $_GET['sala'], $_GET['tempo'], $_GET['data']);
+                    if (!$emailResult['success'] && $emailResult['error'] !== 'Email not enabled') {
                         echo "<div class='alert alert-warning alert-dismissible fade show' role='alert'>
                                 <strong>Aviso:</strong> A reserva foi aprovada, mas o email de notificação não foi enviado. Contacte o Postmaster.
-                                <br><small>Erro: " . htmlspecialchars($enviarmail->ErrorInfo, ENT_QUOTES, 'UTF-8') . "</small>
+                                <br><small>Erro: " . htmlspecialchars($emailResult['error'], ENT_QUOTES, 'UTF-8') . "</small>
                                 <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
                               </div>";
                     }
@@ -369,6 +328,9 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                     $stmt->execute();
                     $requisitor = $stmt->get_result()->fetch_assoc()['requisitor'];
                     $stmt->close();
+                    
+                    // Send rejection email BEFORE deleting the reservation
+                    $emailResult = sendReservationRejectedEmail($db, $requisitor, $_GET['sala'], $_GET['tempo'], $_GET['data']);
                     
                     $stmt = $db->prepare("DELETE FROM reservas WHERE sala=? AND tempo=? AND data=?");
                     $stmt->bind_param("sss", $_GET['sala'], $_GET['tempo'], $_GET['data']);
@@ -386,46 +348,10 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                             </div>
                           </div>";
                     
-                    try {
-                        $stmt = $db->prepare("SELECT nome FROM salas WHERE id=?");
-                        $stmt->bind_param("s", $_GET['sala']);
-                        $stmt->execute();
-                        $sala = $stmt->get_result()->fetch_assoc()['nome'];
-                        $stmt->close();
-                        
-                        $stmt = $db->prepare("SELECT email FROM cache WHERE id=?");
-                        $stmt->bind_param("s", $requisitor);
-                        $stmt->execute();
-                        $maildapessoa = $stmt->get_result()->fetch_assoc()['email'];
-                        $stmt->close();
-                        
-                        $stmt = $db->prepare("SELECT horashumanos FROM tempos WHERE id=?");
-                        $stmt->bind_param("s", $_GET['tempo']);
-                        $stmt->execute();
-                        $tempohumano = $stmt->get_result()->fetch_assoc()['horashumanos'];
-                        $stmt->close();
-                        
-                        if ($mail['ativado'] != true) {
-                            break;
-                        }
-                        $enviarmail = new PHPMailer(true);
-                        $enviarmail->isSMTP();
-                        $enviarmail->Host       = $mail['servidor'];
-                        $enviarmail->SMTPAuth   = $mail['autenticacao'];
-                        $enviarmail->Username   = $mail['username'];
-                        $enviarmail->Password   = $mail['password'];
-                        $enviarmail->SMTPSecure = $mail['tipodeseguranca'];
-                        $enviarmail->Port       = $mail['porta'];
-                        $enviarmail->setFrom($mail['mailfrom'], $mail['fromname']);
-                        $enviarmail->addAddress($maildapessoa);
-                        $enviarmail->isHTML(false);
-                        $enviarmail->Subject = utf8_decode("Reserva da Sala {$sala} Rejeitada");
-                        $enviarmail->Body = utf8_decode("A sua reserva da sala {$sala} para a data de {$_GET['data']} às {$tempohumano} foi rejeitada.\n\nObrigado.");
-                        $enviarmail->send();
-                    } catch (Exception $e) {
+                    if (!$emailResult['success'] && $emailResult['error'] !== 'Email not enabled') {
                         echo "<div class='alert alert-warning alert-dismissible fade show' role='alert'>
                                 <strong>Aviso:</strong> A reserva foi rejeitada, mas o email de notificação não foi enviado. Contacte o Postmaster.
-                                <br><small>Erro: " . htmlspecialchars($enviarmail->ErrorInfo, ENT_QUOTES, 'UTF-8') . "</small>
+                                <br><small>Erro: " . htmlspecialchars($emailResult['error'], ENT_QUOTES, 'UTF-8') . "</small>
                                 <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
                               </div>";
                     }
