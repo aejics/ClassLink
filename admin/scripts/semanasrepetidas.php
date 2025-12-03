@@ -1,4 +1,7 @@
-<?php require '../index.php'; ?>
+<?php 
+require '../index.php';
+require_once(__DIR__ . '/../../func/email_helper.php');
+?>
 <div style="margin-left: 20%; margin-right: 20%; text-align: center;">
 <h1>Semanas repetidas</h1>
 <p>Este script permite criar reservas repetidas de salas ao longo de várias semanas.</p>
@@ -382,6 +385,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sala']) && isset($_PO
                     
                     // Move to next week
                     $current_date = strtotime("+1 week", $current_date);
+                }
+                
+                // Send email notification to the user if any reservations were created
+                if ($reservas_criadas > 0) {
+                    sendRecurringWeeklyReservationsEmail(
+                        $db,
+                        $requisitor_id,
+                        $reservas_criadas,
+                        $reservas_duplicadas,
+                        $sala_id,
+                        $dia_semana,
+                        $data_inicio,
+                        $data_fim,
+                        $num_semanas,
+                        count($tempos_ids),
+                        $motivo
+                    );
                 }
                 
                 // Display results
