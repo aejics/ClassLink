@@ -231,6 +231,7 @@
         echo "<div class=\"login-box\">";
         echo "<img src=\"/assets/logo.png\" alt=\"Logotipo ClassLink\" style=\"max-width:25%;\">";
         echo "<h1>Iniciar Sessão no ClassLink</h1>";
+        echo "<p class=\"small\">Para aceder à plataforma, deve autenticar-se com a sua conta institucional.</p>";
         echo "<a href=\"/login?redirecttoflow=1\" class=\"login-btn\">";
         echo "<svg class=\"ms-logo\" width=\"21\" height=\"21\" viewBox=\"0 0 21 21\" xmlns=\"http://www.w3.org/2000/svg\" style=\"vertical-align: middle; margin-right: 8px;\">";
         echo "<rect class=\"ms-rect1\" x=\"1\" y=\"1\" width=\"9\" height=\"9\" fill=\"white\"/>";
