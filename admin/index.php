@@ -21,6 +21,11 @@
         http_response_code(403);
         header("Location: /login");
         die("A reencaminhar para iniciar sessão...");
+    } else {
+        // A validade da sessão está quase a expirir. Extender a sessão por mais 1h.
+        if ($_SESSION['validity'] - time() < 900) {
+            $_SESSION['validity'] = time() + 3600;
+        }
     }
 ?>
 <?php

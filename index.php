@@ -1,10 +1,14 @@
 <?php
     session_start();
-    // Check if user is logged in and session is valid
     if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
         http_response_code(403);
         header("Location: /login");
         die("A reencaminhar para iniciar sessão...");
+    } else {
+        // A validade da sessão está quase a expirir. Extender a sessão por mais 1h.
+        if ($_SESSION['validity'] - time() < 900) {
+            $_SESSION['validity'] = time() + 3600;
+        }
     }
     
     require_once(__DIR__ . '/src/db.php');
