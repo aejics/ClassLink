@@ -143,6 +143,13 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                             continue;
                         }
                         
+                        // Check if date is in the past and user is not admin
+                        $today = date("Y-m-d");
+                        if ($slotData < $today && !$_SESSION['admin']) {
+                            $failedSlots[] = htmlspecialchars($slotData, ENT_QUOTES, 'UTF-8') . " - " . htmlspecialchars($slotTempo, ENT_QUOTES, 'UTF-8') . " (data no passado)";
+                            continue;
+                        }
+                        
                         // Determine requisitor: for admins, use selected user or current user
                         $requisitor = $id;
                         if ($_SESSION['admin'] && isset($_POST['requisitor_id']) && !empty($_POST['requisitor_id'])) {
@@ -254,6 +261,13 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                     if ($salaInfo['bloqueado'] == 1 && !$_SESSION['admin']) {
                         http_response_code(403);
                         die("Esta sala está bloqueada. Apenas os administradores podem criar reservas.");
+                    }
+                    
+                    // Check if date is in the past and user is not admin
+                    $today = date("Y-m-d");
+                    if ($data < $today && !$_SESSION['admin']) {
+                        http_response_code(403);
+                        die("Não é possível criar reservas no passado. Apenas os administradores podem criar reservas em datas passadas.");
                     }
                     
                     // Determine requisitor: for admins, use selected user if provided

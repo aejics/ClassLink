@@ -190,6 +190,7 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
             <div class='reservation-table-container'>
             <table class='table table-bordered' style='table-layout: fixed; width: 100%; max-width: 70%; margin: 0 auto; font-size: 0.85rem;'><thead><tr><th scope='col' style='font-size: 0.75rem;'>Tempos</th>"
         );
+        $today = date("Y-m-d");
         for ($i = 0; $i < 7; $i++) {
             if ($_GET['before']) {
                 $segunda = strtotime($_GET['before']);
@@ -202,7 +203,16 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
             $segundadiadepois = date("d-m-Y", $segundadiadepois);
             $diaObj = strtotime("+{$i} day", $segunda);
             $diaFormatted = date("d/m", $diaObj) . "<br>" . date("Y", $diaObj);
-            echo "<th scope='col' style='text-align: center; font-size: 0.75rem; padding: 4px;'>{$diaFormatted}</th>";
+            $headerDate = date("Y-m-d", $diaObj);
+            $isHeaderToday = ($headerDate === $today);
+            $isHeaderPast = ($headerDate < $today);
+            $headerStyle = 'text-align: center; font-size: 0.75rem; padding: 4px;';
+            if ($isHeaderToday) {
+                $headerStyle .= ' border: 3px solid #0d6efd; background-color: rgba(13, 110, 253, 0.1);';
+            } elseif ($isHeaderPast) {
+                $headerStyle .= ' opacity: 0.5;';
+            }
+            echo "<th scope='col' style='{$headerStyle}'>{$diaFormatted}</th>";
         };
         echo "</tr></thead><tbody>";
         $tempos = $db->query("SELECT * FROM tempos ORDER BY horashumanos ASC;");
@@ -215,6 +225,11 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                     $diacheckdb = $segunda + ($j * 86400);
                     $diacheckdb = date("Y-m-d", $diacheckdb);
                     
+                    // Check if this day is today or in the past
+                    $isToday = ($diacheckdb === $today);
+                    $isPast = ($diacheckdb < $today);
+                    $canInteract = (!$isPast || $_SESSION['admin']);
+                    
                     $sala = isset($_POST['sala']) ? $_POST['sala'] : $_GET['sala'];
                     
                     $stmt = $db->prepare("SELECT * FROM reservas WHERE sala=? AND data=? AND tempo=?");
@@ -223,18 +238,32 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                     $tempoatualdb = $stmt->get_result()->fetch_assoc();
                     $stmt->close();
                     
+                    // Build cell style with highlighting for today and graying out for past days
+                    $cellStyle = 'padding: 4px; overflow: hidden; position: relative;';
+                    if ($isToday) {
+                        $cellStyle .= ' box-shadow: inset 0 0 0 3px #0d6efd;';
+                    }
+                    
                     if (!$tempoatualdb || $tempoatualdb['aprovado'] == -1) {
-                        if ($canCreateReservation) {
-                            echo "<td class='bg-success text-white text-center' style='padding: 4px; overflow: hidden;'>
-                            <div style='display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 50px;'>
+                        if ($canCreateReservation && $canInteract) {
+                            $innerStyle = 'display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 50px;';
+                            if ($isPast) {
+                                $innerStyle .= ' opacity: 0.5;';
+                            }
+                            echo "<td class='bg-success text-white text-center' style='{$cellStyle}'>
+                            <div style='{$innerStyle}'>
                             <input type='checkbox' name='slots[]' value='" . urlencode($row['id']) . "|" . urlencode($sala) . "|" . urlencode($diacheckdb) . "' class='bulk-checkbox' style='width: 16px; height: 16px;'>
                             <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "' style='display: block; font-size: 0.75rem; word-break: break-word;'>
                             Livre
                             </a>
                             </div></td>";
                         } else {
-                            echo "<td class='bg-success text-white text-center' style='padding: 4px; overflow: hidden;'>
-                            <div style='display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 50px;'>
+                            $innerStyle = 'display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 50px;';
+                            if ($isPast) {
+                                $innerStyle .= ' opacity: 0.5;';
+                            }
+                            echo "<td class='bg-success text-white text-center' style='{$cellStyle}'>
+                            <div style='{$innerStyle}'>
                             <span style='font-size: 0.75rem;'>Livre</span>
                             </div></td>";
                         }
@@ -246,20 +275,47 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
                         $stmt->close();
                         
                         $nomerequisitor['nome'] = preg_replace('/^(\S+).*?(\S+)$/u', '$1 $2', $nomerequisitor['nome']);
+                        $cellStyleWithHeight = $cellStyle . ' min-height: 50px;';
+                        $innerStyle = '';
+                        if ($isPast) {
+                            $innerStyle = 'opacity: 0.5;';
+                        }
                         if ($tempoatualdb['aprovado'] == 0) {
-                            echo "<td class='bg-warning text-white text-center' style='padding: 4px; min-height: 50px; overflow: hidden;'>
-                            <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "' style='font-size: 0.75rem; word-break: break-word;'>
-                            Pendente
-                            <br>
-                            " . htmlspecialchars($nomerequisitor['nome'], ENT_QUOTES, 'UTF-8') . "
-                            </a></td>";
+                            if ($canInteract) {
+                                echo "<td class='bg-warning text-white text-center' style='{$cellStyleWithHeight}'>
+                                <div style='{$innerStyle}'>
+                                <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "' style='font-size: 0.75rem; word-break: break-word;'>
+                                Pendente
+                                <br>
+                                " . htmlspecialchars($nomerequisitor['nome'], ENT_QUOTES, 'UTF-8') . "
+                                </a></div></td>";
+                            } else {
+                                echo "<td class='bg-warning text-white text-center' style='{$cellStyleWithHeight}'>
+                                <div style='{$innerStyle}'>
+                                <span style='font-size: 0.75rem; word-break: break-word;'>
+                                Pendente
+                                <br>
+                                " . htmlspecialchars($nomerequisitor['nome'], ENT_QUOTES, 'UTF-8') . "
+                                </span></div></td>";
+                            }
                         } else if ($tempoatualdb['aprovado'] == 1) {
-                            echo "<td class='bg-danger text-white text-center' style='padding: 4px; min-height: 50px; overflow: hidden;'>
-                            <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "' style='font-size: 0.75rem; word-break: break-word;'>
-                            Ocupado
-                            <br>
-                            " . htmlspecialchars($nomerequisitor['nome'], ENT_QUOTES, 'UTF-8') . "
-                            </a></td>";
+                            if ($canInteract) {
+                                echo "<td class='bg-danger text-white text-center' style='{$cellStyleWithHeight}'>
+                                <div style='{$innerStyle}'>
+                                <a class='reserva' href='/reservar/manage.php?tempo=" . urlencode($row['id']) . "&sala=" . urlencode($sala) . "&data=" . urlencode($diacheckdb) . "' style='font-size: 0.75rem; word-break: break-word;'>
+                                Ocupado
+                                <br>
+                                " . htmlspecialchars($nomerequisitor['nome'], ENT_QUOTES, 'UTF-8') . "
+                                </a></div></td>";
+                            } else {
+                                echo "<td class='bg-danger text-white text-center' style='{$cellStyleWithHeight}'>
+                                <div style='{$innerStyle}'>
+                                <span style='font-size: 0.75rem; word-break: break-word;'>
+                                Ocupado
+                                <br>
+                                " . htmlspecialchars($nomerequisitor['nome'], ENT_QUOTES, 'UTF-8') . "
+                                </span></div></td>";
+                            }
                         }
                     }
                 }
