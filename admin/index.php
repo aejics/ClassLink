@@ -17,6 +17,11 @@
         http_response_code(403);
         die("<div class='alert alert-danger text-center'>Não pode entrar no Painel Administrativo. <a href='/'>Voltar para a página inicial</a></div>");
     }
+    if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
+        http_response_code(403);
+        header("Location: /login");
+        die("A reencaminhar para iniciar sessão...");
+    }
 ?>
 <?php
     // Criação da Sidebar (reaproveito do módulo para as subpáginas)
