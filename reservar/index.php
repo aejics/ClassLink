@@ -208,7 +208,7 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
             $isHeaderPast = ($headerDate < $today);
             $headerStyle = 'text-align: center; font-size: 0.75rem; padding: 4px;';
             if ($isHeaderToday) {
-                $headerStyle .= ' border: 3px solid #0d6efd; background-color: rgba(13, 110, 253, 0.1);';
+                $headerStyle .= ' box-shadow: inset 0 0 0 3px #0d6efd; background-color: rgba(13, 110, 253, 0.1);';
             } elseif ($isHeaderPast) {
                 $headerStyle .= ' opacity: 0.5;';
             }
