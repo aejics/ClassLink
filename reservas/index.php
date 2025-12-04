@@ -245,10 +245,19 @@ $stmt->close();
         <div class="card shadow-sm">
             <div class="card-body p-0">
                 <?php
-                $stmt = $db->prepare("SELECT * FROM reservas WHERE requisitor=? ORDER BY data DESC");
+                // Use JOIN to fetch all data in a single query (eliminates N+1 query problem)
+                $stmt = $db->prepare("SELECT r.*, s.nome as sala_nome, t.horashumanos as tempo_nome 
+                                      FROM reservas r 
+                                      LEFT JOIN salas s ON r.sala = s.id 
+                                      LEFT JOIN tempos t ON r.tempo = t.id 
+                                      WHERE r.requisitor = ? 
+                                      ORDER BY r.data DESC");
                 $stmt->bind_param("s", $requisitor);
                 $stmt->execute();
                 $reservas = $stmt->get_result();
+                
+                // Portuguese day names constant
+                $daysPortuguese = ['', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
                 
                 if ($reservas->num_rows == 0) {
                     echo "<div class='empty-state'>
@@ -274,18 +283,6 @@ $stmt->close();
                     $today = date('Y-m-d');
                     
                     while ($reserva = $reservas->fetch_assoc()) {
-                        $stmt2 = $db->prepare("SELECT nome FROM salas WHERE id=?");
-                        $stmt2->bind_param("s", $reserva['sala']);
-                        $stmt2->execute();
-                        $sala = $stmt2->get_result()->fetch_assoc();
-                        $stmt2->close();
-                        
-                        $stmt2 = $db->prepare("SELECT horashumanos FROM tempos WHERE id=?");
-                        $stmt2->bind_param("s", $reserva['tempo']);
-                        $stmt2->execute();
-                        $tempo = $stmt2->get_result()->fetch_assoc();
-                        $stmt2->close();
-                        
                         $tempoEnc = urlencode($reserva['tempo']);
                         $salaEnc = urlencode($reserva['sala']);
                         $dataEnc = urlencode($reserva['data']);
@@ -303,13 +300,12 @@ $stmt->close();
                         
                         // Format date nicely
                         $dataFormatted = date('d/m/Y', strtotime($reserva['data']));
-                        $dayName = '';
                         $dayNum = date('N', strtotime($reserva['data']));
-                        $daysPortuguese = ['', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
                         $dayName = $daysPortuguese[$dayNum];
                         
-                        $salaName = $sala ? $sala['nome'] : 'N/A';
-                        $tempoName = $tempo ? $tempo['horashumanos'] : 'N/A';
+                        // Get names from joined data (with fallback)
+                        $salaName = $reserva['sala_nome'] ?? 'N/A';
+                        $tempoName = $reserva['tempo_nome'] ?? 'N/A';
                         
                         echo "<tr class='{$rowClass}' data-status='{$dataStatus}' data-future='{$dataFuture}' data-search='" . 
                              htmlspecialchars(strtolower($salaName . ' ' . $reserva['data'] . ' ' . $tempoName), ENT_QUOTES, 'UTF-8') . "'>";
@@ -403,7 +399,7 @@ $stmt->close();
             
             // Update button states
             buttons.forEach(btn => btn.classList.remove('active'));
-            if (event && event.target) {
+            if (event && event.target && event.target.classList.contains('filter-btn')) {
                 event.target.classList.add('active');
             }
             
