@@ -91,6 +91,7 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
     <div class="container mt-5 mb-5">
         <?php
         $id = $_SESSION['id'];
+        $today = date("Y-m-d");
         
         // Handle bulk reservation separately since it doesn't require tempo/data/sala in GET
         if (isset($_GET['subaction']) && $_GET['subaction'] === 'bulk') {
@@ -144,7 +145,6 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                         }
                         
                         // Check if date is in the past and user is not admin
-                        $today = date("Y-m-d");
                         if ($slotData < $today && !$_SESSION['admin']) {
                             $failedSlots[] = htmlspecialchars($slotData, ENT_QUOTES, 'UTF-8') . " - " . htmlspecialchars($slotTempo, ENT_QUOTES, 'UTF-8') . " (data no passado)";
                             continue;
@@ -264,7 +264,6 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                     }
                     
                     // Check if date is in the past and user is not admin
-                    $today = date("Y-m-d");
                     if ($data < $today && !$_SESSION['admin']) {
                         http_response_code(403);
                         die("Não é possível criar reservas no passado. Apenas os administradores podem criar reservas em datas passadas.");
