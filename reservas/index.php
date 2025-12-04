@@ -7,24 +7,19 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
     die("A reencaminhar para iniciar sessão...");
 }
 
-// Get statistics for the dashboard
+// Get statistics for the dashboard with a single optimized query
 $requisitor = $_SESSION['id'];
-$stmt = $db->prepare("SELECT COUNT(*) as total FROM reservas WHERE requisitor=? AND aprovado=0");
+$stmt = $db->prepare("SELECT 
+    SUM(CASE WHEN aprovado = 0 THEN 1 ELSE 0 END) as pendentes,
+    SUM(CASE WHEN aprovado = 1 THEN 1 ELSE 0 END) as aprovadas,
+    SUM(CASE WHEN data >= CURDATE() THEN 1 ELSE 0 END) as futuras
+    FROM reservas WHERE requisitor = ?");
 $stmt->bind_param("s", $requisitor);
 $stmt->execute();
-$totalPendentes = $stmt->get_result()->fetch_assoc()['total'];
-$stmt->close();
-
-$stmt = $db->prepare("SELECT COUNT(*) as total FROM reservas WHERE requisitor=? AND aprovado=1");
-$stmt->bind_param("s", $requisitor);
-$stmt->execute();
-$totalAprovadas = $stmt->get_result()->fetch_assoc()['total'];
-$stmt->close();
-
-$stmt = $db->prepare("SELECT COUNT(*) as total FROM reservas WHERE requisitor=? AND data >= CURDATE()");
-$stmt->bind_param("s", $requisitor);
-$stmt->execute();
-$totalFuturas = $stmt->get_result()->fetch_assoc()['total'];
+$stats = $stmt->get_result()->fetch_assoc();
+$totalPendentes = $stats['pendentes'] ?? 0;
+$totalAprovadas = $stats['aprovadas'] ?? 0;
+$totalFuturas = $stats['futuras'] ?? 0;
 $stmt->close();
 ?>
 <!DOCTYPE html>
@@ -35,10 +30,8 @@ $stmt->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>As suas reservas | ClassLink</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/assets/reservar.css">
     <link href="/assets/index.css" rel="stylesheet">
-    <script src="/assets/tooltips.js"></script>
     <link rel='icon' href='/assets/logo.png'>
     <style>
         .stat-card {
@@ -235,10 +228,10 @@ $stmt->close();
                 <div class="row g-3 align-items-center">
                     <div class="col-md-6">
                         <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-outline-secondary filter-btn active" onclick="filterReservations('all')">Todas</button>
-                            <button type="button" class="btn btn-outline-warning filter-btn" onclick="filterReservations('pending')">Pendentes</button>
-                            <button type="button" class="btn btn-outline-success filter-btn" onclick="filterReservations('approved')">Aprovadas</button>
-                            <button type="button" class="btn btn-outline-primary filter-btn" onclick="filterReservations('future')">Futuras</button>
+                            <button type="button" class="btn btn-outline-secondary filter-btn active" onclick="filterReservations('all', event)">Todas</button>
+                            <button type="button" class="btn btn-outline-warning filter-btn" onclick="filterReservations('pending', event)">Pendentes</button>
+                            <button type="button" class="btn btn-outline-success filter-btn" onclick="filterReservations('approved', event)">Aprovadas</button>
+                            <button type="button" class="btn btn-outline-primary filter-btn" onclick="filterReservations('future', event)">Futuras</button>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -352,6 +345,11 @@ $stmt->close();
                         echo "</td>";
                         
                         // Actions column
+                        // Escape data for JavaScript using json_encode for proper escaping
+                        $salaNameJs = json_encode($salaName, JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_TAG);
+                        $dataFormattedJs = json_encode($dataFormatted, JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_TAG);
+                        $tempoNameJs = json_encode($tempoName, JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_TAG);
+                        
                         echo "<td class='text-center'>
                                 <div class='btn-group' role='group'>
                                     <a href='/reservar/manage.php?tempo={$tempoEnc}&sala={$salaEnc}&data={$dataEnc}' 
@@ -361,7 +359,7 @@ $stmt->close();
                                     </a>
                                     <button type='button' 
                                             class='btn btn-outline-danger btn-sm action-btn' 
-                                            onclick='confirmDelete(\"{$tempoEnc}\", \"{$salaEnc}\", \"{$dataEnc}\", \"" . htmlspecialchars($salaName, ENT_QUOTES, 'UTF-8') . "\", \"" . htmlspecialchars($dataFormatted, ENT_QUOTES, 'UTF-8') . "\", \"" . htmlspecialchars($tempoName, ENT_QUOTES, 'UTF-8') . "\")' 
+                                            onclick='confirmDelete(\"{$tempoEnc}\", \"{$salaEnc}\", \"{$dataEnc}\", {$salaNameJs}, {$dataFormattedJs}, {$tempoNameJs})' 
                                             title='Apagar reserva'>
                                         &#x1F5D1; Apagar
                                     </button>
@@ -399,13 +397,15 @@ $stmt->close();
 
     <script>
         // Filter reservations by status
-        function filterReservations(filter) {
+        function filterReservations(filter, event) {
             const rows = document.querySelectorAll('#reservationsTable tbody tr');
             const buttons = document.querySelectorAll('.filter-btn');
             
             // Update button states
             buttons.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
             
             rows.forEach(row => {
                 const status = row.getAttribute('data-status');
@@ -473,6 +473,8 @@ $stmt->close();
             modal.show();
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="/assets/tooltips.js"></script>
 </body>
 
 </html>
