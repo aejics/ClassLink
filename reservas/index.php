@@ -165,7 +165,6 @@ $stmt->close();
     </nav>
     
     <div class="reservations-container fade-in">
-        <!-- Header Section -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -186,7 +185,6 @@ $stmt->close();
             </div>
         </div>
 
-        <!-- Statistics Cards -->
         <div class="row mb-4 g-3">
             <div class="col-md-4">
                 <div class="card stat-card shadow-sm h-100" style="background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);">
@@ -229,7 +227,6 @@ $stmt->close();
             </div>
         </div>
 
-        <!-- Filter and Search Section -->
         <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <div class="row g-3 align-items-center">
@@ -248,7 +245,6 @@ $stmt->close();
             </div>
         </div>
 
-        <!-- Reservations List -->
         <div class="card shadow-sm">
             <div class="card-body p-0">
                 <?php
@@ -380,7 +376,6 @@ $stmt->close();
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">

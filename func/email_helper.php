@@ -96,14 +96,12 @@ function sendStyledEmail($to, $subject, $heading, $bodyContent, $type = 'info', 
             <td align='center' style='padding: 40px 20px;'>
                 <table role='presentation' cellpadding='0' cellspacing='0' border='0' width='600' style='max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);'>
                     
-                    <!-- Header -->
                     <tr>
                         <td style='background-color: {$color['header']}; padding: 30px 40px; text-align: center;'>
                             <h1 style='margin: 0; color: {$color['headerText']}; font-size: 24px; font-weight: bold;'>{$escapedHeading}</h1>
                         </td>
                     </tr>
                     
-                    <!-- Body Content -->
                     <tr>
                         <td style='padding: 40px; color: #333333; font-size: 16px; line-height: 1.6;'>
                             {$bodyContent}
@@ -111,7 +109,6 @@ function sendStyledEmail($to, $subject, $heading, $bodyContent, $type = 'info', 
                         </td>
                     </tr>
                     
-                    <!-- Footer -->
                     <tr>
                         <td style='background-color: #f8f9fa; padding: 25px 40px; text-align: center; border-top: 1px solid #e9ecef;'>
                             <p style='margin: 0 0 10px 0; color: #6c757d; font-size: 14px;'>
