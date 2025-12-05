@@ -160,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email']) && !empty($_
             <p>Olá <strong>" . htmlspecialchars($demoData['userName'], ENT_QUOTES, 'UTF-8') . "</strong>,</p>
             <p>Lamentamos informar que a sua reserva foi <strong style='color: #dc3545;'>rejeitada</strong>.</p>
             " . buildReservationDetailsHtml($demoData['roomName'], $demoData['date'], $demoData['time']) . "
-            <p>Pode efetuar um novo pedido através no botão em baixo.</p>";
+            <p>Pode efetuar um novo pedido através do botão em baixo.</p>";
         
         $result = sendStyledEmail(
             $targetEmail,
