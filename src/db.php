@@ -47,4 +47,20 @@
     
     // Constant for pre-registered user ID prefix
     define('PRE_REGISTERED_PREFIX', 'pre_');
+    
+    // Constant for external user ID prefix
+    define('EXTERNAL_USER_PREFIX', 'ext_');
+    
+    // Create table for external email verification codes
+    $db->query("CREATE TABLE IF NOT EXISTS email_verification_codes (
+        id VARCHAR(99) UNIQUE,
+        email VARCHAR(255) NOT NULL,
+        code VARCHAR(6) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        expires_at TIMESTAMP NOT NULL,
+        used BOOLEAN DEFAULT FALSE,
+        PRIMARY KEY (id),
+        INDEX idx_email (email),
+        INDEX idx_expires (expires_at)
+    );");
 ?>

@@ -666,3 +666,34 @@ function sendRecurringWeeklyReservationsEmail($db, $requisitorId, $successCount,
         "Ver as minhas reservas"
     );
 }
+
+/**
+ * Send email verification code for external user login
+ * 
+ * @param string $email Recipient email address
+ * @param string $code 6-digit verification code
+ * @return array ['success' => bool, 'error' => string|null]
+ */
+function sendExternalLoginVerificationEmail($email, $code) {
+    // Ensure code is exactly 6 characters for display
+    $code = str_pad((string)$code, 6, '0', STR_PAD_LEFT);
+    $escapedCode = htmlspecialchars($code, ENT_QUOTES, 'UTF-8');
+    
+    $bodyContent = "
+        <p>Olá,</p>
+        <p>Recebemos um pedido de acesso ao ClassLink com o seu email.</p>
+        <p>O seu código de verificação é:</p>
+        <div style='text-align: center; margin: 30px 0;'>
+            <span style='font-size: 32px; font-weight: bold; letter-spacing: 8px; background-color: #f8f9fa; padding: 15px 25px; border-radius: 8px; display: inline-block; color: #212529;'>{$escapedCode}</span>
+        </div>
+        <p>Este código é válido por <strong>10 minutos</strong>.</p>
+        <p>Se não solicitou este código, pode ignorar este email.</p>";
+    
+    return sendStyledEmail(
+        $email,
+        "ClassLink - Código de Verificação",
+        "Código de Verificação",
+        $bodyContent,
+        'primary'
+    );
+}
