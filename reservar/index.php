@@ -180,9 +180,16 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
             }
         }
         
+        // Check if user has an internal @aejics.org email for autonomous reservations
+        $isInternalUser = str_ends_with(strtolower($_SESSION['email']), '@aejics.org');
+        
         // Display autonomous reservation message if applicable
         if ($isAutonomous) {
-            echo "<div class='alert alert-info mb-3' style='width: 100%;'><strong>Reserva Autónoma:</strong> Esta sala é de reserva autónoma. A sua reserva será aprovada automaticamente.</div>";
+            if ($isInternalUser) {
+                echo "<div class='alert alert-info mb-3' style='width: 100%;'><strong>Reserva Autónoma:</strong> Esta sala é de reserva autónoma. A sua reserva será aprovada automaticamente.</div>";
+            } else {
+                echo "<div class='alert alert-warning mb-3' style='width: 100%;'><strong>Reserva Autónoma:</strong> Esta sala é de reserva autónoma, mas como utilizador externo, a sua reserva necessita de aprovação por um administrador.</div>";
+            }
         }
         
         echo (
