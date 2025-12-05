@@ -8,7 +8,14 @@ $totalHoje = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprovado =
 $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprovado = 1")->fetch_assoc()['total'];
 ?>
 
+<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
 <style>
+    img.emoji {
+        height: 1em;
+        width: 1em;
+        margin: 0 .05em 0 .1em;
+        vertical-align: -0.1em;
+    }
     .stat-card {
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         border: none;
@@ -812,4 +819,12 @@ function clearUserSelection() {
     document.getElementById('selectedUserDisplay').value = '';
     document.getElementById('filterForm').submit();
 }
+
+// Initialize Twemoji to parse all emojis on the page
+document.addEventListener('DOMContentLoaded', function() {
+    twemoji.parse(document.body, {
+        folder: 'svg',
+        ext: '.svg'
+    });
+});
 </script>
