@@ -33,7 +33,14 @@ $stmt->close();
     <link rel="stylesheet" href="/assets/reservar.css">
     <link href="/assets/index.css" rel="stylesheet">
     <link rel='icon' href='/assets/logo.png'>
+    <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
     <style>
+        img.emoji {
+            height: 1em;
+            width: 1em;
+            margin: 0 .05em 0 .1em;
+            vertical-align: -0.1em;
+        }
         .stat-card {
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
             border: none;
@@ -471,6 +478,15 @@ $stmt->close();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="/assets/tooltips.js"></script>
+    <script>
+        // Initialize Twemoji to parse all emojis on the page
+        document.addEventListener('DOMContentLoaded', function() {
+            twemoji.parse(document.body, {
+                folder: 'svg',
+                ext: '.svg'
+            });
+        });
+    </script>
 </body>
 
 </html>
