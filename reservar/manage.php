@@ -166,8 +166,26 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                         $bulkRequisitor = $requisitor; // Track for email
                         $lastSlotSala = $slotSala; // Track for email
                         
-                        // Auto-approve if tipo_sala is 2 (autonomous), otherwise set to 0 (pending)
-                        $aprovado = ($salaInfo['tipo_sala'] == 2) ? 1 : 0;
+                        // Get the email of the requisitor to check if they're an internal user
+                        $requisitorEmail = '';
+                        if ($requisitor === $id) {
+                            // Using current user's email
+                            $requisitorEmail = $_SESSION['email'];
+                        } else {
+                            // Admin is reserving for another user, fetch their email
+                            $emailStmt = $db->prepare("SELECT email FROM cache WHERE id = ?");
+                            $emailStmt->bind_param("s", $requisitor);
+                            $emailStmt->execute();
+                            $emailResult = $emailStmt->get_result()->fetch_assoc();
+                            $emailStmt->close();
+                            $requisitorEmail = $emailResult['email'] ?? '';
+                        }
+                        
+                        // Check if user has an internal @aejics.org email
+                        $isInternalUser = str_ends_with(strtolower($requisitorEmail), '@aejics.org');
+                        
+                        // Auto-approve if tipo_sala is 2 (autonomous) AND user is internal, otherwise set to 0 (pending)
+                        $aprovado = ($salaInfo['tipo_sala'] == 2 && $isInternalUser) ? 1 : 0;
                         if ($aprovado == 1) {
                             $isAutonomous = true;
                         }
@@ -283,8 +301,26 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                         }
                     }
                     
-                    // Auto-approve if tipo_sala is 2 (autonomous), otherwise set to 0 (pending)
-                    $aprovado = ($salaInfo['tipo_sala'] == 2) ? 1 : 0;
+                    // Get the email of the requisitor to check if they're an internal user
+                    $requisitorEmail = '';
+                    if ($requisitor === $id) {
+                        // Using current user's email
+                        $requisitorEmail = $_SESSION['email'];
+                    } else {
+                        // Admin is reserving for another user, fetch their email
+                        $emailStmt = $db->prepare("SELECT email FROM cache WHERE id = ?");
+                        $emailStmt->bind_param("s", $requisitor);
+                        $emailStmt->execute();
+                        $emailResult = $emailStmt->get_result()->fetch_assoc();
+                        $emailStmt->close();
+                        $requisitorEmail = $emailResult['email'] ?? '';
+                    }
+                    
+                    // Check if user has an internal @aejics.org email
+                    $isInternalUser = str_ends_with(strtolower($requisitorEmail), '@aejics.org');
+                    
+                    // Auto-approve if tipo_sala is 2 (autonomous) AND user is internal, otherwise set to 0 (pending)
+                    $aprovado = ($salaInfo['tipo_sala'] == 2 && $isInternalUser) ? 1 : 0;
                     
                     $stmt = $db->prepare("INSERT INTO reservas (sala, tempo, requisitor, data, aprovado, motivo, extra) VALUES (?, ?, ?, ?, ?, ?, ?);");
                     $stmt->bind_param("sssssss", $sala, $tempo, $requisitor, $data, $aprovado, $motivo, $extra);
@@ -298,7 +334,8 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                     saveReservationMaterials($db, $sala, $tempo, $data, $_POST['materiais'] ?? null);
                     
                     // Send confirmation email to the requisitor
-                    $isAutonomousReservation = ($salaInfo['tipo_sala'] == 2);
+                    // The reservation is only auto-approved if it's autonomous AND user is internal
+                    $isAutonomousReservation = ($salaInfo['tipo_sala'] == 2 && $isInternalUser);
                     sendReservationCreatedEmail($db, $requisitor, $sala, $tempo, $data, $motivo, $isAutonomousReservation);
                     
                     header("Location: /reservar/manage.php?sala=" . urlencode($sala) . "&tempo=" . urlencode($tempo) . "&data=" . urlencode($data));
@@ -377,8 +414,15 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                                 echo "<div class='alert alert-warning mb-3'><strong>Sala Bloqueada:</strong> Esta sala está bloqueada.</div>";
                             }
                             
+                            // Check if user has an internal @aejics.org email for autonomous reservations
+                            $isInternalUser = str_ends_with(strtolower($_SESSION['email']), '@aejics.org');
+                            
                             if ($isAutonomous) {
-                                echo "<div class='alert alert-info mb-3'><strong>Reserva Autónoma:</strong> Esta sala é de reserva autónoma. A sua reserva será aprovada automaticamente.</div>";
+                                if ($isInternalUser) {
+                                    echo "<div class='alert alert-info mb-3'><strong>Reserva Autónoma:</strong> Esta sala é de reserva autónoma. A sua reserva será aprovada automaticamente.</div>";
+                                } else {
+                                    echo "<div class='alert alert-warning mb-3'><strong>Reserva Autónoma:</strong> Esta sala é de reserva autónoma, mas como utilizador externo, a sua reserva necessita de aprovação por um administrador.</div>";
+                                }
                             }
                             // Get materials for this room
                             $materiaisStmt = $db->prepare("SELECT id, nome, descricao FROM materiais WHERE sala_id = ? ORDER BY nome ASC");
@@ -484,7 +528,7 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                                 echo "</div>";
                             }
                             
-                            if (!$isAutonomous) {
+                            if (!$isAutonomous || !$isInternalUser) {
                                 echo "<p class='text-muted small mb-3'>Nota: A reserva será submetida para aprovação.</p>";
                             }
                             echo "<button type='submit' class='btn btn-success w-100 mb-2'>Reservar</button>
