@@ -6,7 +6,7 @@
     <h5>Importar Materiais via CSV</h5>
     <a href="/assets/csvsample.csv" download>Download do modelo CSV</a>
     <p class="text-muted small"><strong>Nota:</strong> Para obter o RoomID de uma sala, consulte a gestão de salas ou use a listagem abaixo.</p>
-    <p class="small" style="color:red;font-weight:bold;">Deve de consultar o manual do técnico para mais informações. Não tente uma importação de ficheiro caso não consulte o manual, use o flow abaixo para adicionar materiais individualmente.</p>
+    <p class="small" style="color:red;font-weight:bold;">Deve de consultar o manual do administrador para mais informações.</p>
     <form action="materiais.php?action=import" method="POST" enctype="multipart/form-data" class="d-flex align-items-center">
         <div class="me-2">
             <input type="file" class="form-control" id="csvfile" name="csvfile" accept=".csv" required>
