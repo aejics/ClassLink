@@ -106,7 +106,7 @@ $numUtilizadores = $totalResult->fetch_assoc()['total'];
 // Get first 20 users
 $utilizadores = $db->query("SELECT * FROM cache ORDER BY nome ASC LIMIT 20;");
 ?>
-<div class="alert alert-danger">Não deve editar nenhum utilizador que não esteja pré-registado. <strong>Apenas um técnico com o manual de técnico deve efetuar qualquer alteração.</strong> Stay away if you don't know what you are doing!</div>
+<div class="alert alert-danger">Não deve efetuar nenhuma ação presente nesta página sem <strong>consultar o manual do Administrador</strong>. Caso contrário, arrisca-se a danificar a integridade dos dados de reserva!</div>
 <div class="card mb-3">
     <div class="card-header">
         <h5 class="mb-0">Pré-adicionar Utilizador</h5>
