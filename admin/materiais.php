@@ -7,7 +7,7 @@
     <a href="/assets/csvsample.csv" download>Download do modelo CSV</a>
     <p class="text-muted small"><strong>Nota:</strong> Para obter o RoomID de uma sala, consulte a gestão de salas ou use a listagem abaixo.</p>
     <p class="small" style="color:red;font-weight:bold;">Deve de consultar o manual do administrador para mais informações.</p>
-    <form action="materiais.php?action=import" method="POST" enctype="multipart/form-data" class="d-flex align-items-center">
+    <form action="materiais.php?action=import" method="POST" enctype="multipart/form-data" class="d-flex align-items-center justify-content-center">
         <div class="me-2">
             <input type="file" class="form-control" id="csvfile" name="csvfile" accept=".csv" required>
         </div>
@@ -15,7 +15,7 @@
     </form>
 </div>
 
-<div class="d-flex align-items-center mb-3">
+<div class="d-flex align-items-center justify-content-center mb-3">
     <span class="me-3">Adicionar um material via flow</span>
     <?php formulario("materiais.php?action=criar", [
         ["type" => "text", "id" => "nomematerial", "placeholder" => "Nome do Material", "label" => "Nome do Material", "value" => null]
@@ -268,7 +268,7 @@ if ($materiaisQuery->num_rows == 0) {
     echo "<div class='modal-body'>";
     echo "<div class='table-responsive'>";
     echo "<table class='table table-striped table-hover'>";
-    echo "<thead class='table-light'>";
+    echo "<thead>";
     echo "<tr><th scope='col'>Nome</th><th scope='col'>Descrição</th><th scope='col'>Sala</th><th scope='col'>Ações</th></tr>";
     echo "</thead>";
     echo "<tbody>";
@@ -329,7 +329,7 @@ if ($salasRef && $salasRef->num_rows > 0) {
     echo "<p class='mb-3'>Use estes IDs na coluna <code>RoomID</code> ao criar o ficheiro CSV para importação de materiais.</p>";
     echo "<div class='table-responsive'>";
     echo "<table class='table table-striped table-hover'>";
-    echo "<thead class='table-light'>";
+    echo "<thead>";
     echo "<tr><th scope='col'>Nome da Sala</th><th scope='col'>ID (Room ID)</th></tr>";
     echo "</thead>";
     echo "<tbody>";

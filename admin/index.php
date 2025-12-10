@@ -126,6 +126,10 @@
         echo "<script src='https://cdn.canvasjs.com/canvasjs.min.js'></script>
         <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Detect theme preference
+            const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const chartTheme = isDarkMode ? 'dark2' : 'light2';
+            
             fetch('/admin/api/dashboard_stats.php')
                 .then(response => response.json())
                 .then(data => {
@@ -133,7 +137,7 @@
                     if (data.topReservers && data.topReservers.length > 0) {
                         var topReserversChart = new CanvasJS.Chart('topReserversChart', {
                             animationEnabled: true,
-                            theme: 'light2',
+                            theme: chartTheme,
                             axisY: {
                                 title: 'Número de Reservas',
                                 includeZero: true
@@ -159,7 +163,7 @@
                     if (data.reservationsPerRoom && data.reservationsPerRoom.length > 0) {
                         var reservationsPerRoomChart = new CanvasJS.Chart('reservationsPerRoomChart', {
                             animationEnabled: true,
-                            theme: 'light2',
+                            theme: chartTheme,
                             axisY: {
                                 title: 'Número de Reservas',
                                 includeZero: true
