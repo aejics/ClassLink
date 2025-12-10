@@ -304,7 +304,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subject']) && isset($
                 $mailer->Subject = $subject;
                 
                 // Build full HTML email
-                $baseUrl = getBaseUrl();
                 $htmlBody = "
 <!DOCTYPE html>
 <html lang='pt'>
