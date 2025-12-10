@@ -52,8 +52,8 @@
             </button>
         </a>
         <div class="bottom" style="position: fixed; bottom: 0; width:100%; margin-bottom: 10px;">
-            <img src="/assets/poch.png" class="img-thumbnail" alt="Pessoas 2030 | Portugal 2030 | Cofinanciado pela União Europeia" style="max-width: 15%">
-            <img src="/assets/rep_edu.png" class="img-thumbnail" alt="República Portuguesa Educação Ciência e Inovação" style="max-width: 6%">
+            <img src="/assets/poch.png" alt="Pessoas 2030 | Portugal 2030 | Cofinanciado pela União Europeia" style="max-width: 15%">
+            <img src="/assets/rep_edu.png" alt="República Portuguesa Educação Ciência e Inovação" style="max-width: 6%">
         </div>
     </div>
     <div class="circle"></div>
