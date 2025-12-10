@@ -31,18 +31,29 @@ switch (isset($_GET['action']) ? $_GET['action'] : null){
             break;
         }
         
-        $file = fopen($_FILES['csvfile']['tmp_name'], 'r');
-        if (!$file) {
-            echo "<div class='alert alert-danger fade show' role='alert'>Erro ao ler o ficheiro CSV.</div>";
-            break;
+        // Set database charset to utf8mb4
+        $db->set_charset("utf8mb4");
+        
+        // Read the entire file content first to detect encoding
+        $fileContent = file_get_contents($_FILES['csvfile']['tmp_name']);
+        
+        // Detect encoding and convert to UTF-8 if needed
+        $encoding = mb_detect_encoding($fileContent, ['UTF-8', 'ISO-8859-1', 'Windows-1252'], true);
+        if ($encoding && $encoding !== 'UTF-8') {
+            $fileContent = mb_convert_encoding($fileContent, 'UTF-8', $encoding);
         }
+        
+        // Create a temporary file with UTF-8 content
+        $tempFile = tmpfile();
+        fwrite($tempFile, $fileContent);
+        rewind($tempFile);
         
         $successCount = 0;
         $errorCount = 0;
         $errors = [];
         $lineNumber = 0;
         
-        while (($data = fgetcsv($file)) !== FALSE) {
+        while (($data = fgetcsv($tempFile, 0, ';')) !== FALSE) {  // Changed: Added ';' as delimiter
             $lineNumber++;
             
             // Skip empty lines
@@ -89,7 +100,7 @@ switch (isset($_GET['action']) ? $_GET['action'] : null){
             $stmt->close();
         }
         
-        fclose($file);
+        fclose($tempFile);
         
         if ($successCount > 0) {
             echo "<div class='alert alert-success fade show' role='alert'>{$successCount} material(ais) importado(s) com sucesso.</div>";
