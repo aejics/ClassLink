@@ -8,7 +8,7 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt" data-bs-theme="light">
 
 <head>
     <meta charset="UTF-8">
@@ -19,6 +19,22 @@ if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
     <link href="/assets/index.css" rel="stylesheet">
     <link rel="stylesheet" href="/assets/reservar.css">
     <link rel='icon' href='/assets/logo.png'>
+    <script>
+        // Apply theme based on system preference
+        (function() {
+            const htmlElement = document.documentElement;
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                htmlElement.setAttribute('data-bs-theme', 'dark');
+            } else {
+                htmlElement.setAttribute('data-bs-theme', 'light');
+            }
+            
+            // Listen for changes in system theme preference
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                htmlElement.setAttribute('data-bs-theme', e.matches ? 'dark' : 'light');
+            });
+        })();
+    </script>
     <style>
         @media (max-width: 1366px) {
             .table {
