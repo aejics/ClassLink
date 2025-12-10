@@ -139,8 +139,8 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                         &#x23F3;
                     </div>
                     <div>
-                        <div class="stat-number text-warning"><?php echo $totalPendentes; ?></div>
-                        <div class="text-muted small">Pedidos Pendentes</div>
+                        <div class="stat-number" style="color: #856404;"><?php echo $totalPendentes; ?></div>
+                        <div class="small" style="color: #856404;">Pedidos Pendentes</div>
                     </div>
                     <?php if ($totalPendentes > 0): ?>
                     <div class="ms-auto">
@@ -157,8 +157,8 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                         &#x2705;
                     </div>
                     <div>
-                        <div class="stat-number text-success"><?php echo $totalAprovadas; ?></div>
-                        <div class="text-muted small">Reservas Aprovadas</div>
+                        <div class="stat-number" style="color: #155724;"><?php echo $totalAprovadas; ?></div>
+                        <div class="small" style="color: #155724;">Reservas Aprovadas</div>
                     </div>
                 </div>
             </div>
@@ -170,8 +170,8 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                         &#x1F4C5;
                     </div>
                     <div>
-                        <div class="stat-number text-info"><?php echo $totalHoje; ?></div>
-                        <div class="text-muted small">Pendentes para Hoje</div>
+                        <div class="stat-number" style="color: #004085;"><?php echo $totalHoje; ?></div>
+                        <div class="small" style="color: #004085;">Pendentes para Hoje</div>
                     </div>
                     <?php if ($totalHoje > 0): ?>
                     <div class="ms-auto">
@@ -554,7 +554,7 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                 echo "<button type='button' class='btn btn-danger btn-sm action-btn' 
                       onclick='confirmAction(\"rejeitar\", \"{$tempoEnc}\", \"{$dataEnc}\", \"{$salaEnc}\", \"" . htmlspecialchars($salaextenso, ENT_QUOTES, 'UTF-8') . "\", \"" . htmlspecialchars($dataFormatted, ENT_QUOTES, 'UTF-8') . "\", \"" . htmlspecialchars($horastempo, ENT_QUOTES, 'UTF-8') . "\")' 
                       title='Rejeitar'>
-                    &#x274C;
+                    <span style='color: white; font-weight: bold;'>✕</span>
                 </button>";
                 echo "<a href='/reservar/manage.php?tempo={$tempoEnc}&data={$dataEnc}&sala={$salaEnc}' 
                       class='btn btn-outline-secondary btn-sm action-btn' title='Ver Detalhes' target='_blank'>
@@ -681,7 +681,7 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                 echo "<button type='button' class='btn btn-danger btn-sm action-btn' 
                       onclick='confirmAction(\"rejeitar\", \"{$tempoEnc}\", \"{$dataEnc}\", \"{$salaEnc}\", \"" . htmlspecialchars($salaextenso, ENT_QUOTES, 'UTF-8') . "\", \"" . htmlspecialchars($dataFormatted, ENT_QUOTES, 'UTF-8') . "\", \"" . htmlspecialchars($horastempo, ENT_QUOTES, 'UTF-8') . "\")' 
                       title='Rejeitar'>
-                    &#x274C;
+                    <span style='color: white; font-weight: bold;'>✕</span>
                 </button>";
                 echo "<a href='/reservar/manage.php?tempo={$tempoEnc}&data={$dataEnc}&sala={$salaEnc}' 
                       class='btn btn-outline-secondary btn-sm action-btn' title='Ver Detalhes' target='_blank'>
@@ -763,7 +763,7 @@ function confirmAction(action, tempo, data, sala, salaNome, dataFormatted, horas
         modalHeader.className = 'modal-header bg-danger text-white';
         modalBody.innerHTML = `
             <div class="text-center mb-3">
-                <div style="font-size: 4rem;">&#x274C;</div>
+                <div style="font-size: 4rem; color: #dc3545;">✕</div>
             </div>
             <h5 class="text-center text-danger">Rejeitar esta reserva?</h5>
             <div class="alert alert-light border mt-3">

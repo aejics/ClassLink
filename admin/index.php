@@ -43,7 +43,7 @@
     }
 
     // Criação da Navbar no HTML
-    echo "<nav class='navbar navbar-expand-lg navbar-light bg-light border-bottom'>
+    echo "<nav class='navbar navbar-expand-lg border-bottom' id='admin-navbar'>
     <div class='container-fluid'>
         <span class='navbar-brand mb-0 h1'>Dashboard de Administração</span>
         <button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarNav' aria-controls='navbarNav' aria-expanded='false' aria-label='Toggle navigation'>

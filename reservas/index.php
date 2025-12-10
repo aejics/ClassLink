@@ -194,8 +194,8 @@ $stmt->close();
                             &#x23F3;
                         </div>
                         <div>
-                            <div class="stat-number text-warning"><?php echo $totalPendentes; ?></div>
-                            <div class="text-muted small">Pendentes</div>
+                            <div class="stat-number" style="color: #856404;"><?php echo $totalPendentes; ?></div>
+                            <div class="small" style="color: #856404;">Pendentes</div>
                         </div>
                     </div>
                 </div>
@@ -207,8 +207,8 @@ $stmt->close();
                             &#x2705;
                         </div>
                         <div>
-                            <div class="stat-number text-success"><?php echo $totalAprovadas; ?></div>
-                            <div class="text-muted small">Aprovadas</div>
+                            <div class="stat-number" style="color: #155724;"><?php echo $totalAprovadas; ?></div>
+                            <div class="small" style="color: #155724;">Aprovadas</div>
                         </div>
                     </div>
                 </div>
@@ -220,8 +220,8 @@ $stmt->close();
                             &#x1F4C5;
                         </div>
                         <div>
-                            <div class="stat-number text-info"><?php echo $totalFuturas; ?></div>
-                            <div class="text-muted small">Futuras</div>
+                            <div class="stat-number" style="color: #004085;"><?php echo $totalFuturas; ?></div>
+                            <div class="small" style="color: #004085;">Futuras</div>
                         </div>
                     </div>
                 </div>

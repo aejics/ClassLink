@@ -3,15 +3,28 @@
     const htmlElement = document.documentElement;
     const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
     
-    // Set initial theme based on system preference
-    if (darkModeQuery.matches) {
-        htmlElement.setAttribute('data-bs-theme', 'dark');
-    } else {
-        htmlElement.setAttribute('data-bs-theme', 'light');
+    // Function to apply theme
+    function applyTheme(isDark) {
+        htmlElement.setAttribute('data-bs-theme', isDark ? 'dark' : 'light');
+        
+        // Handle admin navbar specifically
+        const adminNavbar = document.getElementById('admin-navbar');
+        if (adminNavbar) {
+            if (isDark) {
+                adminNavbar.classList.remove('navbar-light', 'bg-light');
+                adminNavbar.classList.add('navbar-dark', 'bg-dark');
+            } else {
+                adminNavbar.classList.remove('navbar-dark', 'bg-dark');
+                adminNavbar.classList.add('navbar-light', 'bg-light');
+            }
+        }
     }
+    
+    // Set initial theme based on system preference
+    applyTheme(darkModeQuery.matches);
     
     // Listen for changes in system theme preference
     darkModeQuery.addEventListener('change', e => {
-        htmlElement.setAttribute('data-bs-theme', e.matches ? 'dark' : 'light');
+        applyTheme(e.matches);
     });
 })();
