@@ -23,7 +23,7 @@ $totalFuturas = $stats['futuras'] ?? 0;
 $stmt->close();
 ?>
 <!DOCTYPE html>
-<html lang="pt" data-bs-theme="light">
+<html lang="pt">
 
 <head>
     <meta charset="UTF-8">
@@ -34,22 +34,7 @@ $stmt->close();
     <link href="/assets/index.css" rel="stylesheet">
     <link rel='icon' href='/assets/logo.png'>
     <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
-    <script>
-        // Apply theme based on system preference
-        (function() {
-            const htmlElement = document.documentElement;
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                htmlElement.setAttribute('data-bs-theme', 'dark');
-            } else {
-                htmlElement.setAttribute('data-bs-theme', 'light');
-            }
-            
-            // Listen for changes in system theme preference
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-                htmlElement.setAttribute('data-bs-theme', e.matches ? 'dark' : 'light');
-            });
-        })();
-    </script>
+    <script src="/assets/theme-switcher.js"></script>
     <style>
         img.emoji {
             height: 1em;
