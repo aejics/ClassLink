@@ -1,0 +1,69 @@
+/* Theme Variables for Light and Dark Mode */
+:root {
+    /* Light Mode (default) */
+    --primary-color: rgb(18, 0, 97);
+    --secondary-color: rgb(0, 238, 255);
+    --accent-color: rgb(0, 195, 255);
+    --text-color: #333;
+    --text-inverse: #fff;
+    --link-color: #333;
+    --link-hover-bg: linear-gradient(-90deg, rgb(0, 238, 255) 0%, rgb(13, 4, 66) 100%);
+    --bg-color: #fff;
+    --bg-secondary: rgb(243, 243, 243);
+    --gradient-primary: linear-gradient(-90deg, rgb(0, 238, 255) 0%, rgb(13, 4, 66) 85%);
+    --gradient-secondary: linear-gradient(-90deg, rgb(18, 0, 97) 0%, rgb(0, 238, 255) 100%);
+    --gradient-login-bg: linear-gradient(45deg, rgb(13, 4, 66) 0%, rgb(0, 195, 255) 30%, rgb(255, 255, 255) 85%);
+    --gradient-circle-1: linear-gradient(90deg, rgb(13, 4, 66) 0%, rgb(0, 68, 255) 50%, rgb(0, 255, 242) 100%);
+    --border-color: rgb(228, 228, 228);
+    --input-focus-color: rgb(64, 179, 255);
+    --placeholder-color: rgb(199, 199, 199);
+    --shadow-color: rgba(0, 0, 0, 0.2);
+    --heading-color: rgb(78, 78, 78);
+    --button-accent: rgb(0, 255, 242);
+    --button-hover-border: rgb(255, 0, 119);
+    --white-overlay: rgba(255, 255, 255, 0.9);
+    --white-overlay-light: rgba(255, 255, 255, 0.8);
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary-color: rgb(100, 80, 200);
+        --secondary-color: rgb(0, 200, 220);
+        --accent-color: rgb(0, 170, 220);
+        --text-color: #e0e0e0;
+        --text-inverse: #1a1a1a;
+        --link-color: #e0e0e0;
+        --link-hover-bg: linear-gradient(-90deg, rgb(0, 200, 220) 0%, rgb(80, 60, 150) 100%);
+        --bg-color: #1a1a1a;
+        --bg-secondary: rgb(30, 30, 35);
+        --gradient-primary: linear-gradient(-90deg, rgb(0, 200, 220) 0%, rgb(50, 40, 100) 85%);
+        --gradient-secondary: linear-gradient(-90deg, rgb(100, 80, 200) 0%, rgb(0, 200, 220) 100%);
+        --gradient-login-bg: linear-gradient(45deg, rgb(50, 40, 100) 0%, rgb(0, 170, 220) 30%, rgb(30, 30, 35) 85%);
+        --gradient-circle-1: linear-gradient(90deg, rgb(50, 40, 100) 0%, rgb(0, 100, 220) 50%, rgb(0, 200, 200) 100%);
+        --border-color: rgb(60, 60, 65);
+        --input-focus-color: rgb(80, 150, 220);
+        --placeholder-color: rgb(120, 120, 125);
+        --shadow-color: rgba(0, 0, 0, 0.5);
+        --heading-color: rgb(200, 200, 200);
+        --button-accent: rgb(0, 200, 200);
+        --button-hover-border: rgb(220, 60, 140);
+        --white-overlay: rgba(30, 30, 35, 0.95);
+        --white-overlay-light: rgba(30, 30, 35, 0.9);
+    }
+}
+
+/* Apply background color to body for main site pages */
+body:not(.admin-panel) {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+/* Apply background and text colors to main text sections */
+.text {
+    color: var(--text-color);
+}
+
+.text h2, .text h3 {
+    color: var(--text-color);
+}
