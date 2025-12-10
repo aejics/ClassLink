@@ -1,4 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&display=swap');
+@import url('theme.css');
+
 *{
     box-sizing: border-box;
     padding: 0;
@@ -6,28 +8,27 @@
     font-family: "Poppins", sans-serif;
 }
 body{
-    color: black;
+    color: var(--text-color);
     position: relative;
     width: 100vw;
     height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(45deg, rgb(13, 4, 66) 0%, 
-    rgb(0, 195, 255) 30%, rgb(255, 255, 255) 85%);
+    background: var(--gradient-login-bg);
 }
 svg{
     position: absolute;
-    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+    filter: drop-shadow(0 10px 20px var(--shadow-color));
 }
 .container{
     position: relative;
-    background-color: rgb(243, 243, 243);
+    background-color: var(--bg-secondary);
     width: 300px;
     height: 500px;
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 0 100px rgb(255, 255, 255,.15);
+    box-shadow: 0 0 100px var(--shadow-color);
 }
 .container::after{
     content: '';
@@ -35,8 +36,7 @@ svg{
     width: 450px;
     height: 450px;
     border-radius: 50%;
-    background: linear-gradient(90deg, rgb(13, 4, 66) 0%, 
-    rgb(0, 68, 255) 50%, rgb(0, 255, 242) 100%);
+    background: var(--gradient-circle-1);
     top: -230px;
     left: -70px;
     opacity: .8;
@@ -47,8 +47,7 @@ svg{
     width: 300px;
     height: 300px;
     border-radius: 50%;
-    background: linear-gradient(90deg, rgb(13, 4, 66) 0%, 
-    rgb(0, 68, 255) 50%, rgb(0, 255, 242) 100%);
+    background: var(--gradient-circle-1);
     bottom: -100px;
     right: -200px;
     opacity: .56;
@@ -79,19 +78,19 @@ svg{
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgb(78, 78, 78);
+    color: var(--heading-color);
 }
 .btnRegis{
     position: absolute;
     width: 30px;
     height: 30px;
     border:2px solid transparent;
-    color: white;
+    color: var(--text-inverse);
     border-radius: 50%;
-    background-color: rgb(0, 255, 242);
+    background-color: var(--button-accent);
     bottom: 5px;
     right: 20px;
-    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    box-shadow: 0 5px 10px var(--shadow-color);
     cursor: pointer;
     transition: .2s ease;
     z-index: 999;
@@ -103,9 +102,9 @@ svg{
     rotate: 180deg;
 }
 .cardLogin .btnRegis:hover{
-    border-color: rgb(255, 0, 119);
+    border-color: var(--button-hover-border);
     background: transparent;
-    color: rgb(255, 0, 119);
+    color: var(--button-hover-border);
 }
 form{
     position: relative;
@@ -123,7 +122,7 @@ form .input-grup .border{
     height: 2px;
     border-radius: 5px;
     position: absolute;
-    background-color: rgb(228, 228, 228);
+    background-color: var(--border-color);
     bottom:0;
     left: 0;
     transition: .3s ;
@@ -138,10 +137,10 @@ form .input-grup input{
     font-size: 14px;
 }
 form .input-grup input:focus ~ span {
-    background-color: rgb(64, 179, 255);
+    background-color: var(--input-focus-color);
 }
 form .input-grup input::placeholder{
-    color: rgb(199, 199, 199);
+    color: var(--placeholder-color);
     font-family: Poppins;
     font-size: 12px;
 }
@@ -150,20 +149,20 @@ form .input-grup i{
     right: 5px;
     top: 50%;
     transform: translateY(-50%);
-    color: rgb(199, 199, 199);
+    color: var(--placeholder-color);
     font-size: 16px;
     transition: .3s ;
 }
 form .input-grup input:focus ~ i {
-    color: rgb(64, 179, 255);
+    color: var(--input-focus-color);
 }
 form a{
     font-size: 12px;
     text-decoration: none;
-    color: rgb(146, 146, 146);
+    color: var(--placeholder-color);
 }
 form a:hover{
-    color: rgb(64, 179, 255);
+    color: var(--input-focus-color);
 }
  form button{
     font-size:15px;
@@ -173,11 +172,10 @@ form a:hover{
     height: 35px;
     border: none;
     border-radius: 50px;
-    color: #FFF;
+    color: var(--text-inverse);
     cursor: pointer;
-    background: linear-gradient(-90deg, rgb(18, 0, 97) 0%, 
-    rgb(0, 238, 255) 100%);
-    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    background: var(--gradient-secondary);
+    box-shadow: 0 5px 10px var(--shadow-color);
     transition: .2s;
 }
 .cardLogin form button{
@@ -209,7 +207,7 @@ form a:hover{
     padding: 0;
     text-align: center;
     font-size: 16px;
-    color: #333;
+    color: var(--text-color);
     position: relative;
     top: -10px; /* Adjusted to reduce the space below the text */
     line-height: 1; /* Ensures no extra spacing from line height */
