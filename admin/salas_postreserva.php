@@ -25,7 +25,7 @@ switch (isset($_GET['action']) ? $_GET['action'] : null){
         }
         echo "<div class='alert alert-warning fade show' role='alert'>A editar a Página Pós-Reserva da Sala <b>" . htmlspecialchars($d['nome'], ENT_QUOTES, 'UTF-8') . "</b>.</div>";
         ?>
-        <form action="salas_postreserva.php?action=update&id=<?php echo urlencode($d['id']); ?>" method="POST" style="width: 90%;">
+        <form action="salas_postreserva.php?action=update&id=<?php echo urlencode($d['id']); ?>" method="POST" style="max-width: 100%; margin: 0 auto;">
             <div class="mb-3">
                 <label for="nomesala" class="form-label">Sala</label>
                 <input type="text" class="form-control" id="nomesala" value="<?php echo htmlspecialchars($d['nome'], ENT_QUOTES, 'UTF-8'); ?>" disabled>

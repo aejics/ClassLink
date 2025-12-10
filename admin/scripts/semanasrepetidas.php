@@ -45,6 +45,18 @@ require_once(__DIR__ . '/../../func/email_helper.php');
         background-color: #e9ecef;
     }
     
+    /* Dark mode support for time checkbox items */
+    @media (prefers-color-scheme: dark) {
+        .time-checkbox-item {
+            background-color: #343a40;
+            border-color: #495057;
+            color: #f8f9fa;
+        }
+        .time-checkbox-item:hover {
+            background-color: #495057;
+        }
+    }
+    
     .form-floating label {
         white-space: nowrap;
         overflow: hidden;
