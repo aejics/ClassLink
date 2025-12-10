@@ -1,6 +1,9 @@
 <?php 
 require '../index.php';
 require_once(__DIR__ . '/../../func/email_helper.php');
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 ?>
 <div style="margin-left: 20%; margin-right: 20%; text-align: center;">
 <h1>Notificar por Email</h1>
@@ -279,9 +282,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subject']) && isset($
                     <strong>Erro:</strong> O sistema de email não está ativado.
                 </div>";
             } else {
-                use PHPMailer\PHPMailer\PHPMailer;
-                use PHPMailer\PHPMailer\Exception;
-                
                 $mailer = new PHPMailer(true);
                 $mailer->isSMTP();
                 $mailer->Host = $mail['servidor'];
