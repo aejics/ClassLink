@@ -7,7 +7,8 @@ use PHPMailer\PHPMailer\Exception;
 ?>
 <div style="margin-left: 20%; margin-right: 20%; text-align: center;">
 <h1>Notificar por Email</h1>
-<p>Este script permite enviar um email para todos os utilizadores com reservas de sala para esta semana.</p>
+<p>Este script permite enviar um email para utilizadores com reservas de sala numa semana específica.</p>
+<p>Pode filtrar por sala específica ou enviar para todos os utilizadores com reservas.</p>
 <p>O email será enviado em BCC (cópia oculta) para preservar a privacidade dos destinatários.</p>
 
 <style>
@@ -42,6 +43,84 @@ use PHPMailer\PHPMailer\Exception;
         background-color: #f8f9fa;
     }
     
+    .week-selector-btn {
+        cursor: pointer;
+        width: 100%;
+    }
+    
+    .week-calendar {
+        position: absolute;
+        z-index: 1000;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        padding: 1rem;
+        margin-top: 0.25rem;
+        min-width: 320px;
+    }
+    
+    .week-calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .week-calendar-nav {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        color: #0d6efd;
+    }
+    
+    .week-calendar-nav:hover {
+        background-color: #e7f1ff;
+        border-radius: 0.25rem;
+    }
+    
+    .week-calendar-body {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.25rem;
+    }
+    
+    .week-calendar-day-header {
+        text-align: center;
+        font-weight: bold;
+        font-size: 0.875rem;
+        padding: 0.5rem;
+        color: #6c757d;
+    }
+    
+    .week-calendar-day {
+        text-align: center;
+        padding: 0.5rem;
+        cursor: pointer;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+    }
+    
+    .week-calendar-day:hover {
+        background-color: #e7f1ff;
+    }
+    
+    .week-calendar-day.selected-week {
+        background-color: #0d6efd;
+        color: white;
+    }
+    
+    .week-calendar-day.other-month {
+        color: #adb5bd;
+    }
+    
+    .week-calendar-day.today {
+        font-weight: bold;
+        border: 2px solid #0d6efd;
+    }
+    
     @media (prefers-color-scheme: dark) {
         .preview-box {
             background-color: #343a40;
@@ -56,6 +135,19 @@ use PHPMailer\PHPMailer\Exception;
             background-color: #343a40;
             border-color: #495057;
             color: #f8f9fa;
+        }
+        
+        .week-calendar {
+            background: #212529;
+            border-color: #495057;
+        }
+        
+        .week-calendar-day:hover {
+            background-color: #343a40;
+        }
+        
+        .week-calendar-nav:hover {
+            background-color: #343a40;
         }
     }
     
@@ -76,6 +168,153 @@ use PHPMailer\PHPMailer\Exception;
 </style>
 
 <script>
+    let weekCalendarVisible = false;
+    let currentCalendarDate = new Date();
+    let selectedWeekStart = null;
+    
+    function getWeekNumber(date) {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    }
+    
+    function getMonday(date) {
+        const d = new Date(date);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+        return new Date(d.setDate(diff));
+    }
+    
+    function formatDateForDisplay(date) {
+        return date.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+    
+    function formatWeekForForm(date) {
+        const year = date.getFullYear();
+        const week = getWeekNumber(date);
+        return year + '-W' + String(week).padStart(2, '0');
+    }
+    
+    function toggleWeekCalendar() {
+        weekCalendarVisible = !weekCalendarVisible;
+        const calendar = document.getElementById('weekCalendar');
+        if (weekCalendarVisible) {
+            renderWeekCalendar();
+            calendar.style.display = 'block';
+        } else {
+            calendar.style.display = 'none';
+        }
+    }
+    
+    function renderWeekCalendar() {
+        const calendar = document.getElementById('weekCalendarBody');
+        const monthYear = document.getElementById('calendarMonthYear');
+        
+        const year = currentCalendarDate.getFullYear();
+        const month = currentCalendarDate.getMonth();
+        
+        monthYear.textContent = currentCalendarDate.toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
+        
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const startDay = firstDay.getDay() || 7;
+        
+        let html = '';
+        
+        // Day headers
+        const dayHeaders = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+        dayHeaders.forEach(day => {
+            html += `<div class="week-calendar-day-header">${day}</div>`;
+        });
+        
+        // Previous month days
+        const prevMonthLastDay = new Date(year, month, 0).getDate();
+        for (let i = startDay - 2; i >= 0; i--) {
+            const day = prevMonthLastDay - i;
+            html += `<div class="week-calendar-day other-month">${day}</div>`;
+        }
+        
+        // Current month days
+        const today = new Date();
+        for (let day = 1; day <= lastDay.getDate(); day++) {
+            const date = new Date(year, month, day);
+            const monday = getMonday(date);
+            const isToday = date.toDateString() === today.toDateString();
+            const isSelectedWeek = selectedWeekStart && monday.toDateString() === selectedWeekStart.toDateString();
+            
+            let classes = 'week-calendar-day';
+            if (isToday) classes += ' today';
+            if (isSelectedWeek) classes += ' selected-week';
+            
+            html += `<div class="${classes}" onclick="selectWeek(new Date(${year}, ${month}, ${day}))">${day}</div>`;
+        }
+        
+        // Next month days
+        const remainingDays = 42 - (startDay - 1 + lastDay.getDate());
+        for (let day = 1; day <= remainingDays; day++) {
+            html += `<div class="week-calendar-day other-month">${day}</div>`;
+        }
+        
+        calendar.innerHTML = html;
+    }
+    
+    function changeMonth(delta) {
+        currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta);
+        renderWeekCalendar();
+    }
+    
+    function selectWeek(date) {
+        selectedWeekStart = getMonday(date);
+        const sunday = new Date(selectedWeekStart);
+        sunday.setDate(sunday.getDate() + 6);
+        
+        const displayText = `Semana: ${formatDateForDisplay(selectedWeekStart)} - ${formatDateForDisplay(sunday)}`;
+        document.getElementById('weekSelectorBtn').textContent = displayText;
+        document.getElementById('weekInput').value = formatWeekForForm(selectedWeekStart);
+        
+        renderWeekCalendar();
+        toggleWeekCalendar();
+        
+        // Submit form to update recipients
+        document.getElementById('filterForm').submit();
+    }
+    
+    function initWeekSelector() {
+        const weekInput = document.getElementById('weekInput');
+        if (weekInput.value) {
+            const parts = weekInput.value.split('-W');
+            const year = parseInt(parts[0]);
+            const week = parseInt(parts[1]);
+            const jan1 = new Date(year, 0, 1);
+            const daysOffset = (week - 1) * 7;
+            const targetDate = new Date(jan1.setDate(jan1.getDate() + daysOffset));
+            selectedWeekStart = getMonday(targetDate);
+            currentCalendarDate = new Date(selectedWeekStart);
+            
+            const sunday = new Date(selectedWeekStart);
+            sunday.setDate(sunday.getDate() + 6);
+            document.getElementById('weekSelectorBtn').textContent = `Semana: ${formatDateForDisplay(selectedWeekStart)} - ${formatDateForDisplay(sunday)}`;
+        } else {
+            const today = new Date();
+            selectedWeekStart = getMonday(today);
+            currentCalendarDate = new Date(today);
+            const sunday = new Date(selectedWeekStart);
+            sunday.setDate(sunday.getDate() + 6);
+            document.getElementById('weekSelectorBtn').textContent = `Semana: ${formatDateForDisplay(selectedWeekStart)} - ${formatDateForDisplay(sunday)}`;
+        }
+    }
+    
+    // Close calendar when clicking outside
+    document.addEventListener('click', function(event) {
+        const calendar = document.getElementById('weekCalendar');
+        const btn = document.getElementById('weekSelectorBtn');
+        if (weekCalendarVisible && calendar && btn && !calendar.contains(event.target) && !btn.contains(event.target)) {
+            toggleWeekCalendar();
+        }
+    });
+    
     function showPreview() {
         const subject = document.getElementById('subject').value;
         const message = document.getElementById('message').value;
@@ -162,18 +401,46 @@ use PHPMailer\PHPMailer\Exception;
 </script>
 
 <?php
-// Get users with reservations for this week
-$startOfWeek = date('Y-m-d', strtotime('monday this week'));
-$endOfWeek = date('Y-m-d', strtotime('sunday this week'));
+// Get all classrooms for the filter
+$salasQuery = "SELECT id, nome FROM salas ORDER BY nome ASC";
+$salasResult = $db->query($salasQuery);
+$salas = [];
+while ($sala = $salasResult->fetch_assoc()) {
+    $salas[] = $sala;
+}
 
-$query = "SELECT DISTINCT c.id, c.nome, c.email 
-          FROM cache c
-          INNER JOIN reservas r ON c.id = r.requisitor
-          WHERE r.data >= ? AND r.data <= ?
-          ORDER BY c.nome ASC";
+// Determine the week to check
+$selectedWeek = isset($_POST['week']) ? $_POST['week'] : date('Y-\WW');
+$selectedClassroom = isset($_POST['classroom']) ? $_POST['classroom'] : '';
 
-$stmt = $db->prepare($query);
-$stmt->bind_param("ss", $startOfWeek, $endOfWeek);
+// Calculate start and end of selected week
+$weekParts = explode('-W', $selectedWeek);
+$year = $weekParts[0];
+$week = $weekParts[1];
+$startOfWeek = date('Y-m-d', strtotime($year . 'W' . $week . '1')); // Monday
+$endOfWeek = date('Y-m-d', strtotime($year . 'W' . $week . '7')); // Sunday
+
+// Build query based on classroom filter
+if (!empty($selectedClassroom)) {
+    $query = "SELECT DISTINCT c.id, c.nome, c.email 
+              FROM cache c
+              INNER JOIN reservas r ON c.id = r.requisitor
+              WHERE r.data >= ? AND r.data <= ? AND r.sala = ?
+              ORDER BY c.nome ASC";
+    
+    $stmt = $db->prepare($query);
+    $stmt->bind_param("sss", $startOfWeek, $endOfWeek, $selectedClassroom);
+} else {
+    $query = "SELECT DISTINCT c.id, c.nome, c.email 
+              FROM cache c
+              INNER JOIN reservas r ON c.id = r.requisitor
+              WHERE r.data >= ? AND r.data <= ?
+              ORDER BY c.nome ASC";
+    
+    $stmt = $db->prepare($query);
+    $stmt->bind_param("ss", $startOfWeek, $endOfWeek);
+}
+
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -187,15 +454,66 @@ $stmt->close();
 
 $recipientCount = count($recipients);
 $recipientListString = implode(', ', $recipientListData);
+
+// Get classroom name for display
+$classroomName = 'todas as salas';
+if (!empty($selectedClassroom)) {
+    foreach ($salas as $sala) {
+        if ($sala['id'] == $selectedClassroom) {
+            $classroomName = $sala['nome'];
+            break;
+        }
+    }
+}
 ?>
 
-<form action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="POST" class="mt-4">
+<form action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="POST" class="mt-4" id="filterForm">
     <input type="hidden" id="recipientCount" value="<?php echo $recipientCount; ?>">
     <input type="hidden" id="recipientListData" value="<?php echo htmlspecialchars($recipientListString, ENT_QUOTES, 'UTF-8'); ?>">
     <input type="hidden" id="senderName" value="<?php echo htmlspecialchars($_SESSION['nome'], ENT_QUOTES, 'UTF-8'); ?>">
+    <input type="hidden" id="weekInput" name="week" value="<?php echo htmlspecialchars($selectedWeek, ENT_QUOTES, 'UTF-8'); ?>">
+    
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Selecionar Semana</label>
+            <div style="position: relative;">
+                <button type="button" class="btn btn-outline-secondary week-selector-btn" id="weekSelectorBtn" onclick="toggleWeekCalendar()">
+                    Semana Atual
+                </button>
+                <div id="weekCalendar" class="week-calendar" style="display: none;">
+                    <div class="week-calendar-header">
+                        <button type="button" class="week-calendar-nav" onclick="changeMonth(-1)">◀</button>
+                        <strong id="calendarMonthYear"></strong>
+                        <button type="button" class="week-calendar-nav" onclick="changeMonth(1)">▶</button>
+                    </div>
+                    <div class="week-calendar-body" id="weekCalendarBody"></div>
+                </div>
+            </div>
+            <small class="text-muted">Clique para abrir o calendário e selecionar uma semana.</small>
+        </div>
+        <div class="col-md-6">
+            <div class="form-floating">
+                <select class="form-select" id="classroom" name="classroom" onchange="this.form.submit()">
+                    <option value="">Todas as Salas</option>
+                    <?php foreach ($salas as $sala): ?>
+                        <option value="<?php echo htmlspecialchars($sala['id'], ENT_QUOTES, 'UTF-8'); ?>" 
+                                <?php echo ($selectedClassroom == $sala['id']) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($sala['nome'], ENT_QUOTES, 'UTF-8'); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <label for="classroom">Filtrar por Sala</label>
+            </div>
+            <small class="text-muted">Deixe em branco para enviar a todos.</small>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', initWeekSelector);
+    </script>
     
     <div class="alert alert-info">
-        <strong>Informação:</strong> Foram encontrados <strong><?php echo $recipientCount; ?></strong> utilizador(es) com reservas para esta semana (<?php echo date('d/m/Y', strtotime($startOfWeek)); ?> - <?php echo date('d/m/Y', strtotime($endOfWeek)); ?>).
+        <strong>Informação:</strong> Foram encontrados <strong><?php echo $recipientCount; ?></strong> utilizador(es) com reservas<?php echo !empty($selectedClassroom) ? ' na sala <strong>' . htmlspecialchars($classroomName, ENT_QUOTES, 'UTF-8') . '</strong>' : ''; ?> para a semana de <strong><?php echo date('d/m/Y', strtotime($startOfWeek)); ?> - <?php echo date('d/m/Y', strtotime($endOfWeek)); ?></strong>.
     </div>
     
     <?php if ($recipientCount == 0): ?>
@@ -219,7 +537,7 @@ $recipientListString = implode(', ', $recipientListData);
                 <textarea class="form-control" id="message" name="message" placeholder="Mensagem" style="height: 200px;" required><?php echo isset($_POST['message']) ? htmlspecialchars($_POST['message'], ENT_QUOTES, 'UTF-8') : ''; ?></textarea>
                 <label for="message">Mensagem do Email</label>
             </div>
-            <small class="text-muted">Digite a mensagem que deseja enviar para todos os utilizadores com reservas esta semana.</small>
+            <small class="text-muted">Digite a mensagem que deseja enviar para todos os utilizadores com reservas<?php echo !empty($selectedClassroom) ? ' na sala selecionada' : ''; ?> nesta semana.</small>
         </div>
     </div>
 
@@ -333,6 +651,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subject']) && isset($
                     <tr>
                         <td style='background-color: #f8f9fa; padding: 25px 40px; text-align: center; border-top: 1px solid #e9ecef;'>
                             <p style='margin: 0 0 10px 0; color: #6c757d; font-size: 14px;'>
+                                Recebeu este email porque tem uma reserva para a semana de <strong>" . date('d/m/Y', strtotime($startOfWeek)) . " - " . date('d/m/Y', strtotime($endOfWeek)) . "</strong>" . (!empty($selectedClassroom) ? " na sala <strong>" . htmlspecialchars($classroomName, ENT_QUOTES, 'UTF-8') . "</strong>" : "") . ".
+                            </p>
+                            <p style='margin: 0 0 10px 0; color: #6c757d; font-size: 14px;'>
                                 Este email foi enviado automaticamente pelo sistema ClassLink. Não responda a este email.
                             </p>
                             <p style='margin: 0; color: #6c757d; font-size: 12px;'>
@@ -352,14 +673,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subject']) && isset($
                 
                 // Plain text alternative
                 $plainBody = strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $bodyContent));
-                $plainBody .= "\n\n---\nEste email foi enviado automaticamente pelo sistema ClassLink. Não responda a este email.\nAgrupamento de Escolas Joaquim Inácio da Cruz Sobral";
+                $plainBody .= "\n\n---\nRecebeu este email porque tem uma reserva para a semana de " . date('d/m/Y', strtotime($startOfWeek)) . " - " . date('d/m/Y', strtotime($endOfWeek)) . (!empty($selectedClassroom) ? " na sala " . $classroomName : "") . ".\nEste email foi enviado automaticamente pelo sistema ClassLink. Não responda a este email.\nAgrupamento de Escolas Joaquim Inácio da Cruz Sobral";
                 $mailer->AltBody = $plainBody;
                 
                 $mailer->send();
                 
                 // Log the action
                 require_once(__DIR__ . '/../../func/logaction.php');
-                logaction("Email enviado para {$recipientCount} utilizadores com reservas esta semana. Assunto: {$subject}", $_SESSION['id']);
+                $logMessage = "Email enviado para {$recipientCount} utilizadores com reservas para a semana de " . date('d/m/Y', strtotime($startOfWeek)) . " - " . date('d/m/Y', strtotime($endOfWeek));
+                if (!empty($selectedClassroom)) {
+                    $logMessage .= " (Sala: {$classroomName})";
+                }
+                $logMessage .= ". Assunto: {$subject}";
+                logaction($logMessage, $_SESSION['id']);
                 
                 echo "<div class='mt-3 alert alert-success fade show' role='alert'>
                     <strong>Sucesso!</strong> Email enviado com sucesso para {$recipientCount} destinatário(s) em BCC.
@@ -369,7 +695,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subject']) && isset($
                     <strong>Resumo:</strong><br>
                     - Assunto: " . htmlspecialchars($subject, ENT_QUOTES, 'UTF-8') . "<br>
                     - Destinatários: {$recipientCount}<br>
-                    - Remetente identificado: " . ($identifySender ? 'Sim' : 'Não') . "
+                    - Semana: " . date('d/m/Y', strtotime($startOfWeek)) . " - " . date('d/m/Y', strtotime($endOfWeek)) . "<br>" 
+                    . (!empty($selectedClassroom) ? "- Sala: " . htmlspecialchars($classroomName, ENT_QUOTES, 'UTF-8') . "<br>" : "")
+                    . "- Remetente identificado: " . ($identifySender ? 'Sim' : 'Não') . "
                 </div>";
             }
         } catch (Exception $e) {
