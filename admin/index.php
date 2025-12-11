@@ -77,7 +77,12 @@
     echo "</ul></li>";
     echo "<li class='nav-item'><a href='/' class='nav-link'>Voltar</a></li>";
     // Fechar Navbar no HTML, e passar o conteúdo para baixo
-    echo "</ul></div></div></nav><div class='container-fluid mt-4 justify-content-center text-center'>";
+    echo "</ul></div></div></nav>";
+    
+    // Version check alert container
+    echo "<div id='versionAlertContainer' class='container-fluid mt-2'></div>";
+    
+    echo "<div class='container-fluid mt-4 justify-content-center text-center'>";
 
 ?>
 
@@ -230,6 +235,79 @@
             logaction($acao . ".\nPOST: " . var_export($_POST, true) . "\nGET: " . var_export($_GET, true), $_SESSION['id']);
         }    
 ?>
+
+<script>
+// Version Checker - Checks for new commits on main branch
+(function() {
+    function checkVersion() {
+        fetch('/admin/api/version_check.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.commitsBehind > 0) {
+                    showVersionAlert(data);
+                } else if (!data.success && data.error) {
+                    console.warn('Version check error:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Version check failed:', error);
+            });
+    }
+    
+    function showVersionAlert(data) {
+        const container = document.getElementById('versionAlertContainer');
+        if (!container) return;
+        
+        const plural = data.commitsBehind > 1 ? 's' : '';
+        const aheadText = data.commitsAhead > 0 ? ` (${data.commitsAhead} commit${data.commitsAhead > 1 ? 's' : ''} à frente)` : '';
+        
+        const alertHtml = `
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <strong>⚠️ Atualização Disponível!</strong> 
+                Existem <strong>${data.commitsBehind}</strong> novo${plural} commit${plural} no branch principal${aheadText}.
+                <br>
+                <small class="d-block mt-2">
+                    <strong>Último commit:</strong> ${escapeHtml(data.lastCommitMessage)}<br>
+                    <strong>Autor:</strong> ${escapeHtml(data.lastCommitAuthor)}<br>
+                    <strong>Data:</strong> ${formatDate(data.lastCommitDate)}<br>
+                    <strong>Hash:</strong> ${data.currentCommit} → ${data.remoteCommit}
+                </small>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+            </div>
+        `;
+        
+        container.innerHTML = alertHtml;
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleString('pt-PT', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+    
+    // Check version on page load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', checkVersion);
+    } else {
+        checkVersion();
+    }
+    
+    // Check version every 15 minutes
+    setInterval(checkVersion, 15 * 60 * 1000);
+})();
+</script>
 
 </body>
 </html>
