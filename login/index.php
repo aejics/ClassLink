@@ -294,7 +294,7 @@
                 echo "<h1>⛔ Acesso Negado</h1>";
                 echo "<p>A sua conta foi suspensa e não pode aceder ao ClassLink neste momento.</p>";
                 echo "<p>Por favor, contacte a administração para mais informações ou tente iniciar sessão mais tarde.</p>";
-                echo "<a href=\"/login\" class=\"login-btn\">Voltar</a>";
+                echo "<a href=\"/login\" class=\"login-btn\">Tentar Novamente</a>";
                 echo "</div>";
                 echo "</body>";
                 echo "</html>";
