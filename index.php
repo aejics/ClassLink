@@ -12,6 +12,8 @@
     }
     
     require_once(__DIR__ . '/src/db.php');
+    require_once(__DIR__ . '/func/check_ban.php');
+    check_user_ban($db);
 ?>
 <!DOCTYPE html>
 <html lang="en">

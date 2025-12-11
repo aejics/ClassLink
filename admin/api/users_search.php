@@ -1,7 +1,9 @@
 <?php
 require_once(__DIR__ . '/../../src/db.php');
 require_once(__DIR__ . '/../../func/validation.php');
+require_once(__DIR__ . '/../../func/check_ban.php');
 session_start();
+check_user_ban($db);
 
 header('Content-Type: application/json');
 
@@ -22,10 +24,10 @@ if ($action === 'search') {
         // Escape SQL LIKE wildcards to prevent unintended pattern matching
         $escapedSearch = str_replace(['%', '_'], ['\\%', '\\_'], $search);
         $searchParam = '%' . $escapedSearch . '%';
-        $stmt = $db->prepare("SELECT id, nome, email, admin FROM cache WHERE nome LIKE ? ESCAPE '\\\\' OR email LIKE ? ESCAPE '\\\\' ORDER BY nome ASC LIMIT ? OFFSET ?");
+        $stmt = $db->prepare("SELECT id, nome, email, admin, banned FROM cache WHERE nome LIKE ? ESCAPE '\\\\' OR email LIKE ? ESCAPE '\\\\' ORDER BY nome ASC LIMIT ? OFFSET ?");
         $stmt->bind_param("ssii", $searchParam, $searchParam, $limit, $offset);
     } else {
-        $stmt = $db->prepare("SELECT id, nome, email, admin FROM cache ORDER BY nome ASC LIMIT ? OFFSET ?");
+        $stmt = $db->prepare("SELECT id, nome, email, admin, banned FROM cache ORDER BY nome ASC LIMIT ? OFFSET ?");
         $stmt->bind_param("ii", $limit, $offset);
     }
     
@@ -39,6 +41,7 @@ if ($action === 'search') {
             'nome' => $row['nome'],
             'email' => $row['email'],
             'admin' => (bool)$row['admin'],
+            'banned' => (bool)$row['banned'],
             'isPreRegistered' => str_starts_with($row['id'], PRE_REGISTERED_PREFIX)
         ];
     }

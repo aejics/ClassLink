@@ -13,7 +13,9 @@
 <?php
     require_once(__DIR__ . '/../src/db.php');
     require_once(__DIR__ . '/../func/genuuid.php');
+    require_once(__DIR__ . '/../func/check_ban.php');
     session_start();
+    check_user_ban($db);
     if (!$_SESSION['admin']) {
         http_response_code(403);
         die("<div class='alert alert-danger text-center'>Não pode entrar no Painel Administrativo. <a href='/'>Voltar para a página inicial</a></div>");

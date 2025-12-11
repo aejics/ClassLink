@@ -97,6 +97,38 @@ switch (isset($_GET['action']) ? $_GET['action'] : null){
         }
         $stmt->close();
         break;
+    // caso execute a ação banir:
+    case "ban":
+        if (!isset($_GET['id'])) {
+            echo "<div class='alert alert-danger fade show' role='alert'>ID inválido.</div>";
+            break;
+        }
+        $stmt = $db->prepare("UPDATE cache SET banned = 1 WHERE id = ?");
+        $stmt->bind_param("s", $_GET['id']);
+        if ($stmt->execute()) {
+            echo "<div class='alert alert-success fade show' role='alert'>Utilizador banido com sucesso.</div>";
+            acaoexecutada("Banimento de Utilizador");
+        } else {
+            echo "<div class='alert alert-danger fade show' role='alert'>Erro ao banir utilizador.</div>";
+        }
+        $stmt->close();
+        break;
+    // caso execute a ação desbanir:
+    case "unban":
+        if (!isset($_GET['id'])) {
+            echo "<div class='alert alert-danger fade show' role='alert'>ID inválido.</div>";
+            break;
+        }
+        $stmt = $db->prepare("UPDATE cache SET banned = 0 WHERE id = ?");
+        $stmt->bind_param("s", $_GET['id']);
+        if ($stmt->execute()) {
+            echo "<div class='alert alert-success fade show' role='alert'>Utilizador desbanido com sucesso.</div>";
+            acaoexecutada("Desbanimento de Utilizador");
+        } else {
+            echo "<div class='alert alert-danger fade show' role='alert'>Erro ao desbanir utilizador.</div>";
+        }
+        $stmt->close();
+        break;
 }
 
 // Get total count for display
@@ -145,18 +177,25 @@ $utilizadores = $db->query("SELECT * FROM cache ORDER BY nome ASC LIMIT 20;");
                 $preRegBadge = $isPreRegistered ? " <span class='badge bg-warning text-dark'>Pré-registado</span>" : "";
                 $isExternal = !str_ends_with($row['email'], '@aejics.org');
                 $externalBadge = $isExternal ? " <span class='badge bg-info'>Externo</span>" : "";
+                $isBanned = $row['banned'] ? true : false;
+                $bannedBadge = $isBanned ? " <span class='badge bg-danger'>Banido</span>" : "";
                 $userName = htmlspecialchars($row['nome'], ENT_QUOTES, 'UTF-8');
                 $userEmail = htmlspecialchars($row['email'], ENT_QUOTES, 'UTF-8');
             ?>
                 <div class="col-md-6 col-lg-4 mb-3">
-                    <div class="card h-100">
+                    <div class="card h-100<?php echo $isBanned ? ' border-danger' : ''; ?>">
                         <div class="card-body">
                             <h5 class="card-title"><?php echo $userName; ?></h5>
                             <p class="card-text text-muted"><?php echo $userEmail; ?></p>
-                            <p class="card-text"><?php echo $adminStatus . $preRegBadge . $externalBadge; ?></p>
+                            <p class="card-text"><?php echo $adminStatus . $preRegBadge . $externalBadge . $bannedBadge; ?></p>
                         </div>
                         <div class="card-footer bg-transparent">
                             <a href='/admin/users.php?action=edit&id=<?php echo $idEnc; ?>' class='btn btn-sm btn-primary'>EDITAR</a>
+                            <?php if ($isBanned): ?>
+                                <a href='/admin/users.php?action=unban&id=<?php echo $idEnc; ?>' class='btn btn-sm btn-success' onclick='return confirm("Tem a certeza que pretende desbanir este utilizador?");'>DESBANIR</a>
+                            <?php else: ?>
+                                <a href='/admin/users.php?action=ban&id=<?php echo $idEnc; ?>' class='btn btn-sm btn-warning' onclick='return confirm("Tem a certeza que pretende banir este utilizador? Ele será desconectado imediatamente se estiver logado.");'>BANIR</a>
+                            <?php endif; ?>
                             <a href='/admin/users.php?action=apagar&id=<?php echo $idEnc; ?>' class='btn btn-sm btn-danger' onclick='return confirm("Tem a certeza que pretende apagar o utilizador? Isto irá causar problemas se o utilizador tiver reservas passadas.");'>APAGAR</a>
                         </div>
                     </div>
@@ -199,18 +238,28 @@ $utilizadores = $db->query("SELECT * FROM cache ORDER BY nome ASC LIMIT 20;");
         const externalBadge = isExternal 
             ? " <span class='badge bg-info'>Externo</span>" 
             : "";
+        const isBanned = user.banned ? true : false;
+        const bannedBadge = isBanned 
+            ? " <span class='badge bg-danger'>Banido</span>" 
+            : "";
+        const cardBorder = isBanned ? " border-danger" : "";
         const idEnc = encodeURIComponent(user.id);
+        
+        const banButton = isBanned 
+            ? `<a href='/admin/users.php?action=unban&id=${idEnc}' class='btn btn-sm btn-success' onclick='return confirm("Tem a certeza que pretende desbanir este utilizador?");'>DESBANIR</a>`
+            : `<a href='/admin/users.php?action=ban&id=${idEnc}' class='btn btn-sm btn-warning' onclick='return confirm("Tem a certeza que pretende banir este utilizador? Ele será desconectado imediatamente se estiver logado.");'>BANIR</a>`;
         
         return `
             <div class="col-md-6 col-lg-4 mb-3">
-                <div class="card h-100">
+                <div class="card h-100${cardBorder}">
                     <div class="card-body">
                         <h5 class="card-title">${escapeHtml(user.nome)}</h5>
                         <p class="card-text text-muted">${escapeHtml(user.email)}</p>
-                        <p class="card-text">${adminBadge}${preRegBadge}${externalBadge}</p>
+                        <p class="card-text">${adminBadge}${preRegBadge}${externalBadge}${bannedBadge}</p>
                     </div>
                     <div class="card-footer bg-transparent">
                         <a href='/admin/users.php?action=edit&id=${idEnc}' class='btn btn-sm btn-primary'>EDITAR</a>
+                        ${banButton}
                         <a href='/admin/users.php?action=apagar&id=${idEnc}' class='btn btn-sm btn-danger' onclick='return confirm("Tem a certeza que pretende apagar o utilizador? Isto irá causar problemas se o utilizador tiver reservas passadas.");'>APAGAR</a>
                     </div>
                 </div>

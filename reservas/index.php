@@ -1,6 +1,8 @@
 <?php
 require_once(__DIR__ . '/../src/db.php');
+require_once(__DIR__ . '/../func/check_ban.php');
 session_start();
+check_user_ban($db);
 if (!isset($_SESSION['validity']) || $_SESSION['validity'] < time()) {
     http_response_code(403);
     header("Location: /login");

@@ -8,7 +8,7 @@
     $db->set_charset("utf8mb4");
 
     // Criar bases de dados. Todas.
-    $db->query("CREATE TABLE IF NOT EXISTS cache (id VARCHAR(99) UNIQUE, nome VARCHAR(99), email VARCHAR(99), admin BOOL, PRIMARY KEY (id));");
+    $db->query("CREATE TABLE IF NOT EXISTS cache (id VARCHAR(99) UNIQUE, nome VARCHAR(99), email VARCHAR(99), admin BOOL, banned BOOL DEFAULT 0, PRIMARY KEY (id));");
     
     // Create salas table with post_reservation_content, tipo_sala, and bloqueado columns for new installations
     // tipo_sala: 1 = normal (requires approval), 2 = autonomous (auto-approved)
@@ -33,6 +33,13 @@
     $result = $db->query("SHOW COLUMNS FROM salas LIKE 'bloqueado'");
     if ($result && $result->num_rows == 0) {
         $db->query("ALTER TABLE salas ADD COLUMN bloqueado INT DEFAULT 0;");
+    }
+    
+    // Add banned column to cache table for existing installations
+    // banned: 0 = not banned (default), 1 = banned (user cannot access the site)
+    $result = $db->query("SHOW COLUMNS FROM cache LIKE 'banned'");
+    if ($result && $result->num_rows == 0) {
+        $db->query("ALTER TABLE cache ADD COLUMN banned BOOL DEFAULT 0;");
     }
     
     $db->query("CREATE TABLE IF NOT EXISTS tempos (id VARCHAR(99) UNIQUE, horashumanos VARCHAR(99), PRIMARY KEY (id));");
