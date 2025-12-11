@@ -77,20 +77,17 @@
     echo "</ul></li>";
     echo "<li class='nav-item'><a href='/' class='nav-link'>Voltar</a></li>";
     // Fechar Navbar no HTML, e passar o conteúdo para baixo
-    echo "</ul></div></div></nav>";
-    
-    // Version check alert container
-    echo "<div id='versionAlertContainer' class='container-fluid mt-2'></div>";
-    
-    echo "<div class='container-fluid mt-4 justify-content-center text-center'>";
+    echo "</ul></div></div></nav><div class='container-fluid mt-4 justify-content-center text-center'>";
 
 ?>
 
 <?php
+    // Bugfix: /admin buga os navbar links
     if ($_SERVER['REQUEST_URI'] == "/admin") {
         header("Location: /admin/");
         die();
     }
+
     if ($_SERVER['REQUEST_URI'] == "/admin/") {
         // Conteúdos para a Dashboard Administrativa. Apenas colocar o conteúdo neste bloco, pois
         // este módulo é reutilizado para as subpáginas.
@@ -236,16 +233,20 @@
         }    
 ?>
 
+<?php if ($_SERVER['REQUEST_URI'] == "/admin/"): ?>
+<!-- Version Alert Container at Bottom - Only on Dashboard -->
+<div id='versionAlertContainer' style='margin-top: 20px;'></div>
+
 <script>
-// Version Checker - Checks for new commits on main branch
+// Version Checker - Checks for new commits on main branch - ONLY ON DASHBOARD
 (function() {
     function checkVersion() {
         fetch('/admin/api/version_check.php')
             .then(response => response.json())
             .then(data => {
-                if (data.success && data.commitsBehind > 0) {
+                if (data.success) {
                     showVersionAlert(data);
-                } else if (!data.success && data.error) {
+                } else if (data.error) {
                     console.warn('Version check error:', data.error);
                 }
             })
@@ -258,23 +259,42 @@
         const container = document.getElementById('versionAlertContainer');
         if (!container) return;
         
-        const plural = data.commitsBehind > 1 ? 's' : '';
-        const aheadText = data.commitsAhead > 0 ? ` (${data.commitsAhead} commit${data.commitsAhead > 1 ? 's' : ''} à frente)` : '';
+        let alertHtml = '';
+        const cacheStatus = data.cached ? ' (cache)' : '';
         
-        const alertHtml = `
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                <strong>⚠️ Atualização Disponível!</strong> 
-                Existem <strong>${data.commitsBehind}</strong> novo${plural} commit${plural} no branch principal${aheadText}.
-                <br>
-                <small class="d-block mt-2">
-                    <strong>Último commit:</strong> ${escapeHtml(data.lastCommitMessage)}<br>
-                    <strong>Autor:</strong> ${escapeHtml(data.lastCommitAuthor)}<br>
-                    <strong>Data:</strong> ${formatDate(data.lastCommitDate)}<br>
-                    <strong>Hash:</strong> ${data.currentCommit} → ${data.remoteCommit}
-                </small>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-            </div>
-        `;
+        if (data.commitsBehind > 0) {
+            // Behind - show warning
+            const plural = data.commitsBehind > 1 ? 'versões' : 'versão';
+            const aheadText = data.commitsAhead > 0 ? ` (${data.commitsAhead} commit${data.commitsAhead > 1 ? 's' : ''} à frente)` : '';
+            
+            alertHtml = `
+                <div class="alert alert-warning text-center" role="alert">
+                    <strong>⚠️ Está a correr uma versão desatualizada do ClassLink.</strong> 
+                    Está atrasado <strong>${data.commitsBehind}</strong> ${plural}${aheadText}.
+                    <button type="button" class="btn btn-sm btn-outline-warning ms-3" data-bs-toggle="collapse" data-bs-target="#versionDetails">
+                        Ver Detalhes
+                    </button>
+                    <div class="collapse mt-2" id="versionDetails">
+                        <small class="d-block">
+                            <strong>Último commit:</strong> ${escapeHtml(data.lastCommitMessage)}<br>
+                            <strong>Autor:</strong> ${escapeHtml(data.lastCommitAuthor)}<br>
+                            <strong>Data:</strong> ${formatDate(data.lastCommitDate)}<br>
+                            <strong>Hash:</strong> ${data.currentCommit} → ${data.remoteCommit}
+                        </small>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Up to date - show success
+            alertHtml = `
+                <div class="alert alert-success text-center" role="alert">
+                    <strong>✅ Está a correr uma versão atualizada do ClassLink!</strong>
+                    <small class="d-block mt-1 text-muted">
+                        Última verificação: ${formatDate(data.timestamp)}${cacheStatus}
+                    </small>
+                </div>
+            `;
+        }
         
         container.innerHTML = alertHtml;
     }
@@ -308,6 +328,7 @@
     setInterval(checkVersion, 15 * 60 * 1000);
 })();
 </script>
+<?php endif; ?>
 
 </body>
 </html>
