@@ -5,6 +5,24 @@ require_once(__DIR__ . '/../../func/email_helper.php');
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 ?>
+<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+<script>
+    // Initialize Twemoji to parse all emojis on the page
+    document.addEventListener('DOMContentLoaded', function() {
+        twemoji.parse(document.body, {
+            folder: 'svg',
+            ext: '.svg'
+        });
+    });
+</script>
+<style>
+    img.emoji {
+        height: 1em;
+        width: 1em;
+        margin: 0 .05em 0 .1em;
+        vertical-align: -0.1em;
+    }
+</style>
 <div style="margin-left: 20%; margin-right: 20%; text-align: center;">
 <h1>Notificar por Email</h1>
 <p>Este script permite enviar um email para utilizadores com reservas de sala numa semana específica.</p>
