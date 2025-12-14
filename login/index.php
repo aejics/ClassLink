@@ -18,7 +18,7 @@
         echo "margin: 0;";
         echo "height: 100vh;";
         echo "font-family: \"Segoe UI\", sans-serif;";
-        echo "background: url(\"/assets/aejicsbg.jpeg\") no-repeat center center/cover;";
+        echo "background: url(\"/assets/aejicsbg.png\") no-repeat center center/cover;";
         echo "display: flex;";
         echo "justify-content: center;";
         echo "align-items: center;";
@@ -256,7 +256,7 @@
                     echo "margin: 0;";
                     echo "height: 100vh;";
                     echo "font-family: \"Segoe UI\", sans-serif;";
-                    echo "background: url(\"/assets/aejicsbg.jpeg\") no-repeat center center/cover;";
+                    echo "background: url(\"/assets/aejicsbg.png\") no-repeat center center/cover;";
                     echo "display: flex;";
                     echo "justify-content: center;";
                     echo "align-items: center;";
@@ -418,7 +418,7 @@
         echo "margin: 0;";
         echo "height: 100vh;";
         echo "font-family: \"Segoe UI\", sans-serif;";
-        echo "background: url(\"/assets/aejicsbg.jpeg\") no-repeat center center/cover;";
+        echo "background: url(\"/assets/aejicsbg.png\") no-repeat center center/cover;";
         echo "display: flex;";
         echo "justify-content: center;";
         echo "align-items: center;";
