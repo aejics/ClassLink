@@ -37,7 +37,13 @@
     
     $db->query("CREATE TABLE IF NOT EXISTS tempos (id VARCHAR(99) UNIQUE, horashumanos VARCHAR(99), PRIMARY KEY (id));");
     $db->query("CREATE TABLE IF NOT EXISTS reservas (sala VARCHAR(99) NOT NULL, tempo VARCHAR(99) NOT NULL, requisitor VARCHAR(99) NOT NULL, data DATE NOT NULL, aprovado BOOLEAN, motivo VARCHAR(99), extra VARCHAR(9999), UNIQUE (sala, tempo, data), FOREIGN KEY (tempo) REFERENCES tempos(id), FOREIGN KEY (sala) REFERENCES salas(id), FOREIGN KEY (requisitor) REFERENCES cache(id));");
-    $db->query("CREATE TABLE IF NOT EXISTS logs (id VARCHAR(99), loginfo VARCHAR(9999), userid VARCHAR(99), timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (id), FOREIGN KEY (userid) REFERENCES cache(id));");
+    $db->query("CREATE TABLE IF NOT EXISTS logs (id VARCHAR(99), loginfo VARCHAR(9999), userid VARCHAR(99), ip_address VARCHAR(45), timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (id), FOREIGN KEY (userid) REFERENCES cache(id));");
+    
+    // Add ip_address column to logs table for existing installations
+    $result = $db->query("SHOW COLUMNS FROM logs LIKE 'ip_address'");
+    if ($result && $result->num_rows == 0) {
+        $db->query("ALTER TABLE logs ADD COLUMN ip_address VARCHAR(45);");
+    }
     
     // Create materials table
     $db->query("CREATE TABLE IF NOT EXISTS materiais (id VARCHAR(99) UNIQUE, nome VARCHAR(255), descricao TEXT, sala_id VARCHAR(99), PRIMARY KEY (id), FOREIGN KEY (sala_id) REFERENCES salas(id) ON DELETE CASCADE);");

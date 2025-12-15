@@ -19,7 +19,7 @@ $limit = isset($_GET['limit']) ? min(100, max(1, intval($_GET['limit']))) : 50;
 
 // Fetch logs with user information
 $stmt = $db->prepare("
-    SELECT l.id, l.loginfo, l.timestamp, c.nome, c.email 
+    SELECT l.id, l.loginfo, l.timestamp, l.ip_address, c.nome, c.email 
     FROM logs l 
     LEFT JOIN cache c ON l.userid = c.id 
     ORDER BY l.timestamp DESC 
@@ -35,6 +35,7 @@ while ($row = $result->fetch_assoc()) {
         'id' => $row['id'],
         'loginfo' => $row['loginfo'],
         'timestamp' => $row['timestamp'],
+        'ip_address' => $row['ip_address'],
         'nome' => $row['nome'],
         'email' => $row['email']
     ];

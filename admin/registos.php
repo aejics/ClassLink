@@ -9,14 +9,18 @@
     }
     #logsTable th:nth-child(1),
     #logsTable td:nth-child(1) {
-        width: 25%;
+        width: 20%;
     }
     #logsTable th:nth-child(2),
     #logsTable td:nth-child(2) {
-        width: 50%;
+        width: 40%;
     }
     #logsTable th:nth-child(3),
     #logsTable td:nth-child(3) {
+        width: 15%;
+    }
+    #logsTable th:nth-child(4),
+    #logsTable td:nth-child(4) {
         width: 25%;
     }
     .action-text {
@@ -48,6 +52,13 @@
         color: #6c757d;
         display: none;
     }
+    .ip-hidden {
+        color: #6c757d;
+        font-style: italic;
+    }
+    .ip-visible {
+        font-family: monospace;
+    }
 </style>
 
 <script>
@@ -56,6 +67,7 @@
     const scrollThreshold = 200;
     let isLoading = false;
     let hasMoreLogs = true;
+    let showIPs = false;
 
     function escapeHtml(text) {
         const div = document.createElement('div');
@@ -77,6 +89,27 @@
             expandedSpan.style.display = 'none';
             toggleLink.textContent = 'Ver mais';
         }
+    }
+
+    function toggleAllIPs() {
+        showIPs = !showIPs;
+        const button = document.getElementById('toggleIPButton');
+        const ipCells = document.querySelectorAll('.ip-cell');
+        
+        ipCells.forEach(cell => {
+            const ipValue = cell.getAttribute('data-ip');
+            if (showIPs) {
+                cell.innerHTML = '<span class="ip-visible">' + escapeHtml(ipValue || 'N/A') + '</span>';
+                button.textContent = 'Ocultar IPs';
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-secondary');
+            } else {
+                cell.innerHTML = '<span class="ip-hidden">Oculto</span>';
+                button.textContent = 'Mostrar IPs';
+                button.classList.remove('btn-secondary');
+                button.classList.add('btn-primary');
+            }
+        });
     }
 
     function createActionCell(logId, action) {
@@ -120,6 +153,17 @@
                     const actionCell = document.createElement('td');
                     actionCell.innerHTML = createActionCell(log.id, log.loginfo);
                     tr.appendChild(actionCell);
+                    
+                    // IP Address column (hidden by default)
+                    const ipCell = document.createElement('td');
+                    ipCell.className = 'ip-cell';
+                    ipCell.setAttribute('data-ip', log.ip_address || 'N/A');
+                    if (showIPs) {
+                        ipCell.innerHTML = '<span class="ip-visible">' + escapeHtml(log.ip_address || 'N/A') + '</span>';
+                    } else {
+                        ipCell.innerHTML = '<span class="ip-hidden">Oculto</span>';
+                    }
+                    tr.appendChild(ipCell);
                     
                     // Timestamp column
                     const timestampCell = document.createElement('td');
@@ -171,12 +215,16 @@ $numLogs = $result ? $result->fetch_assoc()['total'] : 0;
 <?php if ($numLogs == 0): ?>
     <div class='alert alert-warning'>Não existem registos.</div>
 <?php else: ?>
+    <div class="mb-3">
+        <button id="toggleIPButton" class="btn btn-primary" onclick="toggleAllIPs()">Mostrar IPs</button>
+    </div>
     <div class="table-responsive">
         <table class='table table-striped table-hover' id="logsTable">
             <thead class='table-dark'>
                 <tr>
                     <th scope='col'>Utilizador</th>
                     <th scope='col'>Ação</th>
+                    <th scope='col'>Endereço IP</th>
                     <th scope='col'>Timestamp</th>
                 </tr>
             </thead>
