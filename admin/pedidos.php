@@ -378,6 +378,15 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                     }
                     
                     $reservations = json_decode($_POST['reservations'], true);
+                    if (!is_array($reservations) || json_last_error() !== JSON_ERROR_NONE) {
+                        echo "<div class='alert alert-danger alert-dismissible fade show shadow-sm' role='alert'>
+                                <strong>Erro!</strong> Dados inválidos.
+                                <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                              </div>";
+                        echo "<a href='/admin/pedidos.php' class='btn btn-primary'>Voltar aos Pedidos</a>";
+                        break;
+                    }
+                    
                     $approved = 0;
                     $failed = 0;
                     $emailErrors = [];
@@ -456,6 +465,15 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                     }
                     
                     $reservations = json_decode($_POST['reservations'], true);
+                    if (!is_array($reservations) || json_last_error() !== JSON_ERROR_NONE) {
+                        echo "<div class='alert alert-danger alert-dismissible fade show shadow-sm' role='alert'>
+                                <strong>Erro!</strong> Dados inválidos.
+                                <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                              </div>";
+                        echo "<a href='/admin/pedidos.php' class='btn btn-primary'>Voltar aos Pedidos</a>";
+                        break;
+                    }
+                    
                     $rejected = 0;
                     $failed = 0;
                     $emailErrors = [];
