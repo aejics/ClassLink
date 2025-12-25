@@ -281,7 +281,10 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
 
     <?php
     if (isset($_GET['subaction'])) {
-        if (!isset($_GET['sala']) || !isset($_GET['tempo']) || !isset($_GET['data'])) {
+        // For bulk actions, skip individual parameter validation
+        $isBulkAction = in_array($_GET['subaction'], ['bulk_approve', 'bulk_reject']);
+        
+        if (!$isBulkAction && (!isset($_GET['sala']) || !isset($_GET['tempo']) || !isset($_GET['data']))) {
             echo "<div class='alert alert-danger alert-dismissible fade show shadow-sm' role='alert'>
                     <strong>Erro!</strong> Parâmetros inválidos.
                     <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
@@ -389,31 +392,41 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                     
                     $approved = 0;
                     $failed = 0;
-                    $emailErrors = [];
+                    $approvedReservations = []; // Track approved reservations for email
+                    $requisitorsByUser = []; // Group by requisitor
                     
                     foreach ($reservations as $res) {
                         if (isset($res['sala']) && isset($res['tempo']) && isset($res['data'])) {
                             try {
-                                // Get requisitor
-                                $stmt = $db->prepare("SELECT requisitor FROM reservas WHERE sala=? AND tempo=? AND data=?");
+                                // Get requisitor and reservation details
+                                $stmt = $db->prepare("SELECT r.requisitor, s.nome as sala_nome, t.horashumanos as tempo_nome 
+                                                      FROM reservas r 
+                                                      LEFT JOIN salas s ON r.sala = s.id 
+                                                      LEFT JOIN tempos t ON r.tempo = t.id 
+                                                      WHERE r.sala=? AND r.tempo=? AND r.data=?");
                                 $stmt->bind_param("sss", $res['sala'], $res['tempo'], $res['data']);
                                 $stmt->execute();
                                 $result = $stmt->get_result()->fetch_assoc();
-                                $requisitor = $result ? $result['requisitor'] : null;
                                 $stmt->close();
                                 
-                                if ($requisitor) {
+                                if ($result && $result['requisitor']) {
                                     // Approve reservation
                                     $stmt = $db->prepare("UPDATE reservas SET aprovado=1 WHERE sala=? AND tempo=? AND data=?");
                                     $stmt->bind_param("sss", $res['sala'], $res['tempo'], $res['data']);
                                     $stmt->execute();
                                     $stmt->close();
                                     
-                                    // Send email
-                                    $emailResult = sendReservationApprovedEmail($db, $requisitor, $res['sala'], $res['tempo'], $res['data']);
-                                    if (!$emailResult['success'] && $emailResult['error'] !== 'Email not enabled') {
-                                        $emailErrors[] = "Sala: {$res['sala']}, Data: {$res['data']}";
+                                    // Group by requisitor
+                                    $reqId = $result['requisitor'];
+                                    if (!isset($requisitorsByUser[$reqId])) {
+                                        $requisitorsByUser[$reqId] = [];
                                     }
+                                    $requisitorsByUser[$reqId][] = [
+                                        'requisitor' => $reqId,
+                                        'sala_nome' => $result['sala_nome'],
+                                        'tempo_nome' => $result['tempo_nome'],
+                                        'data' => $res['data']
+                                    ];
                                     
                                     $approved++;
                                 } else {
@@ -424,6 +437,15 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                             }
                         } else {
                             $failed++;
+                        }
+                    }
+                    
+                    // Send bulk emails grouped by user
+                    $emailErrors = [];
+                    foreach ($requisitorsByUser as $reqId => $userReservations) {
+                        $emailResult = sendBulkReservationApprovedEmail($db, $userReservations);
+                        if (!$emailResult['success'] && $emailResult['error'] !== 'Email not enabled') {
+                            $emailErrors[] = "Utilizador ID: {$reqId}";
                         }
                     }
                     
@@ -476,25 +498,35 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                     
                     $rejected = 0;
                     $failed = 0;
-                    $emailErrors = [];
+                    $rejectedReservations = []; // Track rejected reservations for email
+                    $requisitorsByUser = []; // Group by requisitor
                     
                     foreach ($reservations as $res) {
                         if (isset($res['sala']) && isset($res['tempo']) && isset($res['data'])) {
                             try {
-                                // Get requisitor
-                                $stmt = $db->prepare("SELECT requisitor FROM reservas WHERE sala=? AND tempo=? AND data=?");
+                                // Get requisitor and reservation details BEFORE deleting
+                                $stmt = $db->prepare("SELECT r.requisitor, s.nome as sala_nome, t.horashumanos as tempo_nome 
+                                                      FROM reservas r 
+                                                      LEFT JOIN salas s ON r.sala = s.id 
+                                                      LEFT JOIN tempos t ON r.tempo = t.id 
+                                                      WHERE r.sala=? AND r.tempo=? AND r.data=?");
                                 $stmt->bind_param("sss", $res['sala'], $res['tempo'], $res['data']);
                                 $stmt->execute();
                                 $result = $stmt->get_result()->fetch_assoc();
-                                $requisitor = $result ? $result['requisitor'] : null;
                                 $stmt->close();
                                 
-                                if ($requisitor) {
-                                    // Send rejection email BEFORE deleting
-                                    $emailResult = sendReservationRejectedEmail($db, $requisitor, $res['sala'], $res['tempo'], $res['data']);
-                                    if (!$emailResult['success'] && $emailResult['error'] !== 'Email not enabled') {
-                                        $emailErrors[] = "Sala: {$res['sala']}, Data: {$res['data']}";
+                                if ($result && $result['requisitor']) {
+                                    // Group by requisitor for email
+                                    $reqId = $result['requisitor'];
+                                    if (!isset($requisitorsByUser[$reqId])) {
+                                        $requisitorsByUser[$reqId] = [];
                                     }
+                                    $requisitorsByUser[$reqId][] = [
+                                        'requisitor' => $reqId,
+                                        'sala_nome' => $result['sala_nome'],
+                                        'tempo_nome' => $result['tempo_nome'],
+                                        'data' => $res['data']
+                                    ];
                                     
                                     // Delete reservation
                                     $stmt = $db->prepare("DELETE FROM reservas WHERE sala=? AND tempo=? AND data=?");
@@ -511,6 +543,15 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                             }
                         } else {
                             $failed++;
+                        }
+                    }
+                    
+                    // Send bulk rejection emails grouped by user
+                    $emailErrors = [];
+                    foreach ($requisitorsByUser as $reqId => $userReservations) {
+                        $emailResult = sendBulkReservationRejectedEmail($db, $userReservations);
+                        if (!$emailResult['success'] && $emailResult['error'] !== 'Email not enabled') {
+                            $emailErrors[] = "Utilizador ID: {$reqId}";
                         }
                     }
                     
