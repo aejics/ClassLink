@@ -281,7 +281,10 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
 
     <?php
     if (isset($_GET['subaction'])) {
-        if (!isset($_GET['sala']) || !isset($_GET['tempo']) || !isset($_GET['data'])) {
+        // For bulk actions, skip individual parameter validation
+        $isBulkAction = in_array($_GET['subaction'], ['bulk_approve', 'bulk_reject']);
+        
+        if (!$isBulkAction && (!isset($_GET['sala']) || !isset($_GET['tempo']) || !isset($_GET['data']))) {
             echo "<div class='alert alert-danger alert-dismissible fade show shadow-sm' role='alert'>
                     <strong>Erro!</strong> Parâmetros inválidos.
                     <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
@@ -365,6 +368,218 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                     break;
 
                 case "detalhes":
+                    break;
+                
+                case "bulk_approve":
+                    if (!isset($_POST['reservations']) || empty($_POST['reservations'])) {
+                        echo "<div class='alert alert-danger alert-dismissible fade show shadow-sm' role='alert'>
+                                <strong>Erro!</strong> Nenhuma reserva selecionada.
+                                <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                              </div>";
+                        echo "<a href='/admin/pedidos.php' class='btn btn-primary'>Voltar aos Pedidos</a>";
+                        break;
+                    }
+                    
+                    $reservations = json_decode($_POST['reservations'], true);
+                    if (!is_array($reservations) || json_last_error() !== JSON_ERROR_NONE) {
+                        echo "<div class='alert alert-danger alert-dismissible fade show shadow-sm' role='alert'>
+                                <strong>Erro!</strong> Dados inválidos.
+                                <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                              </div>";
+                        echo "<a href='/admin/pedidos.php' class='btn btn-primary'>Voltar aos Pedidos</a>";
+                        break;
+                    }
+                    
+                    $approved = 0;
+                    $failed = 0;
+                    $approvedReservations = []; // Track approved reservations for email
+                    $requisitorsByUser = []; // Group by requisitor
+                    
+                    foreach ($reservations as $res) {
+                        if (isset($res['sala']) && isset($res['tempo']) && isset($res['data'])) {
+                            try {
+                                // Get requisitor and reservation details
+                                $stmt = $db->prepare("SELECT r.requisitor, s.nome as sala_nome, t.horashumanos as tempo_nome 
+                                                      FROM reservas r 
+                                                      LEFT JOIN salas s ON r.sala = s.id 
+                                                      LEFT JOIN tempos t ON r.tempo = t.id 
+                                                      WHERE r.sala=? AND r.tempo=? AND r.data=?");
+                                $stmt->bind_param("sss", $res['sala'], $res['tempo'], $res['data']);
+                                $stmt->execute();
+                                $result = $stmt->get_result()->fetch_assoc();
+                                $stmt->close();
+                                
+                                if ($result && $result['requisitor']) {
+                                    // Approve reservation
+                                    $stmt = $db->prepare("UPDATE reservas SET aprovado=1 WHERE sala=? AND tempo=? AND data=?");
+                                    $stmt->bind_param("sss", $res['sala'], $res['tempo'], $res['data']);
+                                    $stmt->execute();
+                                    $stmt->close();
+                                    
+                                    // Group by requisitor
+                                    $reqId = $result['requisitor'];
+                                    if (!isset($requisitorsByUser[$reqId])) {
+                                        $requisitorsByUser[$reqId] = [];
+                                    }
+                                    $requisitorsByUser[$reqId][] = [
+                                        'requisitor' => $reqId,
+                                        'sala_nome' => $result['sala_nome'],
+                                        'tempo_nome' => $result['tempo_nome'],
+                                        'data' => $res['data']
+                                    ];
+                                    
+                                    $approved++;
+                                } else {
+                                    $failed++;
+                                }
+                            } catch (Exception $e) {
+                                $failed++;
+                            }
+                        } else {
+                            $failed++;
+                        }
+                    }
+                    
+                    // Send bulk emails grouped by user
+                    $emailErrors = [];
+                    foreach ($requisitorsByUser as $reqId => $userReservations) {
+                        $emailResult = sendBulkReservationApprovedEmail($db, $userReservations);
+                        if (!$emailResult['success'] && $emailResult['error'] !== 'Email not enabled') {
+                            $emailErrors[] = "Utilizador ID: {$reqId}";
+                        }
+                    }
+                    
+                    echo "<div class='card border-success shadow-sm mb-4'>
+                            <div class='card-body text-center py-4'>
+                                <div class='mb-3' style='font-size: 4rem;'>&#x1F389;</div>
+                                <h4 class='text-success mb-3'>Aprovações em Massa Concluídas!</h4>
+                                <p class='text-muted mb-4'><strong>{$approved}</strong> reserva(s) aprovada(s) com sucesso.";
+                    if ($failed > 0) {
+                        echo " <br><strong>{$failed}</strong> reserva(s) falharam.";
+                    }
+                    echo "</p>";
+                    
+                    if (!empty($emailErrors)) {
+                        echo "<div class='alert alert-warning text-start'>
+                                <strong>Aviso:</strong> Algumas reservas foram aprovadas mas os emails não foram enviados:
+                                <ul class='mb-0 mt-2'>";
+                        foreach ($emailErrors as $error) {
+                            echo "<li>" . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . "</li>";
+                        }
+                        echo "</ul></div>";
+                    }
+                    
+                    echo "<a href='/admin/pedidos.php' class='btn btn-primary'>
+                            Voltar aos Pedidos
+                          </a>
+                        </div>
+                      </div>";
+                    break;
+                
+                case "bulk_reject":
+                    if (!isset($_POST['reservations']) || empty($_POST['reservations'])) {
+                        echo "<div class='alert alert-danger alert-dismissible fade show shadow-sm' role='alert'>
+                                <strong>Erro!</strong> Nenhuma reserva selecionada.
+                                <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                              </div>";
+                        echo "<a href='/admin/pedidos.php' class='btn btn-primary'>Voltar aos Pedidos</a>";
+                        break;
+                    }
+                    
+                    $reservations = json_decode($_POST['reservations'], true);
+                    if (!is_array($reservations) || json_last_error() !== JSON_ERROR_NONE) {
+                        echo "<div class='alert alert-danger alert-dismissible fade show shadow-sm' role='alert'>
+                                <strong>Erro!</strong> Dados inválidos.
+                                <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+                              </div>";
+                        echo "<a href='/admin/pedidos.php' class='btn btn-primary'>Voltar aos Pedidos</a>";
+                        break;
+                    }
+                    
+                    $rejected = 0;
+                    $failed = 0;
+                    $rejectedReservations = []; // Track rejected reservations for email
+                    $requisitorsByUser = []; // Group by requisitor
+                    
+                    foreach ($reservations as $res) {
+                        if (isset($res['sala']) && isset($res['tempo']) && isset($res['data'])) {
+                            try {
+                                // Get requisitor and reservation details BEFORE deleting
+                                $stmt = $db->prepare("SELECT r.requisitor, s.nome as sala_nome, t.horashumanos as tempo_nome 
+                                                      FROM reservas r 
+                                                      LEFT JOIN salas s ON r.sala = s.id 
+                                                      LEFT JOIN tempos t ON r.tempo = t.id 
+                                                      WHERE r.sala=? AND r.tempo=? AND r.data=?");
+                                $stmt->bind_param("sss", $res['sala'], $res['tempo'], $res['data']);
+                                $stmt->execute();
+                                $result = $stmt->get_result()->fetch_assoc();
+                                $stmt->close();
+                                
+                                if ($result && $result['requisitor']) {
+                                    // Group by requisitor for email
+                                    $reqId = $result['requisitor'];
+                                    if (!isset($requisitorsByUser[$reqId])) {
+                                        $requisitorsByUser[$reqId] = [];
+                                    }
+                                    $requisitorsByUser[$reqId][] = [
+                                        'requisitor' => $reqId,
+                                        'sala_nome' => $result['sala_nome'],
+                                        'tempo_nome' => $result['tempo_nome'],
+                                        'data' => $res['data']
+                                    ];
+                                    
+                                    // Delete reservation
+                                    $stmt = $db->prepare("DELETE FROM reservas WHERE sala=? AND tempo=? AND data=?");
+                                    $stmt->bind_param("sss", $res['sala'], $res['tempo'], $res['data']);
+                                    $stmt->execute();
+                                    $stmt->close();
+                                    
+                                    $rejected++;
+                                } else {
+                                    $failed++;
+                                }
+                            } catch (Exception $e) {
+                                $failed++;
+                            }
+                        } else {
+                            $failed++;
+                        }
+                    }
+                    
+                    // Send bulk rejection emails grouped by user
+                    $emailErrors = [];
+                    foreach ($requisitorsByUser as $reqId => $userReservations) {
+                        $emailResult = sendBulkReservationRejectedEmail($db, $userReservations);
+                        if (!$emailResult['success'] && $emailResult['error'] !== 'Email not enabled') {
+                            $emailErrors[] = "Utilizador ID: {$reqId}";
+                        }
+                    }
+                    
+                    echo "<div class='card border-danger shadow-sm mb-4'>
+                            <div class='card-body text-center py-4'>
+                                <div class='mb-3' style='font-size: 4rem;'>&#x1F6AB;</div>
+                                <h4 class='text-danger mb-3'>Rejeições em Massa Concluídas</h4>
+                                <p class='text-muted mb-4'><strong>{$rejected}</strong> reserva(s) rejeitada(s).";
+                    if ($failed > 0) {
+                        echo " <br><strong>{$failed}</strong> reserva(s) falharam.";
+                    }
+                    echo "</p>";
+                    
+                    if (!empty($emailErrors)) {
+                        echo "<div class='alert alert-warning text-start'>
+                                <strong>Aviso:</strong> Algumas reservas foram rejeitadas mas os emails não foram enviados:
+                                <ul class='mb-0 mt-2'>";
+                        foreach ($emailErrors as $error) {
+                            echo "<li>" . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . "</li>";
+                        }
+                        echo "</ul></div>";
+                    }
+                    
+                    echo "<a href='/admin/pedidos.php' class='btn btn-primary'>
+                            Voltar aos Pedidos
+                          </a>
+                        </div>
+                      </div>";
                     break;
             }
         }
@@ -456,10 +671,24 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                            placeholder='Pesquisar nos resultados...' onkeyup='filterTable()'>
                   </div>";
             
+            // Bulk action buttons
+            echo "<div class='mb-3 d-flex gap-2 align-items-center'>
+                    <button type='button' class='btn btn-success' onclick='bulkApprove()' id='bulkApproveBtn' disabled>
+                        <span>&#x2705;</span> Aprovar Selecionados
+                    </button>
+                    <button type='button' class='btn btn-danger' onclick='bulkReject()' id='bulkRejectBtn' disabled>
+                        <span style='color: white; font-weight: bold;'>✕</span> Rejeitar Selecionados
+                    </button>
+                    <span class='text-muted ms-2' id='selectedCount'>0 selecionados</span>
+                  </div>";
+            
             echo "<div class='table-responsive'>
                     <table class='table table-hover align-middle' id='pedidosTable'>
                         <thead class='table-dark'>
                             <tr>
+                                <th scope='col' style='width: 40px;'>
+                                    <input type='checkbox' class='form-check-input' id='selectAll' onchange='toggleSelectAll()'>
+                                </th>
                                 <th scope='col'>Data</th>
                                 <th scope='col'>Horário</th>
                                 <th scope='col'>Sala</th>
@@ -513,6 +742,16 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                 
                 echo "<tr class='{$rowClass}' data-search='" . 
                      htmlspecialchars(strtolower($salaextenso . ' ' . $requisitorextenso . ' ' . $pedido['motivo'] . ' ' . $pedido['data']), ENT_QUOTES, 'UTF-8') . "'>";
+                
+                // Checkbox column
+                echo "<td>";
+                echo "<input type='checkbox' class='form-check-input row-checkbox' 
+                      data-sala='{$salaEnc}' data-tempo='{$tempoEnc}' data-data='{$dataEnc}' 
+                      data-salaname='" . htmlspecialchars($salaextenso, ENT_QUOTES, 'UTF-8') . "' 
+                      data-dataformatted='" . htmlspecialchars($dataFormatted, ENT_QUOTES, 'UTF-8') . "' 
+                      data-horasname='" . htmlspecialchars($horastempo, ENT_QUOTES, 'UTF-8') . "' 
+                      onchange='updateBulkButtons()'>";
+                echo "</td>";
                 
                 // Date column
                 echo "<td>";
@@ -596,10 +835,24 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                            placeholder='Pesquisar nos resultados...' onkeyup='filterTable()'>
                   </div>";
             
+            // Bulk action buttons
+            echo "<div class='mb-3 d-flex gap-2 align-items-center'>
+                    <button type='button' class='btn btn-success' onclick='bulkApprove()' id='bulkApproveBtn' disabled>
+                        <span>&#x2705;</span> Aprovar Selecionados
+                    </button>
+                    <button type='button' class='btn btn-danger' onclick='bulkReject()' id='bulkRejectBtn' disabled>
+                        <span style='color: white; font-weight: bold;'>✕</span> Rejeitar Selecionados
+                    </button>
+                    <span class='text-muted ms-2' id='selectedCount'>0 selecionados</span>
+                  </div>";
+            
             echo "<div class='table-responsive'>
                     <table class='table table-hover align-middle' id='pedidosTable'>
                         <thead class='table-dark'>
                             <tr>
+                                <th scope='col' style='width: 40px;'>
+                                    <input type='checkbox' class='form-check-input' id='selectAll' onchange='toggleSelectAll()'>
+                                </th>
                                 <th scope='col'>Data</th>
                                 <th scope='col'>Horário</th>
                                 <th scope='col'>Sala</th>
@@ -649,6 +902,16 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                 
                 echo "<tr class='{$rowClass}' data-search='" . 
                      htmlspecialchars(strtolower($salaextenso . ' ' . $requisitorextenso . ' ' . $pedido['motivo'] . ' ' . $pedido['data']), ENT_QUOTES, 'UTF-8') . "'>";
+                
+                // Checkbox column
+                echo "<td>";
+                echo "<input type='checkbox' class='form-check-input row-checkbox' 
+                      data-sala='{$salaEnc}' data-tempo='{$tempoEnc}' data-data='{$dataEnc}' 
+                      data-salaname='" . htmlspecialchars($salaextenso, ENT_QUOTES, 'UTF-8') . "' 
+                      data-dataformatted='" . htmlspecialchars($dataFormatted, ENT_QUOTES, 'UTF-8') . "' 
+                      data-horasname='" . htmlspecialchars($horastempo, ENT_QUOTES, 'UTF-8') . "' 
+                      onchange='updateBulkButtons()'>";
+                echo "</td>";
                 
                 echo "<td><strong>" . htmlspecialchars($dataFormatted, ENT_QUOTES, 'UTF-8') . "</strong>";
                 if ($isToday) {
@@ -709,7 +972,7 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <a href="#" id="confirmBtn" class="btn btn-primary">Confirmar</a>
+                <button type="button" id="confirmBtn" class="btn btn-primary">Confirmar</button>
             </div>
         </div>
     </div>
@@ -758,7 +1021,9 @@ function confirmAction(action, tempo, data, sala, salaNome, dataFormatted, horas
         `;
         confirmBtn.className = 'btn btn-success';
         confirmBtn.textContent = 'Aprovar Reserva';
-        confirmBtn.href = `/admin/pedidos.php?subaction=aprovar&tempo=${tempo}&data=${data}&sala=${sala}`;
+        confirmBtn.onclick = function() {
+            window.location.href = `/admin/pedidos.php?subaction=aprovar&tempo=${tempo}&data=${data}&sala=${sala}`;
+        };
     } else {
         modalHeader.className = 'modal-header bg-danger text-white';
         modalBody.innerHTML = `
@@ -777,7 +1042,9 @@ function confirmAction(action, tempo, data, sala, salaNome, dataFormatted, horas
         `;
         confirmBtn.className = 'btn btn-danger';
         confirmBtn.textContent = 'Rejeitar Reserva';
-        confirmBtn.href = `/admin/pedidos.php?subaction=rejeitar&tempo=${tempo}&data=${data}&sala=${sala}`;
+        confirmBtn.onclick = function() {
+            window.location.href = `/admin/pedidos.php?subaction=rejeitar&tempo=${tempo}&data=${data}&sala=${sala}`;
+        };
     }
     
     modal.show();
@@ -818,6 +1085,172 @@ function clearUserSelection() {
     document.getElementById('requisitor').value = '';
     document.getElementById('selectedUserDisplay').value = '';
     document.getElementById('filterForm').submit();
+}
+
+// Bulk action functions
+function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        // Only toggle visible checkboxes
+        if (checkbox.closest('tr').style.display !== 'none') {
+            checkbox.checked = selectAllCheckbox.checked;
+        }
+    });
+    
+    updateBulkButtons();
+}
+
+function updateBulkButtons() {
+    const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+    const count = checkboxes.length;
+    
+    const approveBtn = document.getElementById('bulkApproveBtn');
+    const rejectBtn = document.getElementById('bulkRejectBtn');
+    const countSpan = document.getElementById('selectedCount');
+    
+    if (approveBtn && rejectBtn && countSpan) {
+        approveBtn.disabled = count === 0;
+        rejectBtn.disabled = count === 0;
+        countSpan.textContent = count + ' selecionado' + (count !== 1 ? 's' : '');
+    }
+    
+    // Update select all checkbox state
+    const selectAllCheckbox = document.getElementById('selectAll');
+    if (selectAllCheckbox) {
+        const visibleCheckboxes = Array.from(document.querySelectorAll('.row-checkbox')).filter(cb => 
+            cb.closest('tr').style.display !== 'none'
+        );
+        const checkedVisibleCheckboxes = visibleCheckboxes.filter(cb => cb.checked);
+        selectAllCheckbox.checked = visibleCheckboxes.length > 0 && checkedVisibleCheckboxes.length === visibleCheckboxes.length;
+        selectAllCheckbox.indeterminate = checkedVisibleCheckboxes.length > 0 && checkedVisibleCheckboxes.length < visibleCheckboxes.length;
+    }
+}
+
+function bulkApprove() {
+    const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+    if (checkboxes.length === 0) {
+        alert('Por favor, selecione pelo menos uma reserva.');
+        return;
+    }
+    
+    const reservations = [];
+    let summary = '<ul class="text-start">';
+    
+    checkboxes.forEach(checkbox => {
+        const sala = checkbox.getAttribute('data-sala');
+        const tempo = checkbox.getAttribute('data-tempo');
+        const data = checkbox.getAttribute('data-data');
+        const salaName = checkbox.getAttribute('data-salaname');
+        const dataFormatted = checkbox.getAttribute('data-dataformatted');
+        const horasName = checkbox.getAttribute('data-horasname');
+        
+        reservations.push({
+            sala: decodeURIComponent(sala),
+            tempo: decodeURIComponent(tempo),
+            data: decodeURIComponent(data)
+        });
+        
+        summary += `<li><strong>${salaName}</strong> - ${dataFormatted} às ${horasName}</li>`;
+    });
+    
+    summary += '</ul>';
+    
+    const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    const modalHeader = document.getElementById('modalHeader');
+    const modalBody = document.getElementById('modalBody');
+    const confirmBtn = document.getElementById('confirmBtn');
+    
+    modalHeader.className = 'modal-header bg-success text-white';
+    modalBody.innerHTML = `
+        <div class="text-center mb-3">
+            <div style="font-size: 4rem;">&#x2705;</div>
+        </div>
+        <h5 class="text-center">Aprovar ${reservations.length} reserva(s)?</h5>
+        <div class="alert alert-light border mt-3" style="max-height: 300px; overflow-y: auto;">
+            ${summary}
+        </div>
+        <p class="text-muted small text-center mb-0">Os utilizadores serão notificados por email.</p>
+    `;
+    confirmBtn.className = 'btn btn-success';
+    confirmBtn.textContent = 'Aprovar Todas';
+    confirmBtn.onclick = function() {
+        submitBulkAction('bulk_approve', reservations);
+    };
+    
+    modal.show();
+}
+
+function bulkReject() {
+    const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+    if (checkboxes.length === 0) {
+        alert('Por favor, selecione pelo menos uma reserva.');
+        return;
+    }
+    
+    const reservations = [];
+    let summary = '<ul class="text-start">';
+    
+    checkboxes.forEach(checkbox => {
+        const sala = checkbox.getAttribute('data-sala');
+        const tempo = checkbox.getAttribute('data-tempo');
+        const data = checkbox.getAttribute('data-data');
+        const salaName = checkbox.getAttribute('data-salaname');
+        const dataFormatted = checkbox.getAttribute('data-dataformatted');
+        const horasName = checkbox.getAttribute('data-horasname');
+        
+        reservations.push({
+            sala: decodeURIComponent(sala),
+            tempo: decodeURIComponent(tempo),
+            data: decodeURIComponent(data)
+        });
+        
+        summary += `<li><strong>${salaName}</strong> - ${dataFormatted} às ${horasName}</li>`;
+    });
+    
+    summary += '</ul>';
+    
+    const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    const modalHeader = document.getElementById('modalHeader');
+    const modalBody = document.getElementById('modalBody');
+    const confirmBtn = document.getElementById('confirmBtn');
+    
+    modalHeader.className = 'modal-header bg-danger text-white';
+    modalBody.innerHTML = `
+        <div class="text-center mb-3">
+            <div style="font-size: 4rem; color: #dc3545;">✕</div>
+        </div>
+        <h5 class="text-center text-danger">Rejeitar ${reservations.length} reserva(s)?</h5>
+        <div class="alert alert-light border mt-3" style="max-height: 300px; overflow-y: auto;">
+            ${summary}
+        </div>
+        <div class="alert alert-warning">
+            <strong>Atenção:</strong> Esta ação irá eliminar as reservas permanentemente e notificar os utilizadores.
+        </div>
+    `;
+    confirmBtn.className = 'btn btn-danger';
+    confirmBtn.textContent = 'Rejeitar Todas';
+    confirmBtn.onclick = function() {
+        submitBulkAction('bulk_reject', reservations);
+    };
+    
+    modal.show();
+}
+
+function submitBulkAction(action, reservations) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/admin/pedidos.php?subaction=' + action;
+    
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'reservations';
+    input.value = JSON.stringify(reservations);
+    
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
 }
 
 // Initialize Twemoji to parse all emojis on the page

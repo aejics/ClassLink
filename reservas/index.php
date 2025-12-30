@@ -350,20 +350,28 @@ $stmt->close();
                         $dataFormattedJs = json_encode($dataFormatted, JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_TAG);
                         $tempoNameJs = json_encode($tempoName, JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_TAG);
                         
+                        // Determine if delete button should be shown
+                        // Show delete button only if: it's not a past reservation OR user is an admin
+                        $canDelete = !$isPast || $_SESSION['admin'];
+                        
                         echo "<td class='text-center'>
                                 <div class='btn-group' role='group'>
                                     <a href='/reservar/manage.php?tempo={$tempoEnc}&sala={$salaEnc}&data={$dataEnc}' 
                                        class='btn btn-outline-primary btn-sm action-btn' 
                                        title='Ver detalhes'>
                                         &#x1F441; Detalhes
-                                    </a>
-                                    <button type='button' 
+                                    </a>";
+                        
+                        if ($canDelete) {
+                            echo "<button type='button' 
                                             class='btn btn-outline-danger btn-sm action-btn' 
                                             onclick='confirmDelete(\"{$tempoEnc}\", \"{$salaEnc}\", \"{$dataEnc}\", {$salaNameJs}, {$dataFormattedJs}, {$tempoNameJs})' 
                                             title='Apagar reserva'>
                                         &#x1F5D1; Apagar
-                                    </button>
-                                </div>
+                                    </button>";
+                        }
+                        
+                        echo "</div>
                               </td>";
                         
                         echo "</tr>";

@@ -352,7 +352,15 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                     if (!($_SESSION['admin']) && ($_SESSION['id'] != $reserva['requisitor'])) {
                         http_response_code(403);
                         die("Não tem permissão para apagar esta reserva.");
-                    } else {
+                    }
+                    
+                    // Check if reservation is in the past and user is not admin
+                    if (!($_SESSION['admin']) && ($data < $today)) {
+                        http_response_code(403);
+                        die("Não é possível apagar reservas no passado. Apenas os administradores podem apagar reservas em datas passadas.");
+                    }
+                    
+                    if (true) {
                         // Get room name for log
                         $stmt = $db->prepare("SELECT nome FROM salas WHERE id=?");
                         $stmt->bind_param("s", $sala);
@@ -625,7 +633,10 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                         }
                         
                         echo "<div class='d-grid gap-2 d-md-block'>";
-                        if ($_SESSION['id'] == $detalhesreserva['requisitor'] | $_SESSION['admin']) {
+                        // Show delete button only if user is the requisitor or admin, AND (reservation is not in past OR user is admin)
+                        $isPastReservation = ($data < $today);
+                        $canDeleteReservation = ($_SESSION['id'] == $detalhesreserva['requisitor'] || $_SESSION['admin']) && (!$isPastReservation || $_SESSION['admin']);
+                        if ($canDeleteReservation) {
                             echo "<a href='/reservar/manage.php?subaction=apagar&tempo=" . urlencode($tempo) . "&data=" . urlencode($data) . "&sala=" . urlencode($sala) . "' class='btn btn-danger me-md-2 mb-2 mb-md-0' onclick='return confirm(\"Tem a certeza que pretende apagar esta reserva?\");'>Apagar Reserva</a> ";
                         }
                         echo "<a href='/reservar' class='btn btn-success me-md-2 mb-2 mb-md-0'>Voltar à página de reserva de salas</a> ";

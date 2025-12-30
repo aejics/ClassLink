@@ -528,6 +528,152 @@ function sendBulkReservationsEmail($db, $requisitorId, $successCount, $failedCou
 }
 
 /**
+ * Send bulk reservation approval email
+ * 
+ * @param mysqli $db Database connection
+ * @param array $reservations Array of approved reservations with details
+ * @return array ['success' => bool, 'error' => string|null]
+ */
+function sendBulkReservationApprovedEmail($db, $reservations) {
+    if (empty($reservations)) {
+        return ['success' => false, 'error' => 'No reservations provided'];
+    }
+    
+    // Get requisitor from first reservation (all should be same user)
+    $requisitorId = $reservations[0]['requisitor'];
+    
+    // Get requisitor email
+    $stmt = $db->prepare("SELECT email, nome FROM cache WHERE id = ?");
+    $stmt->bind_param("s", $requisitorId);
+    $stmt->execute();
+    $requisitor = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
+    if (!$requisitor) {
+        return ['success' => false, 'error' => 'Requisitor not found'];
+    }
+    
+    $baseUrl = getBaseUrl();
+    $reservasUrl = $baseUrl . "/reservas";
+    
+    // Build table of reservations
+    $reservationsTableHtml = "
+    <table cellpadding='0' cellspacing='0' border='0' width='100%' style='border-collapse: collapse; margin: 20px 0;'>
+        <thead>
+            <tr style='background-color: #28a745; color: white;'>
+                <th style='padding: 12px; text-align: left; border: 1px solid #ddd;'>Sala</th>
+                <th style='padding: 12px; text-align: left; border: 1px solid #ddd;'>Data</th>
+                <th style='padding: 12px; text-align: left; border: 1px solid #ddd;'>Horário</th>
+            </tr>
+        </thead>
+        <tbody>";
+    
+    foreach ($reservations as $res) {
+        $reservationsTableHtml .= "
+            <tr style='background-color: #f8f9fa;'>
+                <td style='padding: 10px; border: 1px solid #ddd;'>" . htmlspecialchars($res['sala_nome'], ENT_QUOTES, 'UTF-8') . "</td>
+                <td style='padding: 10px; border: 1px solid #ddd;'>" . htmlspecialchars(date('d/m/Y', strtotime($res['data'])), ENT_QUOTES, 'UTF-8') . "</td>
+                <td style='padding: 10px; border: 1px solid #ddd;'>" . htmlspecialchars($res['tempo_nome'], ENT_QUOTES, 'UTF-8') . "</td>
+            </tr>";
+    }
+    
+    $reservationsTableHtml .= "
+        </tbody>
+    </table>";
+    
+    $count = count($reservations);
+    $bodyContent = "
+        <p>Olá <strong>" . htmlspecialchars($requisitor['nome'], ENT_QUOTES, 'UTF-8') . "</strong>,</p>
+        <p>Temos boas notícias! As suas <strong>{$count}</strong> reserva(s) " . ($count > 1 ? "foram aprovadas" : "foi aprovada") . ".</p>
+        <h3 style='color: #28a745; margin-top: 20px;'>Reservas Aprovadas:</h3>
+        {$reservationsTableHtml}
+        <p>Carregue no botão em baixo para ver todas as suas reservas.</p>";
+    
+    return sendStyledEmail(
+        $requisitor['email'],
+        "ClassLink - Reservas Aprovadas ({$count})",
+        "🎉 Reservas Aprovadas",
+        $bodyContent,
+        'success',
+        $reservasUrl,
+        "Ver as minhas reservas"
+    );
+}
+
+/**
+ * Send bulk reservation rejection email
+ * 
+ * @param mysqli $db Database connection
+ * @param array $reservations Array of rejected reservations with details
+ * @return array ['success' => bool, 'error' => string|null]
+ */
+function sendBulkReservationRejectedEmail($db, $reservations) {
+    if (empty($reservations)) {
+        return ['success' => false, 'error' => 'No reservations provided'];
+    }
+    
+    // Get requisitor from first reservation (all should be same user)
+    $requisitorId = $reservations[0]['requisitor'];
+    
+    // Get requisitor email
+    $stmt = $db->prepare("SELECT email, nome FROM cache WHERE id = ?");
+    $stmt->bind_param("s", $requisitorId);
+    $stmt->execute();
+    $requisitor = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
+    if (!$requisitor) {
+        return ['success' => false, 'error' => 'Requisitor not found'];
+    }
+    
+    $baseUrl = getBaseUrl();
+    $reservarUrl = $baseUrl . "/reservar";
+    
+    // Build table of reservations
+    $reservationsTableHtml = "
+    <table cellpadding='0' cellspacing='0' border='0' width='100%' style='border-collapse: collapse; margin: 20px 0;'>
+        <thead>
+            <tr style='background-color: #dc3545; color: white;'>
+                <th style='padding: 12px; text-align: left; border: 1px solid #ddd;'>Sala</th>
+                <th style='padding: 12px; text-align: left; border: 1px solid #ddd;'>Data</th>
+                <th style='padding: 12px; text-align: left; border: 1px solid #ddd;'>Horário</th>
+            </tr>
+        </thead>
+        <tbody>";
+    
+    foreach ($reservations as $res) {
+        $reservationsTableHtml .= "
+            <tr style='background-color: #f8f9fa;'>
+                <td style='padding: 10px; border: 1px solid #ddd;'>" . htmlspecialchars($res['sala_nome'], ENT_QUOTES, 'UTF-8') . "</td>
+                <td style='padding: 10px; border: 1px solid #ddd;'>" . htmlspecialchars(date('d/m/Y', strtotime($res['data'])), ENT_QUOTES, 'UTF-8') . "</td>
+                <td style='padding: 10px; border: 1px solid #ddd;'>" . htmlspecialchars($res['tempo_nome'], ENT_QUOTES, 'UTF-8') . "</td>
+            </tr>";
+    }
+    
+    $reservationsTableHtml .= "
+        </tbody>
+    </table>";
+    
+    $count = count($reservations);
+    $bodyContent = "
+        <p>Olá <strong>" . htmlspecialchars($requisitor['nome'], ENT_QUOTES, 'UTF-8') . "</strong>,</p>
+        <p>Lamentamos informar que as suas <strong>{$count}</strong> reserva(s) " . ($count > 1 ? "foram rejeitadas" : "foi rejeitada") . ".</p>
+        <h3 style='color: #dc3545; margin-top: 20px;'>Reservas Rejeitadas:</h3>
+        {$reservationsTableHtml}
+        <p>Pode efetuar novos pedidos através do botão em baixo.</p>";
+    
+    return sendStyledEmail(
+        $requisitor['email'],
+        "ClassLink - Reservas Rejeitadas ({$count})",
+        "Reservas Rejeitadas",
+        $bodyContent,
+        'danger',
+        $reservarUrl,
+        "Fazer Nova Reserva"
+    );
+}
+
+/**
  * Send recurring weekly reservations confirmation email
  * Used by admin/scripts/semanasrepetidas.php for batch weekly reservations
  * 
