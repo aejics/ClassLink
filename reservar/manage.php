@@ -198,6 +198,32 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                             
                             // Save selected materials if any
                             saveReservationMaterials($db, $slotSala, $slotTempo, $slotData, $_POST['materiais'] ?? null);
+                            
+                            // Log reservation creation
+                            $salaStmt = $db->prepare("SELECT nome FROM salas WHERE id = ?");
+                            $salaStmt->bind_param("s", $slotSala);
+                            $salaStmt->execute();
+                            $salaNome = $salaStmt->get_result()->fetch_assoc()['nome'] ?? $slotSala;
+                            $salaStmt->close();
+                            
+                            $tempoStmt = $db->prepare("SELECT horashumanos FROM tempos WHERE id = ?");
+                            $tempoStmt->bind_param("s", $slotTempo);
+                            $tempoStmt->execute();
+                            $tempoNome = $tempoStmt->get_result()->fetch_assoc()['horashumanos'] ?? $slotTempo;
+                            $tempoStmt->close();
+                            
+                            if ($_SESSION['admin'] && $requisitor != $id) {
+                                // Admin creating reservation for another user
+                                $userStmt = $db->prepare("SELECT nome FROM cache WHERE id = ?");
+                                $userStmt->bind_param("s", $requisitor);
+                                $userStmt->execute();
+                                $userName = $userStmt->get_result()->fetch_assoc()['nome'] ?? 'Utilizador';
+                                $userStmt->close();
+                                logaction("Criou uma reserva para o utilizador '{$userName}': sala '{$salaNome}' no dia {$slotData} às {$tempoNome}", $_SESSION['id']);
+                            } else {
+                                // User creating their own reservation
+                                logaction("Criou uma reserva: sala '{$salaNome}' no dia {$slotData} às {$tempoNome}", $requisitor);
+                            }
                         } else {
                             $failedSlots[] = htmlspecialchars($slotData, ENT_QUOTES, 'UTF-8') . " - " . htmlspecialchars($slotTempo, ENT_QUOTES, 'UTF-8');
                         }
@@ -331,6 +357,32 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                     }
                     $stmt->close();
                     
+                    // Log reservation creation
+                    $salaStmt = $db->prepare("SELECT nome FROM salas WHERE id = ?");
+                    $salaStmt->bind_param("s", $sala);
+                    $salaStmt->execute();
+                    $salaNome = $salaStmt->get_result()->fetch_assoc()['nome'] ?? $sala;
+                    $salaStmt->close();
+                    
+                    $tempoStmt = $db->prepare("SELECT horashumanos FROM tempos WHERE id = ?");
+                    $tempoStmt->bind_param("s", $tempo);
+                    $tempoStmt->execute();
+                    $tempoNome = $tempoStmt->get_result()->fetch_assoc()['horashumanos'] ?? $tempo;
+                    $tempoStmt->close();
+                    
+                    if ($_SESSION['admin'] && $requisitor != $id) {
+                        // Admin creating reservation for another user
+                        $userStmt = $db->prepare("SELECT nome FROM cache WHERE id = ?");
+                        $userStmt->bind_param("s", $requisitor);
+                        $userStmt->execute();
+                        $userName = $userStmt->get_result()->fetch_assoc()['nome'] ?? 'Utilizador';
+                        $userStmt->close();
+                        logaction("Criou uma reserva para o utilizador '{$userName}': sala '{$salaNome}' no dia {$data} às {$tempoNome}", $_SESSION['id']);
+                    } else {
+                        // User creating their own reservation
+                        logaction("Criou uma reserva: sala '{$salaNome}' no dia {$data} às {$tempoNome}", $requisitor);
+                    }
+                    
                     // Save selected materials if any
                     saveReservationMaterials($db, $sala, $tempo, $data, $_POST['materiais'] ?? null);
                     
@@ -361,17 +413,35 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                     }
                     
                     if (true) {
-                        // Get room name for log
+                        // Get room name and time for log
                         $stmt = $db->prepare("SELECT nome FROM salas WHERE id=?");
                         $stmt->bind_param("s", $sala);
                         $stmt->execute();
                         $salaextenso = $stmt->get_result()->fetch_assoc()['nome'];
                         $stmt->close();
                         
-                        logAction("Apagou a reserva da sala {$salaextenso} no dia {$data} no tempo com ID {$tempo}.", $_SESSION['id']);
+                        $stmt = $db->prepare("SELECT horashumanos FROM tempos WHERE id=?");
+                        $stmt->bind_param("s", $tempo);
+                        $stmt->execute();
+                        $tempoNome = $stmt->get_result()->fetch_assoc()['horashumanos'] ?? $tempo;
+                        $stmt->close();
                         
                         // Determine if deleted by admin (someone other than the requisitor)
                         $deletedByAdmin = ($_SESSION['id'] != $reserva['requisitor']);
+                        
+                        // Log the deletion with improved message
+                        if ($deletedByAdmin) {
+                            // Admin deleting someone else's reservation
+                            $stmt = $db->prepare("SELECT nome FROM cache WHERE id=?");
+                            $stmt->bind_param("s", $reserva['requisitor']);
+                            $stmt->execute();
+                            $requisitorNome = $stmt->get_result()->fetch_assoc()['nome'] ?? 'Utilizador';
+                            $stmt->close();
+                            logAction("Eliminou a reserva do utilizador '{$requisitorNome}': sala '{$salaextenso}' no dia {$data} às {$tempoNome}", $_SESSION['id']);
+                        } else {
+                            // User deleting their own reservation
+                            logAction("Eliminou a sua reserva: sala '{$salaextenso}' no dia {$data} às {$tempoNome}", $_SESSION['id']);
+                        }
                         
                         // Send email to the person who made the reservation (not the current user)
                         $emailResult = sendReservationDeletedEmail($db, $reserva['requisitor'], $sala, $tempo, $data, $deletedByAdmin);

@@ -304,6 +304,28 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                     $stmt->execute();
                     $stmt->close();
                     
+                    // Log the approval
+                    require_once(__DIR__ . '/../func/logaction.php');
+                    $stmt = $db->prepare("SELECT nome FROM salas WHERE id=?");
+                    $stmt->bind_param("s", $_GET['sala']);
+                    $stmt->execute();
+                    $salaNome = $stmt->get_result()->fetch_assoc()['nome'] ?? $_GET['sala'];
+                    $stmt->close();
+                    
+                    $stmt = $db->prepare("SELECT horashumanos FROM tempos WHERE id=?");
+                    $stmt->bind_param("s", $_GET['tempo']);
+                    $stmt->execute();
+                    $tempoNome = $stmt->get_result()->fetch_assoc()['horashumanos'] ?? $_GET['tempo'];
+                    $stmt->close();
+                    
+                    $stmt = $db->prepare("SELECT nome FROM cache WHERE id=?");
+                    $stmt->bind_param("s", $requisitor);
+                    $stmt->execute();
+                    $requisitorNome = $stmt->get_result()->fetch_assoc()['nome'] ?? 'Utilizador';
+                    $stmt->close();
+                    
+                    logaction("Aprovou a reserva do utilizador '{$requisitorNome}': sala '{$salaNome}' no dia {$_GET['data']} às {$tempoNome}", $_SESSION['id']);
+                    
                     echo "<div class='card border-success shadow-sm mb-4'>
                             <div class='card-body text-center py-4'>
                                 <div class='mb-3' style='font-size: 4rem;'>&#x1F389;</div>
@@ -339,6 +361,26 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                     $requisitor = $stmt->get_result()->fetch_assoc()['requisitor'];
                     $stmt->close();
                     
+                    // Get details for log before deletion
+                    require_once(__DIR__ . '/../func/logaction.php');
+                    $stmt = $db->prepare("SELECT nome FROM salas WHERE id=?");
+                    $stmt->bind_param("s", $_GET['sala']);
+                    $stmt->execute();
+                    $salaNome = $stmt->get_result()->fetch_assoc()['nome'] ?? $_GET['sala'];
+                    $stmt->close();
+                    
+                    $stmt = $db->prepare("SELECT horashumanos FROM tempos WHERE id=?");
+                    $stmt->bind_param("s", $_GET['tempo']);
+                    $stmt->execute();
+                    $tempoNome = $stmt->get_result()->fetch_assoc()['horashumanos'] ?? $_GET['tempo'];
+                    $stmt->close();
+                    
+                    $stmt = $db->prepare("SELECT nome FROM cache WHERE id=?");
+                    $stmt->bind_param("s", $requisitor);
+                    $stmt->execute();
+                    $requisitorNome = $stmt->get_result()->fetch_assoc()['nome'] ?? 'Utilizador';
+                    $stmt->close();
+                    
                     // Send rejection email BEFORE deleting the reservation
                     $emailResult = sendReservationRejectedEmail($db, $requisitor, $_GET['sala'], $_GET['tempo'], $_GET['data']);
                     
@@ -346,6 +388,9 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                     $stmt->bind_param("sss", $_GET['sala'], $_GET['tempo'], $_GET['data']);
                     $stmt->execute();
                     $stmt->close();
+                    
+                    // Log the rejection
+                    logaction("Rejeitou a reserva do utilizador '{$requisitorNome}': sala '{$salaNome}' no dia {$_GET['data']} às {$tempoNome}", $_SESSION['id']);
                     
                     echo "<div class='card border-danger shadow-sm mb-4'>
                             <div class='card-body text-center py-4'>
@@ -448,6 +493,10 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                             $emailErrors[] = "Utilizador ID: {$reqId}";
                         }
                     }
+                    
+                    // Log bulk approval
+                    require_once(__DIR__ . '/../func/logaction.php');
+                    logaction("Aprovou {$approved} reserva(s) em massa através da funcionalidade de aprovação em massa", $_SESSION['id']);
                     
                     echo "<div class='card border-success shadow-sm mb-4'>
                             <div class='card-body text-center py-4'>
@@ -554,6 +603,10 @@ $totalAprovadas = $db->query("SELECT COUNT(*) as total FROM reservas WHERE aprov
                             $emailErrors[] = "Utilizador ID: {$reqId}";
                         }
                     }
+                    
+                    // Log bulk rejection
+                    require_once(__DIR__ . '/../func/logaction.php');
+                    logaction("Rejeitou {$rejected} reserva(s) em massa através da funcionalidade de rejeição em massa", $_SESSION['id']);
                     
                     echo "<div class='card border-danger shadow-sm mb-4'>
                             <div class='card-body text-center py-4'>
