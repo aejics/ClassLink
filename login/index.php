@@ -210,16 +210,35 @@
                     $stmt->close();
                     
                     $db->commit();
+                    
+                    // Log first sign-on for pre-registered user
+                    require_once(__DIR__ . '/../func/logaction.php');
+                    logaction("Primeiro início de sessão realizado com sucesso (utilizador pré-registado migrado para conta OAuth2)", $_SESSION['id']);
                 } catch (Exception $e) {
                     $db->rollback();
                     throw $e;
                 }
             } else {
-                // No pre-registered user found, insert new record (existing behavior)
+                // No pre-registered user found, check if this is truly a new user
+                $stmt = $db->prepare("SELECT id FROM cache WHERE id = ?");
+                $stmt->bind_param("s", $_SESSION['id']);
+                $stmt->execute();
+                $existingUser = $stmt->get_result()->fetch_assoc();
+                $stmt->close();
+                
+                $isNewUser = !$existingUser;
+                
+                // Insert new record (existing behavior)
                 $stmt = $db->prepare("INSERT IGNORE INTO cache (id, nome, email) VALUES (?, ?, ?)");
                 $stmt->bind_param("sss", $_SESSION['id'], $_SESSION['nome'], $_SESSION['email']);
                 $stmt->execute();
                 $stmt->close();
+                
+                // Log first sign-on for new users
+                if ($isNewUser) {
+                    require_once(__DIR__ . '/../func/logaction.php');
+                    logaction("Primeiro início de sessão realizado com sucesso (nova conta criada)", $_SESSION['id']);
+                }
             }
 
             // Determinar se é Administrador
