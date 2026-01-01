@@ -39,5 +39,4 @@
         'clientSecret' => 'clientsecret',  // CHANGE THIS and keep it secret
         'redirectUri'  => 'https://' . $_SERVER['HTTP_HOST'] . '/login'
     ]);
-    $logoutUrlProvider = 'https://authentik.devenv.marcopisco.com/application/o/reserva-salas/end-session/';
 ?>
