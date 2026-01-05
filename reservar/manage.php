@@ -660,7 +660,7 @@ function saveReservationMaterials($db, $sala, $tempo, $data, $materiais) {
                         
                         if (!empty($detalhesreserva['extra'])) {
                             echo "<p class='mb-2'><strong>Informação Extra:</strong></p>";
-                            echo "<div class='border rounded p-3 bg-light'>" . nl2br(htmlspecialchars($detalhesreserva['extra'], ENT_QUOTES, 'UTF-8')) . "</div>";
+                            echo "<div class='border rounded p-3'>" . nl2br(htmlspecialchars($detalhesreserva['extra'], ENT_QUOTES, 'UTF-8')) . "</div>";
                         }
                         
                         // Display reserved materials
