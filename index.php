@@ -51,6 +51,11 @@
                 Reservar uma Sala
             </button>
         </a>
+        <a href="/assets/manual_utilizador_classlink.pdf" target="_blank">
+            <button class="btn btn-secondary">
+                Manual de Utilizador
+            </button>
+        </a>
         <div class="bottom" style="position: fixed; bottom: 0; width:100%; margin-bottom: 10px;">
             <img src="/assets/poch.png" alt="Pessoas 2030 | Portugal 2030 | Cofinanciado pela União Europeia" style="max-width: 15%">
             <img src="/assets/rep_edu.png" alt="República Portuguesa Educação Ciência e Inovação" style="max-width: 6%">
