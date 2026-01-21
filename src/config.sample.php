@@ -39,4 +39,9 @@
         'clientSecret' => 'clientsecret',  // CHANGE THIS and keep it secret
         'redirectUri'  => 'https://' . $_SERVER['HTTP_HOST'] . '/login'
     ]);
+
+    // OAuth Provider Name
+    // Set to 'Microsoft' to display Microsoft logo and text on login button
+    // Set to any other value (e.g., 'Google', 'Authentik', etc.) to display generic text
+    $authProvider = 'Microsoft';
 ?>
