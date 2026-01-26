@@ -187,7 +187,6 @@ $provider = new GenericProvider([
 - `assets/theme.css` - Color scheme & theme variables (light/dark mode)
 - `assets/index.css` - Main dashboard styles
 - `assets/reservar.css` - Reservation page styles
-- `assets/login.css` - Login page styles
 - `assets/banner.css` - Banner component styles
 
 ## Admin API Endpoints
